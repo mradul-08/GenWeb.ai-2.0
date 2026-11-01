@@ -1,0 +1,8 @@
+# Consistent line endings: LF in the repository and on Linux build hosts
+# (Render, Vercel), regardless of the Windows checkout.
+* text=auto eol=lf
+
+# Binary files: never convert or diff as text.
+*.png binary
+*.jpg binary
+*.ico binary

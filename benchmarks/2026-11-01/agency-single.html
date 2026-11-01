@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Northbeam – Branding & Web Design Agency</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0d3b66;      /* deep navy */
+      --secondary: #faf0ca;    /* warm cream */
+      --accent: #f95738;       /* vivid coral */
+      --bg: #ffffff;
+      --surface: #f5f5f5;
+      --text: #222222;
+      --radius: .5rem;
+      --transition: .3s ease;
+      --font-sans: 'Inter', sans-serif;
+      --font-serif: 'Playfair Display', serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--primary); text-decoration: none; transition: var(--transition); }
+    a:hover, a:focus { color: var(--accent); outline: none; }
+    img { max-width: 100%; height: auto; display: block; }
+    button, input, textarea {
+      font: inherit;
+      border: 1px solid #ccc;
+      border-radius: var(--radius);
+      padding: .5rem;
+    }
+    button { background: var(--primary); color: #fff; cursor: pointer; border: none; }
+    button:hover, button:focus { background: var(--accent); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    header { background: var(--primary); color: #fff; padding: 2rem 1rem; text-align: center; }
+    header h1 { font-family: var(--font-serif); font-size: 2.5rem; margin: 0; }
+    header p { margin-top: .5rem; font-size: 1.2rem; }
+
+    nav { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
+    nav a { color: #fff; font-weight: 600; }
+
+    section { padding: 4rem 1rem; max-width: 1200px; margin: 0 auto; }
+    .section-title { font-family: var(--font-serif); font-size: 2rem; margin-bottom: 1.5rem; text-align: center; color: var(--primary); }
+
+    /* Services */
+    #services .cards { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .card { background: var(--surface); padding: 1.5rem; border-radius: var(--radius); transition: var(--transition); }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+
+    /* Case Studies */
+    #cases .grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .case { background: var(--surface); border-radius: var(--radius); overflow: hidden; }
+    .case img { width: 100%; height: 180px; object-fit: cover; }
+    .case-content { padding: 1rem; }
+    .case-content h3 { margin: 0 0 .5rem; font-size: 1.25rem; color: var(--primary); }
+
+    /* Process */
+    #process .steps { display: flex; flex-direction: column; gap: 2rem; max-width: 800px; margin: 0 auto; }
+    .step { display: flex; align-items: flex-start; gap: 1rem; }
+    .step-number { flex-shrink: 0; background: var(--accent); color: #fff; width: 2.5rem; height: 2.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+    /* Team */
+    #team .members { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .member { text-align: center; }
+    .member img { border-radius: 50%; width: 120px; height: 120px; object-fit: cover; margin: 0 auto .75rem; }
+
+    /* Clients */
+    #clients .logos { display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; align-items: center; }
+    .logos img { max-height: 40px; filter: grayscale(100%); transition: var(--transition); }
+    .logos img:hover { filter: none; }
+
+    /* Contact */
+    #contact form { max-width: 600px; margin: 0 auto; display: grid; gap: 1rem; }
+    #contact label { display: block; font-weight: 600; margin-bottom: .25rem; }
+    #contact input, #contact textarea { width: 100%; }
+    #contact button { width: fit-content; padding: .75rem 1.5rem; }
+
+    footer { background: var(--primary); color: #fff; text-align: center; padding: 2rem 1rem; }
+    footer p { margin: 0; }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <header id="home">
+    <h1>Northbeam</h1>
+    <p>Branding &amp; Web Design that makes your story shine.</p>
+    <nav>
+      <a href="#services">Services</a>
+      <a href="#cases">Work</a>
+      <a href="#process">Process</a>
+      <a href="#team">Team</a>
+      <a href="#clients">Clients</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section id="services">
+    <h2 class="section-title">What We Do</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Brand Strategy</h3>
+        <p>Research‑driven positioning, naming, and visual identity that resonate with your audience.</p>
+      </div>
+      <div class="card">
+        <h3>Web Design</h3>
+        <p>Responsive, user‑focused sites built with clean code and thoughtful interactions.</p>
+      </div>
+      <div class="card">
+        <h3>Graphic Design</h3>
+        <p>Print and digital assets—from brochures to social media graphics—that keep your brand consistent.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="cases" style="background: var(--surface);">
+    <h2 class="section-title">Selected Case Studies</h2>
+    <div class="grid">
+      <div class="case">
+        <img src="https://images.unsplash.com/photo-1581091012184-7c9c2f1c8c7c?auto=format&fit=crop&w=800&q=60" alt="Coffee shop branding">
+        <div class="case-content">
+          <h3>Bean &amp; Brew</h3>
+          <p>Full brand overhaul and e‑commerce site that boosted online sales by 38%.</p>
+        </div>
+      </div>
+      <div class="case">
+        <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=60" alt="Tech startup landing page">
+        <div class="case-content">
+          <h3>PulseTech</h3>
+          <p>Landing‑page design and UI kit that increased lead conversions by 22%.</p>
+        </div>
+      </div>
+      <div class="case">
+        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=60" alt="Fashion boutique visual identity">
+        <div class="case-content">
+          <h3>Silk Thread</h3>
+          <p>Logo, pattern system, and lookbook that helped the boutique expand to three locations.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="process">
+    <h2 class="section-title">Our Process</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div>
+          <h3>Discovery</h3>
+          <p>We dive deep into your business, audience, and goals to set a solid foundation.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div>
+          <h3>Concept</h3>
+          <p>Sketches, mood boards, and wireframes bring ideas to life for early feedback.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div>
+          <h3>Design</h3>
+          <p>Pixel‑perfect visual design and interactive prototypes crafted with brand consistency.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">4</div>
+        <div>
+          <h3>Launch</h4>
+          <p>Development, testing, and deployment—followed by training and ongoing support.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="team" style="background: var(--surface);">
+    <h2 class="section-title">Meet the Team</h2>
+    <div class="members">
+      <div class="member">
+        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Portrait of Maya Patel, Creative Director">
+        <h4>Maya Patel</h4>
+        <p>Creative Director</p>
+      </div>
+      <div class="member">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Portrait of Luis Gomez, Lead Developer">
+        <h4>Luis Gomez</h4>
+        <p>Lead Developer</p>
+      </div>
+      <div class="member">
+        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Portrait of Sara Lee, Brand Strategist">
+        <h4>Sara Lee</h4>
+        <p>Brand Strategist</p>
+      </div>
+      <div class="member">
+        <img src="https://randomuser.me/api/portraits/men/85.jpg" alt="Portrait of Tom Reed, Graphic Designer">
+        <h4>Tom Reed</h4>
+        <p>Graphic Designer</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="clients">
+    <h2 class="section-title">Trusted By</h2>
+    <div class="logos">
+      <img src="https://via.placeholder.com/150x40?text=Client+1" alt="Client 1 logo">
+      <img src="https://via.placeholder.com/150x40?text=Client+2" alt="Client 2 logo">
+      <img src="https://via.placeholder.com/150x40?text=Client+3" alt="Client 3 logo">
+      <img src="https://via.placeholder.com/150x40?text=Client+4" alt="Client 4 logo">
+      <img src="https://via.placeholder.com/150x40?text=Client+5" alt="Client 5 logo">
+    </div>
+  </section>
+
+  <section id="contact" style="background: var(--surface);">
+    <h2 class="section-title">Get In Touch</h2>
+    <form action="#" method="POST" aria-label="Contact form">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required aria-required="true">
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required aria-required="true">
+
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="5" required aria-required="true"></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 Northbeam. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Simple smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>

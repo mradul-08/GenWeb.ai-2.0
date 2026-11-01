@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>quickcache Documentation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #2a7f5c;      /* forest green */
+  --secondary: #f4f9f4;    /* soft off‑white */
+  --accent: #ff9800;       /* warm orange for highlights */
+  --bg: #e8f5e9;           /* light green tint */
+  --surface: #ffffff;     /* cards, sidebar */
+  --text: #212121;         /* dark gray */
+  --code-bg: #f0f4f8;
+  --code-text: #d32f2f;
+  --radius: 6px;
+  --gap: 1rem;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Reset & base */
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Layout */
+#sidebar {
+  background: var(--surface);
+  width: 260px;
+  flex-shrink: 0;
+  padding: var(--gap);
+  overflow-y: auto;
+  border-right: 1px solid #ccc;
+}
+#content {
+  flex:1;
+  padding: calc(var(--gap)*2);
+  overflow-y:auto;
+}
+
+/* Header */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--gap);
+}
+h1 { font-size:1.8rem; color:var(--primary); }
+h2 { margin-top:2rem; font-size:1.4rem; color:var(--primary); }
+h3 { margin-top:1.5rem; font-size:1.2rem; }
+
+/* Sidebar navigation */
+#nav-search {
+  width:100%;
+  padding:0.5rem;
+  margin-bottom:var(--gap);
+  border:1px solid #bbb;
+  border-radius: var(--radius);
+}
+nav ul { list-style:none; }
+nav li { margin:0.4rem 0; }
+nav a {
+  text-decoration:none;
+  color:var(--text);
+  display:block;
+  padding:0.3rem 0.5rem;
+  border-radius: var(--radius);
+}
+nav a:hover, nav a:focus { background:var(--secondary); outline:none; }
+nav a.active { background:var(--primary); color:#fff; }
+
+/* Code blocks */
+pre, code {
+  font-family: var(--font-mono);
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding:0.5rem;
+  border-radius: var(--radius);
+  overflow-x:auto;
+}
+pre { margin: var(--gap) 0; }
+
+/* FAQ accordion */
+details {
+  margin: var(--gap) 0;
+  border:1px solid #ddd;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+summary {
+  cursor:pointer;
+  padding:0.5rem;
+  font-weight:600;
+}
+summary::-webkit-details-marker { display:none; }
+details[open] summary { background:var(--secondary); }
+
+/* Responsive */
+@media (max-width:768px) {
+  body { flex-direction:column; }
+  #sidebar {
+    width:100%;
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+    border-right:none;
+    border-bottom:1px solid #ccc;
+  }
+  #sidebar.open { max-height:500px; } /* enough for content */
+  #toggle-sidebar {
+    display:inline-flex;
+    align-items:center;
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    padding:0.5rem 1rem;
+    border-radius: var(--radius);
+    cursor:pointer;
+  }
+}
+</style>
+</head>
+<body>
+<aside id="sidebar" aria-label="Documentation navigation">
+  <button id="toggle-sidebar" aria-controls="sidebar" aria-expanded="false">☰ Menu</button>
+  <input type="search" id="nav-search" placeholder="Search…" aria-label="Search navigation">
+  <nav aria-label="Main">
+    <ul id="nav-list">
+      <li><a href="#getting-started" class="active">Getting Started</a></li>
+      <li><a href="#installation">Installation</a></li>
+      <li><a href="#api-reference">API Reference</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<main id="content">
+  <header>
+    <h1>quickcache</h1>
+    <p>Lightweight JavaScript caching library for browsers and Node.js.</p>
+  </header>
+
+  <section id="getting-started">
+    <h2>Getting Started</h2>
+    <p>quickcache provides a simple API to store, retrieve and invalidate values in memory. It works both in the browser and in Node environments.</p>
+    <pre><code class="language-javascript">// Create a cache instance
+const cache = quickcache({ ttl: 3000 }); // 3 seconds default TTL
+
+// Store a value
+cache.set('user:123', { name: 'Alice', age: 30 });
+
+// Retrieve it later
+const user = cache.get('user:123');
+console.log(user); // { name: 'Alice', age: 30 }
+</code></pre>
+  </section>
+
+  <section id="installation">
+    <h2>Installation</h2>
+    <p>Install via npm or use the CDN for quick experiments.</p>
+    <h3>npm</h3>
+    <pre><code class="language-bash">npm install quickcache</code></pre>
+    <h3>CDN</h3>
+    <pre><code class="language-html">&lt;script src="https://cdn.jsdelivr.net/npm/quickcache@latest/dist/quickcache.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const cache = quickcache();
+&lt;/script&gt;
+</code></pre>
+  </section>
+
+  <section id="api-reference">
+    <h2>API Reference</h2>
+
+    <h3>quickcache(options?) → Cache</h3>
+    <p>Creates a new cache instance.</p>
+    <pre><code class="language-javascript">quickcache({ ttl?: number, maxSize?: number })</code></pre>
+
+    <h3>Cache methods</h3>
+    <ul>
+      <li><strong>set(key, value, ttl?)</strong> – Store <code>value</code> under <code>key</code>. Optional <code>ttl</code> (ms) overrides default.</li>
+      <li><strong>get(key)</strong> – Retrieve the value or <code>undefined</code> if missing/expired.</li>
+      <li><strong>has(key)</strong> – Returns <code>true</code> if a non‑expired entry exists.</li>
+      <li><strong>delete(key)</strong> – Remove an entry.</li>
+      <li><strong>clear()</strong> – Empty the cache.</li>
+      <li><strong>size()</strong> – Current number of entries.</li>
+    </ul>
+
+    <h3>Example</h3>
+    <pre><code class="language-javascript">// Custom TTL per entry
+cache.set('session:abc', { token: 'xyz' }, 60000); // 1 min
+
+if (cache.has('session:abc')) {
+  const sess = cache.get('session:abc');
+  console.log('session active', sess);
+}
+</code></pre>
+  </section>
+
+  <section id="faq">
+    <h2>FAQ</h2>
+    <details>
+      <summary>Is quickcache safe for production?</summary>
+      <p>Yes. It is pure JavaScript with no external dependencies. It uses a LRU eviction strategy when <code>maxSize</code> is set.</p>
+    </details>
+    <details>
+      <summary>Can I use quickcache in a Service Worker?</summary>
+      <p>Absolutely. The API works in any JavaScript context, including Service Workers and Node.</p>
+    </details>
+    <details>
+      <summary>How does TTL work?</summary>
+      <p>Each entry stores its expiration timestamp. On <code>get</code> the library checks the timestamp and automatically removes expired items.</p>
+    </details>
+  </section>
+</main>
+
+<script>
+/* Sidebar toggle for mobile */
+const toggleBtn = document.getElementById('toggle-sidebar');
+const sidebar = document.getElementById('sidebar');
+toggleBtn.addEventListener('click', () => {
+  const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+  toggleBtn.setAttribute('aria-expanded', !expanded);
+  sidebar.classList.toggle('open');
+});
+
+/* Search filter */
+const searchInput = document.getElementById('nav-search');
+const navLinks = document.querySelectorAll('#nav-list a');
+searchInput.addEventListener('input', () => {
+  const term = searchInput.value.toLowerCase();
+  navLinks.forEach(link => {
+    const text = link.textContent.toLowerCase();
+    link.parentElement.style.display = text.includes(term) ? '' : 'none';
+  });
+});
+
+/* Highlight active section on scroll */
+const sections = document.querySelectorAll('section[id]');
+const linkMap = {};
+navLinks.forEach(link => {
+  const href = link.getAttribute('href').slice(1);
+  linkMap[href] = link;
+});
+function onScroll() {
+  let current = '';
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top <= 80) current = sec.id;
+  });
+  navLinks.forEach(l => l.classList.remove('active'));
+  if (linkMap[current]) linkMap[current].classList.add('active');
+}
+document.addEventListener('scroll', onScroll);
+onScroll(); // initial call
+</script>
+</body>
+</html>

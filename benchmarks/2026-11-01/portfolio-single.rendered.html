@@ -1,0 +1,194 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ananya Rao – UX Designer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #006d77;      /* deep teal */
+      --secondary: #83c5be;    /* soft teal */
+      --accent: #ffddd2;       /* warm coral */
+      --bg: #f5f5f5;           /* light gray */
+      --surface: #ffffff;      /* white cards */
+      --text: #212529;         /* dark gray */
+      --radius: 8px;
+      --transition: 0.3s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin:0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+      line-height:1.6; scroll-behavior: smooth;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover, a:focus { text-decoration: underline; }
+    img { max-width: 100%; height: auto; display: block; }
+    header, section, footer { padding: 2rem 1rem; max-width: 1200px; margin: auto; }
+    h1, h2, h3 { margin:0 0 .5rem; font-weight:600; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; }
+    h2 { font-size: 2rem; color: var(--primary); }
+    h3 { font-size: 1.25rem; }
+    .visually-hidden { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    /* Layout */
+    nav { display:flex; justify-content:space-between; align-items:center; background: var(--surface); padding: .5rem 1rem; position:sticky; top:0; z-index:10; box-shadow:0 2px 4px rgba(0,0,0,.1); }
+    nav a { margin-left:1rem; font-weight:600; }
+    .hero { text-align:center; padding:4rem 1rem; background: var(--primary); color:#fff; }
+    .hero h1 { font-size:3rem; }
+    .hero p { font-size:1.2rem; margin-top:.5rem; }
+    .btn { display:inline-block; padding:.75rem 1.5rem; background:var(--accent); color:#000; border:none; border-radius:var(--radius); cursor:pointer; font-weight:600; transition:var(--transition); }
+    .btn:hover,.btn:focus { background:#ffb4a2; }
+    .grid { display:grid; gap:1.5rem; }
+    @media(min-width:600px){ .grid-2 { grid-template-columns:repeat(2,1fr); } }
+    @media(min-width:900px){ .grid-3 { grid-template-columns:repeat(3,1fr); } }
+    .card { background:var(--surface); border-radius:var(--radius); overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,.1); transition:var(--transition); }
+    .card:hover,.card:focus-within { transform:translateY(-4px); box-shadow:0 4px 12px rgba(0,0,0,.15); }
+    .card img { width:100%; height:180px; object-fit:cover; }
+    .card-content { padding:1rem; }
+    .skills-list { list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:.5rem; }
+    .skills-list li { background:var(--secondary); padding:.3rem .6rem; border-radius:var(--radius); font-size:.9rem; }
+    form { background:var(--surface); padding:2rem; border-radius:var(--radius); box-shadow:0 2px 6px rgba(0,0,0,.1); }
+    label { display:block; margin-bottom:.3rem; font-weight:600; }
+    input, textarea { width:100%; padding:.6rem; margin-bottom:1rem; border:1px solid #ccc; border-radius:var(--radius); font-family:inherit; }
+    input:focus, textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 2px rgba(0,109,119,.2); }
+    button[type="submit"] { background:var(--primary); color:#fff; border:none; padding:.8rem 1.5rem; border-radius:var(--radius); cursor:pointer; font-weight:600; }
+    button[type="submit"]:hover, button[type="submit"]:focus { background:#00555a; }
+    footer { text-align:center; font-size:.9rem; color:#666; border-top:1px solid #e0e0e0; padding-top:1rem; }
+    /* Focus visible */
+    a, button, input, textarea { outline:none; }
+    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { box-shadow:0 0 0 3px rgba(0,109,119,.4); }
+  </style>
+</head>
+<body>
+  <nav aria-label="Primary navigation">
+    <a href="#hero" class="visually-hidden">Skip to content</a>
+    <div><strong>Ananya Rao</strong></div>
+    <div>
+      <a href="#case-studies">Work</a>
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#testimonials">Testimonials</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <section id="hero" class="hero">
+    <h1>Hi, I’m Ananya Rao</h1>
+    <p>Freelance UX Designer based in Bengaluru, turning complex problems into delightful experiences.</p>
+    <a href="#contact" class="btn">Get in Touch</a>
+  </section>
+
+  <section id="case-studies">
+    <h2>Selected Case Studies</h2>
+    <div class="grid grid-2">
+      <article class="card" tabindex="0">
+        <img src="https://images.unsplash.com/photo-1581091870620-7f2c4e9d3b3c?auto=format&amp;fit=crop&amp;w=800&amp;q=60" alt="Mobile banking app redesign">
+        <div class="card-content">
+          <h3>FinFlow – Mobile Banking Redesign</h3>
+          <p>Improved onboarding flow and reduced transaction errors by 30%.</p>
+          <a href="#">Read case study →</a>
+        </div>
+      </article>
+      <article class="card" tabindex="0">
+        <img src="https://images.unsplash.com/photo-1521790797524-b7b53071c55f?auto=format&amp;fit=crop&amp;w=800&amp;q=60" alt="E‑commerce website wireframes">
+        <div class="card-content">
+          <h3>ShopSphere – E‑commerce Platform</h3>
+          <p>Designed a responsive UI that increased conversion rates by 22%.</p>
+          <a href="#">Read case study →</a>
+        </div>
+      </article>
+      <article class="card" tabindex="0">
+        <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&amp;fit=crop&amp;w=800&amp;q=60" alt="Healthcare dashboard prototype">
+        <div class="card-content">
+          <h3>HealthHub – Dashboard for Clinics</h3>
+          <p>Created a data‑driven dashboard that cut admin time by half.</p>
+          <a href="#">Read case study →</a>
+        </div>
+      </article>
+      <article class="card" tabindex="0">
+        <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&amp;fit=crop&amp;w=800&amp;q=60" alt="Travel app user flow illustration">
+        <div class="card-content">
+          <h3>Wanderlust – Travel Planning App</h3>
+          <p>Streamlined itinerary creation, boosting user retention by 18%.</p>
+          <a href="#">Read case study →</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="about">
+    <h2>About Me</h2>
+    <div class="grid grid-2" style="align-items:center;">
+      <div>
+        <p>Hello! I’m Ananya, a Bengaluru‑based UX designer with 5+ years of experience crafting user‑centred digital products for fintech, e‑commerce, and health tech. I blend research, interaction design, and visual storytelling to create intuitive experiences that meet both business goals and user needs.</p>
+        <p>When I’m not sketching wireframes, you’ll find me exploring Bangalore’s coffee scene or sketching street life for fun.</p>
+      </div>
+      <img src="https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?auto=format&amp;fit=crop&amp;w=600&amp;q=60" alt="Ananya Rao smiling in a co‑working space">
+    </div>
+  </section>
+
+  <section id="skills">
+    <h2>Skills</h2>
+    <ul class="skills-list">
+      <li>User Research</li>
+      <li>Interaction Design</li>
+      <li>Information Architecture</li>
+      <li>Wireframing &amp; Prototyping</li>
+      <li>Usability Testing</li>
+      <li>Figma &amp; Sketch</li>
+      <li>Adobe XD</li>
+      <li>Responsive Design</li>
+      <li>HTML/CSS basics</li>
+    </ul>
+  </section>
+
+  <section id="testimonials">
+    <h2>What Clients Say</h2>
+    <div class="grid grid-2">
+      <blockquote class="card" tabindex="0">
+        <div class="card-content">
+          <p>“Ananya transformed our confusing checkout flow into a seamless experience. Sales jumped instantly.”</p>
+          <footer>— Rohan Mehta, Founder, ShopSphere</footer>
+        </div>
+      </blockquote>
+      <blockquote class="card" tabindex="0">
+        <div class="card-content">
+          <p>“Her research insights were spot‑on. The new health dashboard saved our staff hours every week.”</p>
+          <footer>— Dr. Priya Nair, Clinic Director, HealthHub</footer>
+        </div>
+      </blockquote>
+    </div>
+  </section>
+
+  <section id="contact">
+    <h2>Contact Me</h2>
+    <form action="#" method="POST" aria-label="Contact form">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required="" placeholder="Your name">
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required="" placeholder="you@example.com">
+
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="5" required="" placeholder="Tell me about your project..."></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+  <footer>
+    © 2026 Ananya Rao. All rights reserved.
+  </footer>
+
+  <script>
+    // Simple smooth scroll for older browsers
+    document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+
+</body></html>

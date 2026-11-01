@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IronHouse Gym Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #d62828;   /* IronHouse red */
+      --secondary: #003049; /* Dark steel */
+      --accent: #f77f00;    /* Warm orange */
+      --bg-light: #f5f5f5;
+      --bg-dark: #1e1e1e;
+      --surface-light: #ffffff;
+      --surface-dark: #2b2b2b;
+      --text-light: #212529;
+      --text-dark: #f1f1f1;
+    }
+    [data-theme="light"] {
+      --bg: var(--bg-light);
+      --surface: var(--surface-light);
+      --text: var(--text-light);
+    }
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --surface: var(--surface-dark);
+      --text: var(--text-dark);
+    }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font: inherit; }
+    /* Layout */
+    #sidebar {
+      width: 240px;
+      background: var(--primary);
+      color: #fff;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      transition: transform .3s ease;
+    }
+    #sidebar h1 {
+      font-size: 1.5rem;
+      text-align: center;
+      padding: 1rem 0;
+      margin:0;
+    }
+    #sidebar nav a {
+      padding: .75rem 1rem;
+      display: block;
+    }
+    #sidebar nav a:hover, #sidebar nav a:focus {
+      background: rgba(255,255,255,.1);
+      outline: none;
+    }
+    #main {
+      flex:1;
+      display:flex;
+      flex-direction: column;
+      padding: 1rem;
+    }
+    header {
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      margin-bottom:1rem;
+    }
+    .kpi-grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+      gap:1rem;
+      margin-bottom:1.5rem;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border-radius:8px;
+      padding:1rem;
+      box-shadow:0 2px 4px rgba(0,0,0,.1);
+    }
+    .kpi-card h2 {
+      font-size:1rem;
+      margin-bottom:.5rem;
+      color: var(--secondary);
+    }
+    .kpi-card p {
+      font-size:1.5rem;
+      font-weight:600;
+    }
+    .section {
+      background: var(--surface);
+      border-radius:8px;
+      padding:1rem;
+      margin-bottom:1.5rem;
+      box-shadow:0 2px 4px rgba(0,0,0,.1);
+    }
+    .section h2 {
+      margin-bottom:.75rem;
+      color: var(--secondary);
+    }
+    table {
+      width:100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding:.5rem;
+      text-align:left;
+      border-bottom:1px solid #ccc;
+    }
+    th {
+      background: var(--accent);
+      color:#fff;
+    }
+    .theme-toggle {
+      background:none;
+      border:none;
+      color:var(--text);
+      font-size:1.2rem;
+    }
+    /* Mobile */
+    @media (max-width: 768px) {
+      #sidebar {
+        position:fixed;
+        top:0;
+        left:0;
+        height:100%;
+        transform: translateX(-100%);
+        z-index:1000;
+      }
+      #sidebar.open { transform: translateX(0); }
+      #sidebar-toggle {
+        display:inline-block;
+        background:none;
+        border:none;
+        font-size:1.5rem;
+        color:#fff;
+        margin-left:1rem;
+      }
+      #main { padding:0.5rem; }
+    }
+    /* Focus visible */
+    a:focus, button:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <aside id="sidebar" aria-label="Main navigation">
+    <h1>IronHouse</h1>
+    <nav>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#kpis">KPIs</a>
+      <a href="#attendance">Attendance</a>
+      <a href="#signups">Recent Sign‑ups</a>
+    </nav>
+    <button id="themeBtn" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+  </aside>
+
+  <main id="main">
+    <header>
+      <button id="sidebar-toggle" aria-label="Open menu">☰</button>
+      <h2 id="dashboard">IronHouse Admin Dashboard</h2>
+    </header>
+
+    <section id="kpis" class="section">
+      <h2>Key Performance Indicators</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card" aria-labelledby="members-label">
+          <h2 id="members-label">Members</h2>
+          <p id="members-count">1,842</p>
+        </div>
+        <div class="kpi-card" aria-labelledby="revenue-label">
+          <h2 id="revenue-label">Monthly Revenue</h2>
+          <p id="revenue-amount">$27,430</p>
+        </div>
+        <div class="kpi-card" aria-labelledby="checkins-label">
+          <h2 id="checkins-label">Today's Check‑ins</h2>
+          <p id="checkins-count">124</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="attendance" class="section">
+      <h2>Weekly Attendance</h2>
+      <svg id="attendanceChart" width="100%" height="200" role="img" aria-label="Bar chart of attendance for the last 7 days"></svg>
+    </section>
+
+    <section id="signups" class="section">
+      <h2>Recent Sign‑ups</h2>
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Plan</th><th>Date</th></tr>
+        </thead>
+        <tbody id="signups-body">
+          <!-- rows injected by JS -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    // Theme toggle
+    const themeBtn = document.getElementById('themeBtn');
+    const html = document.documentElement;
+    function setTheme(t) {
+      html.setAttribute('data-theme', t);
+      themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+      themeBtn.setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    themeBtn.addEventListener('click', () => {
+      const newTheme = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+    });
+    // Sidebar toggle (mobile)
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+    // Populate recent sign‑ups
+    const signups = [
+      {name:'Alex Rivera', plan:'Premium', date:'2026-10-28'},
+      {name:'Mia Chen', plan:'Standard', date:'2026-10-27'},
+      {name:'Liam O\'Neill', plan:'Premium', date:'2026-10-27'},
+      {name:'Sofia Patel', plan:'Standard', date:'2026-10-26'},
+      {name:'Noah Kim', plan:'Basic', date:'2026-10-26'}
+    ];
+    const tbody = document.getElementById('signups-body');
+    signups.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${s.name}</td><td>${s.plan}</td><td>${s.date}</td>`;
+      tbody.appendChild(tr);
+    });
+    // Simple bar chart using SVG
+    const data = [112, 95, 130, 150, 140, 125, 160]; // attendance Mon‑Sun
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const svg = document.getElementById('attendanceChart');
+    const width = svg.clientWidth;
+    const height = svg.clientHeight;
+    const padding = 30;
+    const maxVal = Math.max(...data);
+    const barWidth = (width - 2*padding) / data.length - 10;
+    data.forEach((val,i) => {
+      const x = padding + i * (barWidth + 10);
+      const barHeight = (val / maxVal) * (height - 2*padding);
+      const y = height - padding - barHeight;
+      const bar = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      bar.setAttribute('x', x);
+      bar.setAttribute('y', y);
+      bar.setAttribute('width', barWidth);
+      bar.setAttribute('height', barHeight);
+      bar.setAttribute('fill', 'var(--accent)');
+      bar.setAttribute('role','img');
+      bar.setAttribute('aria-label', `${days[i]}: ${val} check‑ins`);
+      svg.appendChild(bar);
+      // Day label
+      const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x', x + barWidth/2);
+      txt.setAttribute('y', height - padding + 15);
+      txt.setAttribute('text-anchor','middle');
+      txt.setAttribute('font-size','12');
+      txt.setAttribute('fill','var(--text)');
+      txt.textContent = days[i];
+      svg.appendChild(txt);
+    });
+  </script>
+</body>
+</html>

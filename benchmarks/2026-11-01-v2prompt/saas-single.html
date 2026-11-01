@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ledgerly – Simple Invoicing for Indian Small Businesses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0D47A1;      /* deep indigo – trust, Indian corporate vibe */
+      --secondary: #FFB300;    /* saffron accent */
+      --accent: #FF5722;       /* orange for calls to action */
+      --bg: #F5F7FA;           /* very light gray‑blue */
+      --surface: #FFFFFF;
+      --text: #212121;
+      --radius: .5rem;
+      --gap: 1rem;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
+      line-height:1.6;
+    }
+    a { color:var(--primary); text-decoration:none; }
+    a:focus, button:focus { outline:3px solid var(--secondary); outline-offset:2px; }
+    header, main, footer { padding: var(--gap) calc(2rem + 2vw); }
+    h1,h2,h3 { margin:0 0 .5rem; font-weight:600; }
+    p { margin:0 0 1rem; }
+    button, .btn {
+      cursor:pointer; border:none; border-radius:var(--radius);
+      padding:.75rem 1.5rem; font-weight:600; font-size:1rem;
+    }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-primary:hover { background:#e64a19; }
+    .btn-outline {
+      background:transparent; border:2px solid var(--primary); color:var(--primary);
+    }
+    .btn-outline:hover { background:rgba(13,71,161,.1); }
+
+    /* Layout */
+    nav { display:flex; justify-content:space-between; align-items:center; }
+    .logo { font-size:1.5rem; font-weight:700; color:var(--primary); }
+    .nav-links { display:flex; gap:1rem; }
+    .nav-links a { font-weight:500; }
+    .mobile-toggle { display:none; background:none; font-size:1.5rem; }
+
+    @media (max-width:768px) {
+      .nav-links { position:absolute; top:100%; left:0; right:0; background:var(--surface);
+        flex-direction:column; display:none; }
+      .nav-links.show { display:flex; }
+      .mobile-toggle { display:block; }
+    }
+
+    /* Hero */
+    #hero { background:linear-gradient(135deg, var(--primary) 0%, #1976D2 100%);
+      color:#fff; text-align:center; padding:4rem var(--gap);
+    }
+    #hero h1 { font-size:2.5rem; margin-bottom:.5rem; }
+    #hero p { font-size:1.125rem; max-width:45ch; margin:auto; margin-bottom:2rem; }
+    #hero .hero-cta { display:inline-flex; gap:.5rem; }
+
+    /* Features */
+    #features { background:var(--surface); }
+    .features-grid { display:grid; gap:2rem; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); }
+    .feature-card { text-align:center; padding:1.5rem; border-radius:var(--radius);
+      box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .feature-card svg { width:48px; height:48px; margin-bottom:.75rem; fill:var(--primary); }
+
+    /* How it works */
+    #how { background:var(--bg); }
+    .steps { display:flex; gap:2rem; flex-wrap:wrap; justify-content:center; }
+    .step { flex:1 1 250px; background:var(--surface); padding:1.5rem;
+      border-radius:var(--radius); box-shadow:0 2px 6px rgba(0,0,0,.07); }
+    .step-number { font-size:2rem; font-weight:700; color:var(--accent); margin-bottom:.5rem; }
+
+    /* Pricing */
+    #pricing { background:var(--surface); }
+    .pricing-grid { display:grid; gap:2rem; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); }
+    .plan { border:2px solid var(--primary); border-radius:var(--radius); padding:2rem;
+      text-align:center; background:#fff; }
+    .plan.popular { border-color:var(--secondary); }
+    .plan h3 { margin-top:0; font-size:1.5rem; }
+    .price { font-size:2rem; font-weight:700; margin:.75rem 0; color:var(--primary); }
+    .plan ul { list-style:none; padding:0; margin:1rem 0; text-align:left; }
+    .plan li { margin-bottom:.5rem; display:flex; align-items:center; }
+    .plan li::before { content:"✔"; color:var(--accent); margin-right:.5rem; }
+
+    /* FAQ */
+    #faq { background:var(--bg); }
+    .faq-item { margin-bottom:1rem; }
+    .question { background:var(--surface); padding:.75rem 1rem; border-radius:var(--radius);
+      cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+    .answer { max-height:0; overflow:hidden; transition:max-height .3s ease; padding:0 1rem; }
+    .question[aria-expanded="true"] + .answer { max-height:200px; padding-top:.5rem; }
+
+    footer { background:var(--primary); color:#fff; text-align:center; padding:2rem var(--gap); }
+    footer a { color:#ffeb3b; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">Ledgerly</div>
+      <button class="mobile-toggle" aria-label="Toggle navigation" aria-controls="nav-links" aria-expanded="false">☰</button>
+      <div class="nav-links" id="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="#hero" class="btn btn-primary">Sign Up</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section id="hero">
+      <h1>Invoice Faster, Get Paid Sooner</h1>
+      <p>Ledgerly simplifies invoicing for Indian small businesses – create, send and track invoices in seconds.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary" onclick="document.getElementById('signup-email').focus();">Start Free Trial</button>
+        <a href="#features" class="btn btn-outline">Learn More</a>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+      <h2>Key Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 4h12v2H3V7zm0 4h18v2H3v-2zm0 4h12v2H3v-2zm0 4h18v2H3v-2z"/></svg>
+          <h3>Instant Invoice Creation</h3>
+          <p>Design professional invoices with your branding in a few clicks.</p>
+        </div>
+        <div class="feature-card">
+          <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 00-3.16 19.45c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.36-1.34-3.36-1.34-.45-1.15-1.1-1.46-1.1-1.46-.9-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03 .88 1.5 2.31 1.07 2.87 .82 .09-.64 .35-1.07 .64-1.32-2.22-.25-4.56-1.11-4.56-4.95 0-1.09 .39-1.98 1.03-2.68-.1-.25-.45-1.27 .1-2.65 0 0 .84-.27 2.75 1.02A9.58 9.58 0 0112 6.8c.85.004 1.71.115 2.51.337 1.9-1.29 2.74-1.02 2.74-1.02 .55 1.38 .2 2.4 .1 2.65 .64 .7 1.02 1.59 1.02 2.68 0 3.85-2.34 4.7-4.57 4.95 .36 .31 .68 .92 .68 1.86v2.76c0 .27 .18 .58 .69 .48A10 10 0 0012 2z"/></svg>
+          <h3>GST‑Ready Templates</h3>
+          <p>Auto‑populate tax details and comply with Indian GST regulations.</p>
+        </div>
+        <div class="feature-card">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14l4-4h12c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+          <h3>Payment Reminders</h3>
+          <p>Send automated reminders via SMS or email to reduce late payments.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how">
+      <h2>How Ledgerly Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Create an Invoice</h3>
+          <p>Select a template, fill client details and add items – done in seconds.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Send & Track</h3>
+          <p>Share via email, WhatsApp or QR code and monitor status in real time.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Get Paid</h3>
+          <p>Integrate with UPI, net banking or cards; funds land directly in your account.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing">
+      <h2>Simple Pricing</h2>
+      <div class="pricing-grid">
+        <div class="plan">
+          <h3>Starter</h3>
+          <div class="price">₹0<span style="font-size:.6rem;">/mo</span></div>
+          <ul>
+            <li>Up to 10 invoices/month</li>
+            <li>Basic templates</li>
+            <li>Email support</li>
+          </ul>
+          <button class="btn btn-primary">Start Free</button>
+        </div>
+        <div class="plan popular">
+          <h3>Growth</h3>
+          <div class="price">₹799<span style="font-size:.6rem;">/mo</span></div>
+          <ul>
+            <li>Unlimited invoices</li>
+            <li>GST‑ready & custom branding</li>
+            <li>SMS & WhatsApp reminders</li>
+            <li>Priority email support</li>
+          </ul>
+          <button class="btn btn-primary">Go Growth</button>
+        </div>
+        <div class="plan">
+          <h3>Enterprise</h3>
+          <div class="price">₹1,999<span style="font-size:.6rem;">/mo</span></div>
+          <ul>
+            <li>All Growth features</li>
+            <li>Multi‑user access</li>
+            <li>API integration</li>
+            <li>Phone & dedicated support</li>
+          </ul>
+          <button class="btn btn-primary">Contact Sales</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="question" role="button" tabindex="0" aria-expanded="false">Is there a free trial?</div>
+        <div class="answer"><p>Yes, the Starter plan is completely free with no credit card required.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="question" role="button" tabindex="0" aria-expanded="false">Can I cancel anytime?</div>
+        <div class="answer"><p>All plans are month‑to‑month; cancel from your dashboard with a single click.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="question" role="button" tabindex="0" aria-expanded="false">Does Ledgerly support GST?</div>
+        <div class="answer"><p>Yes, all invoices can include GSTIN, tax rates and automatic calculations.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Ledgerly. All rights reserved.</p>
+    <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+  </footer>
+
+  <script>
+    // Mobile navigation toggle
+    const toggleBtn = document.querySelector('.mobile-toggle');
+    const navLinks = document.getElementById('nav-links');
+    toggleBtn.addEventListener('click', () => {
+      const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+      toggleBtn.setAttribute('aria-expanded', !expanded);
+      navLinks.classList.toggle('show');
+    });
+
+    // FAQ accordion
+    document.querySelectorAll('.question').forEach(q => {
+      q.addEventListener('click', () => toggleFAQ(q));
+      q.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggleFAQ(q); } });
+    });
+    function toggleFAQ(el) {
+      const expanded = el.getAttribute('aria-expanded') === 'true';
+      el.setAttribute('aria-expanded', !expanded);
+      // close others
+      document.querySelectorAll('.question').forEach(other => {
+        if(other!==el) other.setAttribute('aria-expanded','false');
+      });
+    }
+  </script>
+</body>
+</html>

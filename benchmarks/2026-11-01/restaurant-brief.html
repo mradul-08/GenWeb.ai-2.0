@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spice Route – Kerala Seafood Restaurant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2e8b57;
+      --secondary: #ffd700;
+      --accent: #ff4500;
+      --bg: #fff8e1;
+      --surface: #ffffff;
+      --text: #2f4f4f;
+      --font-heading: 'Montserrat', sans-serif;
+      --font-body: 'Open Sans', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:focus, button:focus, input:focus, textarea:focus {
+      outline: 3px solid var(--secondary);
+      outline-offset: 2px;
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    header, section, footer { padding: 2rem 1rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    /* Hero */
+    #hero {
+      background: url('https://images.unsplash.com/photo-1589923188900-6c2c5f4f3f1c?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      color: var(--surface);
+      text-align: center;
+      padding: 8rem 1rem;
+      position: relative;
+    }
+    #hero::after {
+      content:"";
+      position:absolute; inset:0;
+      background:rgba(0,0,0,0.4);
+    }
+    #hero > * { position:relative; z-index:1; }
+    h1 { font-family: var(--font-heading); font-size: 2.5rem; margin-bottom: .5rem; }
+    h2 { font-family: var(--font-heading); font-size: 2rem; margin-bottom: .5rem; }
+    .btn {
+      display:inline-block;
+      padding:.75rem 1.5rem;
+      background:var(--secondary);
+      color:#000;
+      border:none;
+      border-radius:4px;
+      font-weight:600;
+      cursor:pointer;
+      transition:background .3s;
+    }
+    .btn:hover, .btn:focus { background:#e6c200; }
+    /* Sections */
+    section { background: var(--surface); margin-bottom:1rem; border-radius:8px; }
+    h2 { color: var(--primary); margin-bottom:1rem; }
+    .grid { display:grid; gap:1.5rem; }
+    @media(min-width:600px){ .grid-2 { grid-template-columns: repeat(2,1fr); } }
+    @media(min-width:900px){ .grid-3 { grid-template-columns: repeat(3,1fr); } }
+    /* Menu */
+    .menu-item { border:1px solid #ddd; border-radius:6px; padding:1rem; background:#fafafa; }
+    .menu-item h3 { margin:0 0 .5rem; font-size:1.2rem; color:var(--accent); }
+    .price { font-weight:600; color:var(--primary); }
+    /* Gallery */
+    .gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:.5rem; }
+    .gallery img { border-radius:4px; transition:transform .3s; }
+    .gallery img:hover { transform:scale(1.05); }
+    /* Form */
+    form { display:flex; flex-direction:column; gap:.75rem; }
+    label { font-weight:600; }
+    input, textarea, select {
+      padding:.5rem;
+      border:1px solid #ccc;
+      border-radius:4px;
+      font-family:inherit;
+    }
+    button[type="submit"] {
+      background:var(--primary);
+      color:#fff;
+      border:none;
+      padding:.75rem;
+      border-radius:4px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    button[type="submit"]:hover, button[type="submit"]:focus { background:#276b48; }
+    /* Footer */
+    footer { text-align:center; font-size:.9rem; color:#555; }
+  </style>
+</head>
+<body>
+  <header id="hero">
+    <div class="container">
+      <h1>Spice Route</h1>
+      <p>Authentic Kerala Seafood in the Heart of Kochi</p>
+      <a href="#reservation" class="btn">Reserve a Table</a>
+    </div>
+  </header>
+
+  <section id="about">
+    <div class="container">
+      <h2>About Us</h2>
+      <p>At Spice Route we bring the vibrant flavors of Kerala’s coast to Kochi. Our chefs use locally sourced seafood, traditional spices, and time‑honored cooking techniques to create dishes that feel like a seaside celebration. Whether you’re a food enthusiast or a local diner, you’ll find a warm, inviting atmosphere and a menu that tells a story of the sea.</p>
+    </div>
+  </section>
+
+  <section id="menu">
+    <div class="container">
+      <h2>Menu</h2>
+      <div class="grid grid-2">
+        <div class="menu-item">
+          <h3>Kerala Fish Curry</h3>
+          <p>Fresh pomfret simmered in coconut milk, tamarind, and a blend of Malabar spices.</p>
+          <p class="price">₹250</p>
+        </div>
+        <div class="menu-item">
+          <h3>Spicy Prawn Fry</h3>
+          <p>Juicy prawns tossed with red chili, curry leaves, and a hint of mustard seed.</p>
+          <p class="price">₹300</p>
+        </div>
+        <div class="menu-item">
+          <h3>Mangrove Crab Masala</h3>
+          <p>Crab cooked in a rich tomato‑onion masala with coconut and fresh herbs.</p>
+          <p class="price">₹350</p>
+        </div>
+        <div class="menu-item">
+          <h3>Kerala Lobster Thermidor</h5>
+          <p>Lobster tail baked with a creamy cheese‑spice sauce, garnished with coriander.</p>
+          <p class="price">₹620</p>
+        </div>
+        <div class="menu-item">
+          <h3>Fish Moilee</h3>
+          <p>Delicate white fish in a mild coconut‑milk gravy with green chilies.</p>
+          <p class="price">₹280</p>
+        </div>
+        <div class="menu-item">
+          <h3>Calamari Fry</h3>
+          <p>Crispy calamari rings seasoned with Kerala pepper and lemon.</p>
+          <p class="price">₹260</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="chef-specials">
+    <div class="container">
+      <h2>Chef’s Specials</h2>
+      <div class="grid grid-2">
+        <div class="menu-item">
+          <h3>Malabar King Prawn Platter</h3>
+          <p>Whole king prawns grilled with a secret blend of spices, served with lemon butter.</p>
+          <p class="price">₹480</p>
+        </div>
+        <div class="menu-item">
+          <h3>Coir‑Smoked Tuna</h3>
+          <p>Tuna smoked over coconut husk, sliced thin and drizzled with tamarind glaze.</p>
+          <p class="price">₹540</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <div class="container">
+      <h2>Gallery</h2>
+      <div class="gallery">
+        <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=600&q=80" alt="Kerala Fish Curry bowl">
+        <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=600&q=80" alt="Spicy Prawn Fry on banana leaf">
+        <img src="https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=600&q=80" alt="Mouth‑watering lobster thermidor">
+        <img src="https://images.unsplash.com/photo-1600891964599-0c0c2d3e0e5a?auto=format&fit=crop&w=600&q=80" alt="Cozy interior of Spice Route restaurant">
+        <img src="https://images.unsplash.com/photo-1556912167-f556f1f39b8d?auto=format&fit=crop&w=600&q=80" alt="Chef preparing seafood in open kitchen">
+        <img src="https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=600&q=80" alt="Fresh catch displayed on ice">
+      </div>
+    </div>
+  </section>
+
+  <section id="hours">
+    <div class="container">
+      <h2>Opening Hours</h2>
+      <ul>
+        <li>Monday – Friday: 11:00 AM – 10:00 PM</li>
+        <li>Saturday: 12:00 PM – 11:00 PM</li>
+        <li>Sunday: 12:00 PM – 9:00 PM</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="reservation">
+    <div class="container">
+      <h2>Reserve a Table</h2>
+      <form id="reservation-form" novalidate>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required aria-required="true">
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required aria-required="true">
+
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" name="phone" required aria-required="true">
+
+        <label for="date">Date</label>
+        <input type="date" id="date" name="date" required aria-required="true">
+
+        <label for="time">Time</label>
+        <input type="time" id="time" name="time" required aria-required="true">
+
+        <label for="guests">Number of Guests</label>
+        <select id="guests" name="guests" required aria-required="true">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5+</option>
+        </select>
+
+        <button type="submit">Book Now</button>
+      </form>
+      <p id="form-message" aria-live="polite" style="margin-top:1rem;"></p>
+    </div>
+  </section>
+
+  <section id="location">
+    <div class="container">
+      <h2>Find Us</h2>
+      <p>Spice Route, Marine Drive, Kochi, Kerala, India 682001</p>
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3885.123456789!2d76.2775!3d9.9665!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b07d9b0c0c0c0c1%3A0xabcdef123456789!2sMarine%20Drive%2C%20Kochi%2C%20Kerala%2C%20India!5e0!3m2!1sen!2sus!4v1700000000000" width="100%" height="300" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2024 Spice Route. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Simple client‑side form handling (no backend)
+    const form = document.getElementById('reservation-form');
+    const message = document.getElementById('form-message');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      // Basic validation
+      const required = form.querySelectorAll('[required]');
+      let valid = true;
+      required.forEach(inp => {
+        if (!inp.value.trim()) {
+          valid = false;
+          inp.style.borderColor = 'red';
+        } else {
+          inp.style.borderColor = '';
+        }
+      });
+      if (valid) {
+        message.textContent = 'Thank you! Your reservation request has been received.';
+        message.style.color = 'var(--primary)';
+        form.reset();
+      } else {
+        message.textContent = 'Please fill out all required fields.';
+        message.style.color = 'var(--accent)';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Loom & Thread – Handmade Cotton Sarees</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #8B4513;      /* warm earthy brown */
+      --secondary: #D2A679;    /* soft tan */
+      --accent: #C0392B;       /* deep coral for calls‑to‑action */
+      --bg: #FAF8F5;           /* light ivory background */
+      --surface: #FFFFFF;      /* cards, inputs */
+      --text: #2E2E2E;         /* dark gray for readability */
+      --radius: 8px;
+      --transition: 0.2s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
+      line-height:1.6;
+    }
+    a { color:var(--primary); text-decoration:none; }
+    a:focus, button:focus, input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+    header, nav, main, footer { padding: 1rem 2rem; max-width:1200px; margin:auto; }
+    header { display:flex; justify-content:space-between; align-items:center; background:var(--surface); box-shadow:0 2px 4px rgba(0,0,0,0.05);}
+    .logo { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--primary); }
+    .cart { position:relative; font-size:1.2rem; }
+    .cart::after {
+      content: attr(data-count);
+      position:absolute; top:-0.4rem; right:-0.8rem; background:var(--accent);
+      color:#fff; font-size:0.7rem; width:1.2rem; height:1.2rem;
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+    }
+    nav { margin-top:0.5rem; }
+    .nav-links { list-style:none; display:flex; gap:1.5rem; }
+    .nav-links a { font-weight:500; }
+    #filters { margin:2rem 0; display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .filter-btn {
+      background:var(--surface); border:1px solid var(--secondary);
+      padding:0.4rem 0.8rem; border-radius:var(--radius);
+      cursor:pointer; transition:var(--transition);
+    }
+    .filter-btn.active, .filter-btn:hover { background:var(--secondary); color:#fff; }
+    #product-grid { display:grid; gap:1.5rem; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); }
+    .product-card {
+      background:var(--surface); border-radius:var(--radius);
+      overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.08);
+      display:flex; flex-direction:column;
+    }
+    .product-card img { width:100%; height:auto; aspect-ratio:4/3; object-fit:cover; }
+    .product-info { flex:1; padding:0.8rem 1rem; display:flex; flex-direction:column; }
+    .product-info h3 { margin:0 0 0.4rem; font-size:1.1rem; color:var(--primary); }
+    .product-info p { margin:0 0 0.8rem; flex-grow:1; }
+    .price { font-weight:600; margin-bottom:0.5rem; }
+    .add-to-cart {
+      background:var(--accent); color:#fff; border:none;
+      padding:0.5rem; border-radius:var(--radius);
+      cursor:pointer; transition:var(--transition);
+    }
+    .add-to-cart:hover { background:#a93226; }
+    #shipping { background:var(--surface); padding:2rem; margin:2rem 0; border-radius:var(--radius); text-align:center; }
+    #newsletter { background:var(--secondary); color:#fff; padding:2rem; border-radius:var(--radius); text-align:center; }
+    #newsletter input[type="email"] {
+      padding:0.6rem; border:none; border-radius:var(--radius) 0 0 var(--radius);
+      width:250px; max-width:80%; outline:none;
+    }
+    #newsletter button {
+      padding:0.6rem 1rem; border:none; background:var(--accent);
+      color:#fff; border-radius:0 var(--radius) var(--radius) 0; cursor:pointer;
+    }
+    footer { font-size:0.9rem; text-align:center; margin-top:2rem; color:#555; }
+    @media (max-width:600px) {
+      header, nav, main, footer { padding:1rem; }
+      #newsletter input[type="email"] { width:100%; border-radius:var(--radius); margin-bottom:0.5rem; }
+      #newsletter button { width:100%; border-radius:var(--radius); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Loom &amp; Thread</div>
+    <div class="cart" aria-label="Shopping cart" data-count="0">🛒</div>
+  </header>
+
+  <nav aria-label="Primary">
+    <ul class="nav-links">
+      <li><a href="#products">Shop</a></li>
+      <li><a href="#shipping">Shipping</a></li>
+      <li><a href="#newsletter">Newsletter</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section id="filters" aria-label="Product categories">
+      <button class="filter-btn active" data-category="all">All</button>
+      <button class="filter-btn" data-category="traditional">Traditional</button>
+      <button class="filter-btn" data-category="modern">Modern</button>
+      <button class="filter-btn" data-category="festival">Festival</button>
+    </section>
+
+    <section id="products" aria-label="Product grid">
+      <div id="product-grid">
+        <!-- Sample products -->
+        <article class="product-card" data-category="traditional">
+          <img src="https://picsum.photos/seed/1/400/300" alt="Saree – Classic Maroon">
+          <div class="product-info">
+            <h3>Classic Maroon Saree</h3>
+            <p>Handwoven cotton with subtle gold border.</p>
+            <div class="price">₹2,500</div>
+            <button class="add-to-cart">Add to Cart</button>
+          </div>
+        </article>
+        <article class="product-card" data-category="modern">
+          <img src="https://picsum.photos/seed/2/400/300" alt="Saree – Mint Green">
+          <div class="product-info">
+            <h3>Mint Green Saree</h3>
+            <p>Contemporary block print on soft cotton.</p>
+            <div class="price">₹2,800</div>
+            <button class="add-to-cart">Add to Cart</button>
+          </div>
+        </article>
+        <article class="product-card" data-category="festival">
+          <img src="https://picsum.photos/seed/3/400/300" alt="Saree – Festive Red">
+          <div class="product-info">
+            <h3>Festive Red Saree</h3>
+            <p>Vibrant patterns perfect for celebrations.</p>
+            <div class="price">₹3,200</div>
+            <button class="add-to-cart">Add to Cart</button>
+          </div>
+        </article>
+        <!-- Add more product cards as needed -->
+      </div>
+    </section>
+
+    <section id="shipping" aria-labelledby="shipping-heading">
+      <h2 id="shipping-heading">Free Shipping on Orders Over ₹5,000</h2>
+      <p>We ship across India with eco‑friendly packaging. Delivery within 5‑7 business days.</p>
+    </section>
+
+    <section id="newsletter" aria-labelledby="newsletter-heading">
+      <h2 id="newsletter-heading">Stay Updated</h2>
+      <p>Get the latest designs and exclusive offers.</p>
+      <form id="newsletter-form" novalidate>
+        <label for="email" class="visually-hidden">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+        <button type="submit">Subscribe</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Loom &amp; Thread. All rights reserved.
+  </footer>
+
+  <script>
+    // Cart functionality
+    const cartIcon = document.querySelector('.cart');
+    let cartCount = 0;
+    document.querySelectorAll('.add-to-cart').forEach(btn => {
+      btn.addEventListener('click', () => {
+        cartCount++;
+        cartIcon.dataset.count = cartCount;
+      });
+    });
+
+    // Filter functionality
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const productCards = document.querySelectorAll('.product-card');
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.category;
+        productCards.forEach(card => {
+          card.style.display = (cat === 'all' || card.dataset.category === cat) ? '' : 'none';
+        });
+      });
+    });
+
+    // Newsletter form (demo only)
+    const newsletterForm = document.getElementById('newsletter-form');
+    newsletterForm.addEventListener('submit', e => {
+      e.preventDefault();
+      alert('Thank you for subscribing!');
+      newsletterForm.reset();
+    });
+  </script>
+</body>
+</html>

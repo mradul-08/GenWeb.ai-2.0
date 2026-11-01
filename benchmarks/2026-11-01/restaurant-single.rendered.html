@@ -1,0 +1,178 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spice Route – Kerala Seafood Restaurant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&amp;family=Open+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00695c;      /* deep teal */
+      --secondary: #ff9800;    /* warm orange */
+      --accent: #ff5722;       /* spice red */
+      --bg: #fafafa;           /* light background */
+      --surface: #ffffff;      /* cards */
+      --text: #212121;         /* dark text */
+      --radius: .5rem;
+      --gap: 1.5rem;
+      --transition: 0.3s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin:0; font-family:'Open Sans',sans-serif; background:var(--bg); color:var(--text);
+      line-height:1.6;
+    }
+    a { color:var(--accent); text-decoration:none; }
+    a:focus, button:focus, input:focus, textarea:focus {
+      outline: 3px solid var(--secondary);
+      outline-offset: 2px;
+    }
+    header, nav, main, footer { padding: var(--gap); max-width: 1200px; margin:auto; }
+    header {
+      background: var(--primary);
+      color:#fff;
+      text-align:center;
+      padding:2rem var(--gap);
+    }
+    header h1 {font-family:'Playfair Display',serif; font-size:2.5rem; margin:0;}
+    nav {display:flex; justify-content:center; gap:2rem; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.1);}
+    nav a {font-weight:600; padding:.5rem 0; color:var(--primary);}
+    nav a:hover {color:var(--accent);}
+    section {margin-top:2rem;}
+    h2 {font-family:'Playfair Display',serif; color:var(--primary); margin-bottom:.5rem;}
+    .menu, .specials, .gallery, .hours, .reservation, .location {background:var(--surface); border-radius:var(--radius); padding:var(--gap); box-shadow:0 2px 6px rgba(0,0,0,.05);}
+    .menu table {width:100%; border-collapse:collapse;}
+    .menu th, .menu td {padding:.75rem; text-align:left; border-bottom:1px solid #eee;}
+    .menu th {background:var(--primary); color:#fff;}
+    .specials ul {list-style:none; padding:0; margin:0;}
+    .specials li {margin-bottom:.75rem;}
+    .gallery {display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.5rem;}
+    .gallery img {width:100%; height:150px; object-fit:cover; border-radius:var(--radius); transition:transform var(--transition);}
+    .gallery img:hover {transform:scale(1.05);}
+    .hours ul {list-style:none; padding:0;}
+    .hours li {margin-bottom:.5rem;}
+    form {display:grid; gap:.75rem;}
+    input, textarea, button {font:inherit; padding:.75rem; border:1px solid #ccc; border-radius:var(--radius);}
+    button {background:var(--secondary); color:#fff; border:none; cursor:pointer; transition:background var(--transition);}
+    button:hover {background:var(--accent);}
+    footer {text-align:center; font-size:.875rem; color:#777; margin-top:2rem;}
+    @media (max-width:600px) {
+      nav {flex-direction:column; gap:.5rem;}
+    }
+  </style>
+</head>
+<body>
+  <header id="home">
+    <h1>Spice Route</h1>
+    <p>Authentic Kerala Seafood – Fresh, Flavourful, Unforgettable</p>
+  </header>
+
+  <nav aria-label="Main navigation">
+    <a href="#menu">Menu</a>
+    <a href="#specials">Chef's Specials</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#hours">Hours</a>
+    <a href="#reservation">Reserve a Table</a>
+    <a href="#location">Location</a>
+  </nav>
+
+  <main>
+    <section id="menu" class="menu">
+      <h2>Our Menu</h2>
+      <table>
+        <thead>
+          <tr><th>Dish</th><th>Description</th><th>Price</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Kerala Fish Curry</td><td>Fresh sardines simmered in coconut milk, tamarind &amp; spices</td><td>₹250</td></tr>
+          <tr><td>Prawn Roast</td><td>Jumbo prawns roasted with black pepper, curry leaves &amp; mustard seeds</td><td>₹320</td></tr>
+          <tr><td>Malabar Crab Masala</td><td>Crab cooked in a rich tomato‑onion masala</td><td>₹380</td></tr>
+          <tr><td>Fish Fry (Kerala Style)</td><td>Marinated fish fillet fried in coconut oil</td><td>₹210</td></tr>
+          <tr><td>Squid Pepper Fry</td><td>Spicy stir‑fried squid with green chilies</td><td>₹285</td></tr>
+          <tr><td>Vegetable Thoran</td><td>Mixed veggies with grated coconut &amp; mustard seeds</td><td>₹150</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="specials" class="specials">
+      <h2>Chef's Specials</h2>
+      <ul>
+        <li><strong>Meen Moilee</strong> – Delicate fish in a fragrant coconut‑turmeric broth (₹340)</li>
+        <li><strong>Karimeen Pollichathu</strong> – Pearl spot wrapped in banana leaf, grilled with spices (₹420)</li>
+        <li><strong>Spicy Lobster Thermidor</strong> – Lobster tossed in a creamy mustard sauce (₹560)</li>
+      </ul>
+    </section>
+
+    <section id="gallery" class="gallery" aria-label="Photo gallery">
+      <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&amp;fit=crop&amp;w=400&amp;q=60" alt="Kerala fish curry served in a banana leaf">
+      <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&amp;fit=crop&amp;w=400&amp;q=60" alt="Grilled Karimeen Pollichathu">
+      <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&amp;fit=crop&amp;w=400&amp;q=60" alt="Spicy prawn roast on a rustic wooden table">
+      <img src="https://images.unsplash.com/photo-1543353071-873f17a7a088?auto=format&amp;fit=crop&amp;w=400&amp;q=60" alt="Seafood thali with rice and pickles">
+    </section>
+
+    <section id="hours" class="hours">
+      <h2>Opening Hours</h2>
+      <ul>
+        <li>Monday – Friday: 11:00 AM – 10:00 PM</li>
+        <li>Saturday: 12:00 PM – 11:00 PM</li>
+        <li>Sunday: Closed</li>
+      </ul>
+    </section>
+
+    <section id="reservation" class="reservation">
+      <h2>Reserve a Table</h2>
+      <form id="reservation-form" novalidate="">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required="" aria-required="true">
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required="" aria-required="true">
+
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" name="phone" required="" aria-required="true">
+
+        <label for="date">Date</label>
+        <input type="date" id="date" name="date" required="" aria-required="true">
+
+        <label for="time">Time</label>
+        <input type="time" id="time" name="time" required="" aria-required="true">
+
+        <label for="guests">Number of guests</label>
+        <input type="number" id="guests" name="guests" min="1" max="20" required="" aria-required="true">
+
+        <button type="submit">Book Now</button>
+        <p id="form-message" aria-live="polite" style="margin-top:.5rem;"></p>
+      </form>
+    </section>
+
+    <section id="location" class="location">
+      <h2>Find Us</h2>
+      <p>Spice Route, 12 Marine Drive, Fort Kochi, Kerala 682001, India</p>
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3885.123456789!2d76.300000!3d9.960000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b07c8c5c5c5c5c5%3A0x123456789abcdef!2sSpice%20Route%20Restaurant!5e0!3m2!1sen!2sin!4v1700000000000" width="100%" height="300" style="border:0; border-radius:var(--radius);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Spice Route. All rights reserved.
+  </footer>
+
+  <script>
+    const form = document.getElementById('reservation-form');
+    const msg = document.getElementById('form-message');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      // Simple front‑end validation feedback
+      const missing = [...form.elements].filter(el => el.required && !el.value);
+      if (missing.length) {
+        msg.textContent = 'Please fill out all required fields.';
+        msg.style.color = 'var(--accent)';
+        return;
+      }
+      msg.textContent = 'Thank you! Your reservation request has been sent.';
+      msg.style.color = 'var(--secondary)';
+      form.reset();
+    });
+  </script>
+
+</body></html>

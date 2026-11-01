@@ -1,0 +1,735 @@
+{
+  "ranAt": "2026-11-01T09:39:40.827Z",
+  "results": [
+    {
+      "category": "portfolio",
+      "strategy": "single",
+      "ok": true,
+      "failure": null,
+      "seconds": 6,
+      "apiCalls": 1,
+      "callLog": [
+        "generate:groq/gpt-oss-120b:success(200)"
+      ],
+      "tokens": {
+        "input": 428,
+        "output": 2595,
+        "anyEstimated": false
+      },
+      "repairs": [],
+      "generationModel": "groq/gpt-oss-120b",
+      "briefStatus": "skipped",
+      "file": "portfolio-single.html",
+      "title": "Ananya Rao – UX Designer Portfolio",
+      "bytes": 9255,
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "warnings": []
+      },
+      "requirementCoverage": {
+        "case_studies": true,
+        "about": true,
+        "skills": true,
+        "testimonials": true,
+        "contact_form": true
+      },
+      "coverageMet": "5/5",
+      "visual": {
+        "primary": "#00695c",
+        "bg": "#f5f7fa",
+        "text": "#212121",
+        "fonts": [
+          "Inter",
+          "Playfair Display"
+        ]
+      },
+      "functional": {
+        "scripts": 1,
+        "scriptErrors": [],
+        "duplicateIds": [],
+        "brokenAnchors": []
+      },
+      "responsive": {
+        "mediaQueries": 2,
+        "viewportMeta": true
+      },
+      "accessibility": {
+        "lang": true,
+        "imgsWithoutAlt": 0,
+        "inputsWithoutLabel": 0,
+        "h1Count": 1,
+        "focusStyles": true
+      },
+      "render": {
+        "mobile": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(245, 247, 250)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "portfolio-single-mobile.png"
+        },
+        "desktop": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(245, 247, 250)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "portfolio-single-desktop.png"
+        }
+      },
+      "primaryHueFamily": "teal",
+      "postProcessedImagesReplaced": 0,
+      "renderedCoverage": {
+        "case_studies": true,
+        "about": true,
+        "skills": true,
+        "testimonials": true,
+        "contact_form": true
+      },
+      "renderedCoverageMet": "5/5"
+    },
+    {
+      "category": "saas",
+      "strategy": "single",
+      "ok": true,
+      "failure": null,
+      "seconds": 8,
+      "apiCalls": 1,
+      "callLog": [
+        "generate:groq/gpt-oss-120b:success(200)"
+      ],
+      "tokens": {
+        "input": 442,
+        "output": 3556,
+        "anyEstimated": false
+      },
+      "repairs": [],
+      "generationModel": "groq/gpt-oss-120b",
+      "briefStatus": "skipped",
+      "file": "saas-single.html",
+      "title": "Ledgerly – Simple Invoicing for Indian Small Businesses",
+      "bytes": 11297,
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "warnings": []
+      },
+      "requirementCoverage": {
+        "cta": true,
+        "features": true,
+        "how_it_works": true,
+        "three_tiers_inr": true,
+        "faq": true
+      },
+      "coverageMet": "5/5",
+      "visual": {
+        "primary": "#0D47A1",
+        "bg": "#F5F7FA",
+        "text": "#212121",
+        "fonts": [
+          "Inter"
+        ]
+      },
+      "functional": {
+        "scripts": 1,
+        "scriptErrors": [],
+        "duplicateIds": [],
+        "brokenAnchors": []
+      },
+      "responsive": {
+        "mediaQueries": 1,
+        "viewportMeta": true
+      },
+      "accessibility": {
+        "lang": true,
+        "imgsWithoutAlt": 0,
+        "inputsWithoutLabel": 0,
+        "h1Count": 1,
+        "focusStyles": true
+      },
+      "render": {
+        "mobile": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(245, 247, 250)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "saas-single-mobile.png"
+        },
+        "desktop": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(245, 247, 250)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "saas-single-desktop.png"
+        }
+      },
+      "primaryHueFamily": "blue",
+      "postProcessedImagesReplaced": 0,
+      "renderedCoverage": {
+        "cta": true,
+        "features": true,
+        "how_it_works": true,
+        "three_tiers_inr": true,
+        "faq": true
+      },
+      "renderedCoverageMet": "5/5"
+    },
+    {
+      "category": "restaurant",
+      "strategy": "single",
+      "ok": true,
+      "failure": null,
+      "seconds": 8,
+      "apiCalls": 1,
+      "callLog": [
+        "generate:groq/gpt-oss-120b:success(200)"
+      ],
+      "tokens": {
+        "input": 432,
+        "output": 3478,
+        "anyEstimated": false
+      },
+      "repairs": [],
+      "generationModel": "groq/gpt-oss-120b",
+      "briefStatus": "skipped",
+      "file": "restaurant-single.html",
+      "title": "Spice Route – Kerala Seafood Restaurant",
+      "bytes": 11137,
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "warnings": []
+      },
+      "requirementCoverage": {
+        "menu_prices": true,
+        "specials": true,
+        "gallery": true,
+        "hours": true,
+        "reservation_form": true,
+        "location": true
+      },
+      "coverageMet": "6/6",
+      "visual": {
+        "primary": "#00695c",
+        "bg": "#f9f5e9",
+        "text": "#2e2e2e",
+        "fonts": [
+          "Libre Franklin",
+          "Playfair Display"
+        ]
+      },
+      "functional": {
+        "scripts": 1,
+        "scriptErrors": [],
+        "duplicateIds": [],
+        "brokenAnchors": []
+      },
+      "responsive": {
+        "mediaQueries": 2,
+        "viewportMeta": true
+      },
+      "accessibility": {
+        "lang": true,
+        "imgsWithoutAlt": 3,
+        "inputsWithoutLabel": 0,
+        "h1Count": 1,
+        "focusStyles": true
+      },
+      "render": {
+        "mobile": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgba(0, 0, 0, 0)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "restaurant-single-mobile.png"
+        },
+        "desktop": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgba(0, 0, 0, 0)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "restaurant-single-desktop.png"
+        }
+      },
+      "primaryHueFamily": "teal",
+      "postProcessedImagesReplaced": 1,
+      "renderedCoverage": {
+        "menu_prices": true,
+        "specials": true,
+        "gallery": true,
+        "hours": true,
+        "reservation_form": true,
+        "location": true
+      },
+      "renderedCoverageMet": "6/6"
+    },
+    {
+      "category": "ecommerce",
+      "strategy": "single",
+      "ok": true,
+      "failure": null,
+      "seconds": 5,
+      "apiCalls": 1,
+      "callLog": [
+        "generate:groq/gpt-oss-120b:success(200)"
+      ],
+      "tokens": {
+        "input": 440,
+        "output": 2235,
+        "anyEstimated": false
+      },
+      "repairs": [],
+      "generationModel": "groq/gpt-oss-120b",
+      "briefStatus": "skipped",
+      "file": "ecommerce-single.html",
+      "title": "Loom & Thread – Handmade Cotton Sarees",
+      "bytes": 7629,
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "warnings": []
+      },
+      "requirementCoverage": {
+        "product_grid": false,
+        "add_to_cart": true,
+        "filters": true,
+        "cart_count_js": true,
+        "shipping": true,
+        "newsletter": true
+      },
+      "coverageMet": "5/6",
+      "visual": {
+        "primary": "#6B4226",
+        "bg": "#FAF5EF",
+        "text": "#2F1E0F",
+        "fonts": [
+          "Playfair Display",
+          "Inter"
+        ]
+      },
+      "functional": {
+        "scripts": 1,
+        "scriptErrors": [],
+        "duplicateIds": [],
+        "brokenAnchors": []
+      },
+      "responsive": {
+        "mediaQueries": 1,
+        "viewportMeta": true
+      },
+      "accessibility": {
+        "lang": true,
+        "imgsWithoutAlt": 1,
+        "inputsWithoutLabel": 0,
+        "h1Count": 1,
+        "focusStyles": true
+      },
+      "render": {
+        "mobile": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(250, 245, 239)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "ecommerce-single-mobile.png"
+        },
+        "desktop": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(250, 245, 239)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "ecommerce-single-desktop.png"
+        }
+      },
+      "primaryHueFamily": "orange/brown",
+      "postProcessedImagesReplaced": 0,
+      "renderedCoverage": {
+        "product_grid": false,
+        "add_to_cart": true,
+        "filters": true,
+        "cart_count_js": true,
+        "shipping": true,
+        "newsletter": true
+      },
+      "renderedCoverageMet": "5/6"
+    },
+    {
+      "category": "agency",
+      "strategy": "single",
+      "ok": true,
+      "failure": null,
+      "seconds": 8,
+      "apiCalls": 1,
+      "callLog": [
+        "generate:groq/gpt-oss-120b:success(200)"
+      ],
+      "tokens": {
+        "input": 429,
+        "output": 3368,
+        "anyEstimated": false
+      },
+      "repairs": [],
+      "generationModel": "groq/gpt-oss-120b",
+      "briefStatus": "skipped",
+      "file": "agency-single.html",
+      "title": "Northbeam – Branding & Web Design Agency",
+      "bytes": 11428,
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "warnings": []
+      },
+      "requirementCoverage": {
+        "services": true,
+        "case_studies": true,
+        "process": true,
+        "team": true,
+        "clients": true,
+        "contact": true
+      },
+      "coverageMet": "6/6",
+      "visual": {
+        "primary": "#2A4D69",
+        "bg": "#F5F7FA",
+        "text": "#2B2B2B",
+        "fonts": [
+          "Inter",
+          "Playfair Display"
+        ]
+      },
+      "functional": {
+        "scripts": 1,
+        "scriptErrors": [],
+        "duplicateIds": [],
+        "brokenAnchors": []
+      },
+      "responsive": {
+        "mediaQueries": 1,
+        "viewportMeta": true
+      },
+      "accessibility": {
+        "lang": true,
+        "imgsWithoutAlt": 0,
+        "inputsWithoutLabel": 0,
+        "h1Count": 1,
+        "focusStyles": true
+      },
+      "render": {
+        "mobile": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(245, 247, 250)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "agency-single-mobile.png"
+        },
+        "desktop": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(245, 247, 250)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "agency-single-desktop.png"
+        }
+      },
+      "primaryHueFamily": "blue",
+      "postProcessedImagesReplaced": 0,
+      "renderedCoverage": {
+        "services": true,
+        "case_studies": true,
+        "process": true,
+        "team": true,
+        "clients": true,
+        "contact": true
+      },
+      "renderedCoverageMet": "6/6"
+    },
+    {
+      "category": "dashboard",
+      "strategy": "single",
+      "ok": true,
+      "failure": null,
+      "seconds": 6,
+      "apiCalls": 1,
+      "callLog": [
+        "generate:groq/gpt-oss-120b:success(200)"
+      ],
+      "tokens": {
+        "input": 436,
+        "output": 2493,
+        "anyEstimated": false
+      },
+      "repairs": [],
+      "generationModel": "groq/gpt-oss-120b",
+      "briefStatus": "skipped",
+      "file": "dashboard-single.html",
+      "title": "IronHouse Gym Admin Dashboard",
+      "bytes": 8369,
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "warnings": []
+      },
+      "requirementCoverage": {
+        "sidebar": true,
+        "kpis": true,
+        "chart": true,
+        "table": true,
+        "theme_toggle_js": true
+      },
+      "coverageMet": "5/5",
+      "visual": {
+        "primary": "#d62828",
+        "bg": null,
+        "text": null,
+        "fonts": [
+          "Inter"
+        ]
+      },
+      "functional": {
+        "scripts": 1,
+        "scriptErrors": [],
+        "duplicateIds": [],
+        "brokenAnchors": []
+      },
+      "responsive": {
+        "mediaQueries": 1,
+        "viewportMeta": true
+      },
+      "accessibility": {
+        "lang": true,
+        "imgsWithoutAlt": 0,
+        "inputsWithoutLabel": 0,
+        "h1Count": 1,
+        "focusStyles": true
+      },
+      "render": {
+        "mobile": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(245, 245, 245)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "dashboard-single-mobile.png"
+        },
+        "desktop": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(245, 245, 245)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "dashboard-single-desktop.png"
+        }
+      },
+      "primaryHueFamily": "red/pink",
+      "postProcessedImagesReplaced": 0,
+      "renderedCoverage": {
+        "sidebar": true,
+        "kpis": true,
+        "chart": true,
+        "table": true,
+        "theme_toggle_js": true
+      },
+      "renderedCoverageMet": "5/5"
+    },
+    {
+      "category": "docs",
+      "strategy": "single",
+      "ok": true,
+      "failure": null,
+      "seconds": 6,
+      "apiCalls": 1,
+      "callLog": [
+        "generate:groq/gpt-oss-120b:success(200)"
+      ],
+      "tokens": {
+        "input": 441,
+        "output": 2366,
+        "anyEstimated": false
+      },
+      "repairs": [],
+      "generationModel": "groq/gpt-oss-120b",
+      "briefStatus": "skipped",
+      "file": "docs-single.html",
+      "title": "quickcache Documentation",
+      "bytes": 8134,
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "warnings": []
+      },
+      "requirementCoverage": {
+        "sidebar": true,
+        "getting_started": true,
+        "code_samples": true,
+        "api_reference": true,
+        "faq": true,
+        "search_filter_js": true
+      },
+      "coverageMet": "6/6",
+      "visual": {
+        "primary": "#2a7f5c",
+        "bg": "#e8f5e9",
+        "text": "#212121",
+        "fonts": [
+          "Inter",
+          "JetBrains Mono"
+        ]
+      },
+      "functional": {
+        "scripts": 1,
+        "scriptErrors": [],
+        "duplicateIds": [],
+        "brokenAnchors": []
+      },
+      "responsive": {
+        "mediaQueries": 1,
+        "viewportMeta": true
+      },
+      "accessibility": {
+        "lang": true,
+        "imgsWithoutAlt": 0,
+        "inputsWithoutLabel": 0,
+        "h1Count": 1,
+        "focusStyles": true
+      },
+      "render": {
+        "mobile": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(232, 245, 233)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "docs-single-mobile.png"
+        },
+        "desktop": {
+          "overflowPx": 0,
+          "brokenImages": 0,
+          "bodyBg": "rgb(232, 245, 233)",
+          "overlappingTextPairs": 0,
+          "overlapExamples": [],
+          "runtimeExceptions": [],
+          "screenshot": "docs-single-desktop.png"
+        }
+      },
+      "primaryHueFamily": "green",
+      "postProcessedImagesReplaced": 0,
+      "renderedCoverage": {
+        "sidebar": true,
+        "getting_started": true,
+        "code_samples": true,
+        "api_reference": true,
+        "faq": true,
+        "search_filter_js": true
+      },
+      "renderedCoverageMet": "6/6"
+    }
+  ],
+  "providerStatus": {
+    "timestamp": "2026-11-01T09:39:40.827Z",
+    "providers": [
+      {
+        "provider": "groq",
+        "quotaScope": "provider",
+        "total": 5,
+        "available": 5,
+        "dead": 0,
+        "pausedReason": null,
+        "nextResetMs": null,
+        "lastSuccessAt": "2026-11-01T09:39:40.818Z",
+        "lastError": null,
+        "enabled": true,
+        "health": "verified"
+      },
+      {
+        "provider": "zhipu",
+        "quotaScope": "provider",
+        "total": 5,
+        "available": 5,
+        "dead": 0,
+        "pausedReason": null,
+        "nextResetMs": null,
+        "lastSuccessAt": null,
+        "lastError": null,
+        "enabled": true,
+        "health": "unverified"
+      },
+      {
+        "provider": "cloudflare",
+        "quotaScope": "credential",
+        "total": 5,
+        "available": 5,
+        "dead": 0,
+        "pausedReason": null,
+        "nextResetMs": null,
+        "lastSuccessAt": null,
+        "lastError": null,
+        "enabled": true,
+        "health": "unverified"
+      },
+      {
+        "provider": "mistral",
+        "quotaScope": "provider",
+        "total": 5,
+        "available": 5,
+        "dead": 0,
+        "pausedReason": null,
+        "nextResetMs": null,
+        "lastSuccessAt": null,
+        "lastError": null,
+        "enabled": false,
+        "health": "disabled"
+      },
+      {
+        "provider": "sambanova",
+        "quotaScope": "provider",
+        "total": 5,
+        "available": 5,
+        "dead": 0,
+        "pausedReason": null,
+        "nextResetMs": null,
+        "lastSuccessAt": null,
+        "lastError": null,
+        "enabled": false,
+        "health": "disabled"
+      },
+      {
+        "provider": "openrouter",
+        "quotaScope": "provider",
+        "total": 5,
+        "available": 5,
+        "dead": 0,
+        "pausedReason": null,
+        "nextResetMs": null,
+        "lastSuccessAt": null,
+        "lastError": null,
+        "enabled": false,
+        "health": "disabled"
+      }
+    ],
+    "unavailableModels": [],
+    "anyAvailable": true,
+    "anyVerified": true,
+    "earliestReset": null
+  }
+}

@@ -1,0 +1,241 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Loom &amp; Thread – Handmade Cotton Sarees</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6B4226;      /* warm terracotta */
+      --secondary: #C49E78;    /* muted sand */
+      --accent: #D97706;       /* spice orange */
+      --bg: #FAF5EF;           /* soft parchment */
+      --surface: #FFFFFF;
+      --text: #2F1E0F;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin:0; font-family: 'Inter', sans-serif; background: var(--bg);
+      color: var(--text); line-height:1.5;
+    }
+    a { color: var(--primary); text-decoration:none; }
+    a:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+    header {
+      background: var(--primary); color:#fff; padding:1rem;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    header h1 { margin:0; font-family:'Playfair Display',serif; font-size:1.5rem; }
+    #cart {
+      background: var(--accent); border-radius:9999px; padding:0.25rem 0.6rem;
+      font-weight:500; min-width:1.5rem; text-align:center;
+    }
+    nav { display:none; }
+    .menu-toggle {
+      background:none; border:none; color:#fff; font-size:1.5rem;
+    }
+    main { padding:1rem; max-width:1200px; margin:auto; }
+    .filters {
+      margin-bottom:1rem; display:flex; flex-wrap:wrap; gap:0.5rem;
+    }
+    .filters button {
+      background: var(--surface); border:1px solid var(--secondary);
+      padding:0.5rem 1rem; cursor:pointer; border-radius:4px;
+    }
+    .filters button.active { background: var(--primary); color:#fff; }
+    .grid {
+      display:grid; gap:1rem;
+      grid-template-columns: repeat(auto-fill, minmax(250px,1fr));
+    }
+    .card {
+      background: var(--surface); border:1px solid var(--secondary);
+      border-radius:8px; overflow:hidden; display:flex; flex-direction:column;
+    }
+    .card img {
+      width:100%; height:200px; object-fit:cover;
+      background: linear-gradient(135deg, var(--secondary), var(--primary));
+    }
+    .card-content { padding:0.75rem; flex-grow:1; display:flex; flex-direction:column; }
+    .card h3 { margin:0 0 0.5rem; font-size:1.1rem; }
+    .price { margin-top:auto; font-weight:500; }
+    .add-btn {
+      margin-top:0.5rem; background: var(--accent); color:#fff;
+      border:none; padding:0.5rem; border-radius:4px; cursor:pointer;
+    }
+    .add-btn:focus { outline:2px solid var(--primary); }
+    footer { background: var(--secondary); color:#fff; padding:1rem; margin-top:2rem; }
+    .footer-section { margin-bottom:1rem; }
+    .footer-section h2 { margin-top:0; font-size:1.2rem; }
+    .newsletter input[type="email"] {
+      padding:0.5rem; border:none; border-radius:4px 0 0 4px;
+    }
+    .newsletter button {
+      padding:0.5rem 1rem; border:none; background: var(--accent);
+      color:#fff; border-radius:0 4px 4px 0; cursor:pointer;
+    }
+    @media (max-width: 767px) {
+      nav { display:block; }
+      .filters { flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Loom &amp; Thread</h1>
+  <button class="menu-toggle" aria-label="Toggle navigation" onclick="toggleNav()">☰</button>
+  <nav id="nav">
+    <a href="#products">Shop</a> |
+    <a href="#shipping">Shipping</a> |
+    <a href="#newsletter">Newsletter</a>
+  </nav>
+  <div aria-live="polite">Cart: <span id="cart">0</span></div>
+</header>
+
+<main>
+  <section id="products">
+    <h2 style="font-family:'Playfair Display',serif;">Handmade Cotton Sarees</h2>
+    <div class="filters" role="group" aria-label="Category filters">
+      <button class="active" data-category="all">All</button>
+      <button data-category="floral">Floral</button>
+      <button data-category="geometric">Geometric</button>
+      <button data-category="solid">Solid</button>
+    </div>
+    <div class="grid" id="product-grid"><div class="card">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23C49E78'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='%23fff'&gt;🧵&lt;/text%3E%3C/svg%3E" alt="Sunrise Floral">
+        <div class="card-content">
+          <h3>Sunrise Floral</h3>
+          <div class="price">$120</div>
+          <button class="add-btn" data-id="1">Add to Cart</button>
+        </div>
+      </div><div class="card">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%236B4226'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='%23fff'&gt;🧵&lt;/text%3E%3C/svg%3E" alt="Midnight Geometry">
+        <div class="card-content">
+          <h3>Midnight Geometry</h3>
+          <div class="price">$135</div>
+          <button class="add-btn" data-id="2">Add to Cart</button>
+        </div>
+      </div><div class="card">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%236B4226'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='%23fff'&gt;🧵&lt;/text%3E%3C/svg%3E" alt="Classic White">
+        <div class="card-content">
+          <h3>Classic White</h3>
+          <div class="price">$110</div>
+          <button class="add-btn" data-id="3">Add to Cart</button>
+        </div>
+      </div><div class="card">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23C49E78'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='%23fff'&gt;🧵&lt;/text%3E%3C/svg%3E" alt="Peacock Bloom">
+        <div class="card-content">
+          <h3>Peacock Bloom</h3>
+          <div class="price">$128</div>
+          <button class="add-btn" data-id="4">Add to Cart</button>
+        </div>
+      </div><div class="card">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%236B4226'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='%23fff'&gt;🧵&lt;/text%3E%3C/svg%3E" alt="Desert Stripes">
+        <div class="card-content">
+          <h3>Desert Stripes</h3>
+          <div class="price">$122</div>
+          <button class="add-btn" data-id="5">Add to Cart</button>
+        </div>
+      </div><div class="card">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%236B4226'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='%23fff'&gt;🧵&lt;/text%3E%3C/svg%3E" alt="Ivory Silk">
+        <div class="card-content">
+          <h3>Ivory Silk</h3>
+          <div class="price">$115</div>
+          <button class="add-btn" data-id="6">Add to Cart</button>
+        </div>
+      </div></div>
+  </section>
+
+  <section id="shipping" class="footer-section">
+    <h2>Shipping &amp; Returns</h2>
+    <p>Free standard shipping on orders over $80. All sarees are handcrafted; please allow 5‑7 business days for delivery. Returns accepted within 14 days of receipt.</p>
+  </section>
+
+  <section id="newsletter" class="footer-section">
+    <h2>Stay Updated</h2>
+    <p>Join our newsletter for new collections and exclusive offers.</p>
+    <form class="newsletter" id="newsletter-form">
+      <label for="email" class="visually-hidden">Email address</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required="">
+      <button type="submit">Subscribe</button>
+    </form>
+  </section>
+</main>
+
+<footer>
+  <p>© 2026 Loom &amp; Thread. All rights reserved.</p>
+</footer>
+
+<script>
+  // Sample product data
+  const products = [
+    {id:1, name:"Sunrise Floral", category:"floral", price:120, img:""},
+    {id:2, name:"Midnight Geometry", category:"geometric", price:135, img:""},
+    {id:3, name:"Classic White", category:"solid", price:110, img:""},
+    {id:4, name:"Peacock Bloom", category:"floral", price:128, img:""},
+    {id:5, name:"Desert Stripes", category:"geometric", price:122, img:""},
+    {id:6, name:"Ivory Silk", category:"solid", price:115, img:""}
+  ];
+
+  const cartCount = document.getElementById('cart');
+  let cart = 0;
+
+  function renderProducts(filter='all') {
+    const grid = document.getElementById('product-grid');
+    grid.innerHTML = '';
+    const filtered = filter==='all' ? products : products.filter(p=>p.category===filter);
+    filtered.forEach(p=>{
+      const card = document.createElement('div');
+      card.className='card';
+      card.innerHTML = `
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23${p.category==='floral'?'C49E78':'6B4226'}'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='%23fff'>🧵</text%3E%3C/svg%3E" alt="${p.name}">
+        <div class="card-content">
+          <h3>${p.name}</h3>
+          <div class="price">$${p.price}</div>
+          <button class="add-btn" data-id="${p.id}">Add to Cart</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // Initial render
+  renderProducts();
+
+  // Filter buttons
+  document.querySelectorAll('.filters button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProducts(btn.dataset.category);
+    });
+  });
+
+  // Add to cart
+  document.getElementById('product-grid').addEventListener('click', e=>{
+    if(e.target.classList.contains('add-btn')){
+      cart++;
+      cartCount.textContent = cart;
+      e.target.textContent='Added';
+      setTimeout(()=>{ e.target.textContent='Add to Cart'; }, 1200);
+    }
+  });
+
+  // Newsletter
+  document.getElementById('newsletter-form').addEventListener('submit', e=>{
+    e.preventDefault();
+    alert('Thank you for subscribing!');
+    e.target.reset();
+  });
+
+  // Mobile nav toggle
+  function toggleNav(){
+    const nav = document.getElementById('nav');
+    if(nav.style.display==='block'){
+      nav.style.display='none';
+    }else{
+      nav.style.display='block';
+    }
+  }
+</script>
+
+</body></html>

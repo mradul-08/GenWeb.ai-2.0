@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Northbeam – Branding & Web Design Agency</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2A4D69;      /* deep midnight blue */
+      --secondary: #4B86B4;    /* muted sky */
+      --accent: #F0A500;       /* warm amber for CTAs */
+      --bg: #F5F7FA;           /* soft off‑white */
+      --surface: #FFFFFF;     /* cards */
+      --text: #2B2B2B;         /* dark charcoal */
+      --radius: .5rem;
+      --gap: 1.5rem;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin:0; font-family: 'Inter', sans-serif; background: var(--bg);
+      color: var(--text); line-height:1.6;
+    }
+    a { color: var(--primary); text-decoration:none; }
+    a:focus, button:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+    header, nav, main, footer { padding: var(--gap); }
+    header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color:#fff; }
+    header h1 { margin:0; font-family:'Playfair Display', serif; font-size:2rem; }
+    nav { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+    nav ul { list-style:none; display:flex; gap:var(--gap); margin:0; padding:0; }
+    nav a { color:#fff; font-weight:600; }
+    .menu-toggle { display:none; background:none; border:none; color:#fff; font-size:1.5rem; }
+    section { max-width:1200px; margin:0 auto; }
+    h2 { font-family:'Playfair Display', serif; color:var(--primary); margin-top:0; }
+    .services, .process, .team, .clients { display:grid; gap:var(--gap); }
+    .services { grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); }
+    .service-card { background:var(--surface); padding:1rem; border-radius:var(--radius); box-shadow:0 2px 6px rgba(0,0,0,.1); }
+    .case-studies { display:grid; gap:var(--gap); grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); }
+    .case-card { background:var(--surface); border-radius:var(--radius); overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,.1); }
+    .case-card img { width:100%; height:auto; display:block; }
+    .case-card div { padding:1rem; }
+    .process { grid-template-columns:repeat(4,1fr); text-align:center; }
+    .process-step { background:var(--surface); padding:1rem; border-radius:var(--radius); }
+    .team { grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); text-align:center; }
+    .team-member { background:var(--surface); padding:1rem; border-radius:var(--radius); }
+    .team-member img { width:80px; height:80px; border-radius:50%; object-fit:cover; }
+    .clients { grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); align-items:center; justify-items:center; }
+    .client-logo { width:80px; height:40px; background:linear-gradient(45deg,var(--secondary),var(--accent)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; border-radius:4px; }
+    .contact-form { background:var(--surface); padding:1.5rem; border-radius:var(--radius); max-width:600px; margin:auto; }
+    .contact-form label { display:block; margin-bottom:.5rem; font-weight:600; }
+    .contact-form input, .contact-form textarea { width:100%; padding:.5rem; margin-bottom:1rem; border:1px solid #ccc; border-radius:4px; font-family:inherit; }
+    .contact-form button { background:var(--accent); color:#fff; border:none; padding:.75rem 1.5rem; border-radius:var(--radius); cursor:pointer; font-weight:600; }
+    .contact-form button:hover { background:#d98c00; }
+    footer { background:var(--primary); color:#fff; text-align:center; font-size:.9rem; }
+    @media (max-width:768px) {
+      nav ul { flex-direction:column; display:none; width:100%; background:rgba(0,0,0,.2); }
+      nav ul.show { display:flex; }
+      .menu-toggle { display:block; }
+      .process { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header id="top">
+    <nav aria-label="Main navigation">
+      <h1>Northbeam</h1>
+      <button class="menu-toggle" aria-controls="nav-list" aria-expanded="false">☰</button>
+      <ul id="nav-list">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#case-studies">Case Studies</a></li>
+        <li><a href="#process">Our Process</a></li>
+        <li><a href="#team">Team</a></li>
+        <li><a href="#clients">Clients</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <section>
+      <h2>Branding & Web Design that Lights Up Your Business</h2>
+      <p>We blend strategy, storytelling, and sleek design to help small‑to‑mid‑size brands stand out.</p>
+      <a href="#contact" style="background:var(--accent);color:#fff;padding:.75rem 1.5rem;border-radius:var(--radius);display:inline-block;">Start a Project</a>
+    </section>
+  </header>
+
+  <main>
+    <section id="services">
+      <h2>Our Services</h2>
+      <div class="services">
+        <div class="service-card">
+          <h3>Brand Strategy</h3>
+          <p>Research, positioning, and voice that resonates with your audience.</p>
+        </div>
+        <div class="service-card">
+          <h3>Visual Identity</h3>
+          <p>Logo, color systems, typography, and brand guidelines.</p>
+        </div>
+        <div class="service-card">
+          <h3>Web Design</h3>
+          <p>Responsive, accessible sites built on modern standards.</p>
+        </div>
+        <div class="service-card">
+          <h3>Content Design</h4>
+          <p>Copy, micro‑interactions, and UI copy that guides users.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="case-studies">
+      <h2>Selected Case Studies</h2>
+      <div class="case-studies">
+        <div class="case-card">
+          <svg viewBox="0 0 400 200" preserveAspectRatio="none"><rect width="400" height="200" fill="url(#grad1)"/><defs><linearGradient id="grad1"><stop offset="0%" stop-color="#4B86B4"/><stop offset="100%" stop-color="#F0A500"/></linearGradient></defs></svg>
+          <div>
+            <h3>Harbor Café</h3>
+            <p>Rebranded with a coastal palette and built a menu‑driven website that increased reservations by 27%.</p>
+          </div>
+        </div>
+        <div class="case-card">
+          <svg viewBox="0 0 400 200" preserveAspectRatio="none"><rect width="400" height="200" fill="url(#grad2)"/><defs><linearGradient id="grad2"><stop offset="0%" stop-color="#2A4D69"/><stop offset="100%" stop-color="#4B86B4"/></linearGradient></defs></svg>
+          <div>
+            <h3>Peak Outdoor Gear</h3>
+            <p>Created a bold visual system and e‑commerce site that lifted online sales by 42%.</p>
+          </div>
+        </div>
+        <div class="case-card">
+          <svg viewBox="0 0 400 200" preserveAspectRatio="none"><rect width="400" height="200" fill="url(#grad3)"/><defs><linearGradient id="grad3"><stop offset="0%" stop-color="#F0A500"/><stop offset="100%" stop-color="#2A4D69"/></linearGradient></defs></svg>
+          <div>
+            <h3>Litera Publishing</h3>
+            <p>Designed a clean brand identity and author portal that reduced bounce rate by 31%.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="process">
+      <h2>Our Process</h2>
+      <div class="process">
+        <div class="process-step">
+          <strong>1. Discover</strong>
+          <p>Workshops & research to uncover goals.</p>
+        </div>
+        <div class="process-step">
+          <strong>2. Define</strong>
+          <p>Strategy, personas, and brand architecture.</p>
+        </div>
+        <div class="process-step">
+          <strong>3. Design</strong>
+          <p>Iterative visual concepts and UI mockups.</p>
+        </div>
+        <div class="process-step">
+          <strong>4. Deliver</strong>
+          <p>Development, testing, launch & handoff.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="team">
+      <h2>Meet the Team</h2>
+      <div class="team">
+        <div class="team-member">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%234B86B4'/%3E%3Ctext x='50%25' y='55%25' font-size='36' text-anchor='middle' fill='%23fff' dy='.3em'%3EL%3C/text%3E%3C/svg%3E" alt="Lena Hart, Founder & Creative Director">
+          <h4>Lena Hart</h4>
+          <p>Creative Director</p>
+        </div>
+        <div class="team-member">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%232A4D69'/%3E%3Ctext x='50%25' y='55%25' font-size='36' text-anchor='middle' fill='%23fff' dy='.3em'%3EM%3C/text%3E%3C/svg%3E" alt="Milo Reyes, Lead Designer">
+          <h4>Milo Reyes</h4>
+          <p>Lead Designer</p>
+        </div>
+        <div class="team-member">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23F0A500'/%3E%3Ctext x='50%25' y='55%25' font-size='36' text-anchor='middle' fill='%23fff' dy='.3em'%3EE%3C/text%3E%3C/svg%3E" alt="Eli Zhang, Front‑End Engineer">
+          <h4>Eli Zhang</h4>
+          <p>Front‑End Engineer</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="clients">
+      <h2>Trusted By</h2>
+      <div class="clients">
+        <div class="client-logo" aria-label="Harbor Café">HC</div>
+        <div class="client-logo" aria-label="Peak Outdoor Gear">POG</div>
+        <div class="client-logo" aria-label="Litera Publishing">LP</div>
+        <div class="client-logo" aria-label="Greenfield Farms">GF</div>
+        <div class="client-logo" aria-label="Nova Tech">NT</div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <h2>Get In Touch</h2>
+      <form class="contact-form" action="#" method="post" novalidate>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required aria-required="true">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required aria-required="true">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="4" required aria-required="true"></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Northbeam. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Mobile nav toggle
+    const toggleBtn = document.querySelector('.menu-toggle');
+    const navList = document.getElementById('nav-list');
+    toggleBtn.addEventListener('click', () => {
+      const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+      toggleBtn.setAttribute('aria-expanded', !expanded);
+      navList.classList.toggle('show');
+    });
+
+    // Simple form validation feedback
+    document.querySelector('.contact-form').addEventListener('submit', function(e){
+      const inputs = this.querySelectorAll('input, textarea');
+      let valid = true;
+      inputs.forEach(inp => {
+        if(!inp.checkValidity()){
+          valid = false;
+          inp.style.borderColor = 'var(--accent)';
+        } else {
+          inp.style.borderColor = '#ccc';
+        }
+      });
+      if(!valid) e.preventDefault();
+    });
+  </script>
+</body>
+</html>

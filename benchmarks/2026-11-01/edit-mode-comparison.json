@@ -1,0 +1,73 @@
+{
+  "page": "saas-single.html",
+  "rows": [
+    {
+      "label": "style/old: return whole <style>",
+      "mode": "style_only",
+      "model": "groq/gpt-oss-120b",
+      "inputTokens": 1336,
+      "outputTokens": 1305,
+      "patchApplied": true,
+      "patchValid": true,
+      "rejectReasons": [],
+      "latencyMs": 3382
+    },
+    {
+      "label": "style/new: return overrides only",
+      "mode": "style_append",
+      "model": "groq/gpt-oss-120b",
+      "inputTokens": 1339,
+      "outputTokens": 166,
+      "patchApplied": true,
+      "patchValid": true,
+      "rejectReasons": [],
+      "latencyMs": 747
+    },
+    {
+      "label": "text/old: return whole hero section",
+      "mode": "section_patch",
+      "model": "groq/gpt-oss-120b",
+      "inputTokens": 208,
+      "outputTokens": 94,
+      "patchApplied": true,
+      "patchValid": true,
+      "rejectReasons": [],
+      "latencyMs": 700
+    },
+    {
+      "label": "text/new: find/replace pairs",
+      "mode": "text_replace",
+      "model": "groq/gpt-oss-120b",
+      "inputTokens": 218,
+      "outputTokens": 117,
+      "patchApplied": true,
+      "patchValid": true,
+      "rejectReasons": [],
+      "latencyMs": 753
+    },
+    {
+      "label": "text-body/old: return whole body",
+      "mode": "body_only",
+      "model": "groq/gpt-oss-120b",
+      "inputTokens": 1478,
+      "outputTokens": 1414,
+      "outcome": "success",
+      "patchApplied": true,
+      "patchValid": true,
+      "rejectReasons": [],
+      "latencyMs": 3518
+    },
+    {
+      "label": "text-body/new: find/replace pairs",
+      "mode": "text_replace",
+      "model": "groq/gpt-oss-120b",
+      "inputTokens": 1490,
+      "outputTokens": 117,
+      "outcome": "success",
+      "patchApplied": true,
+      "patchValid": true,
+      "rejectReasons": [],
+      "latencyMs": 688
+    }
+  ]
+}

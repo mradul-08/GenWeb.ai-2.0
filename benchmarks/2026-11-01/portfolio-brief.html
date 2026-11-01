@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ananya Rao – UX Designer Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto+Slab:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #004e92;
+      --secondary: #008cba;
+      --accent: #ffc107;
+      --bg: #ffffff;
+      --surface: #f5f5f5;
+      --text: #333333;
+      --radius: 8px;
+      --transition: 0.3s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin:0; font-family: 'Open Sans', sans-serif; background: var(--bg); color: var(--text);
+      line-height:1.6; scroll-behavior: smooth;
+    }
+    a { color: var(--primary); text-decoration:none; }
+    a:focus, button:focus, input:focus, textarea:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    header {
+      position: sticky; top:0; background: var(--primary); color:#fff; padding:1rem 2rem;
+      display:flex; justify-content:space-between; align-items:center; z-index:10;
+    }
+    header h1 { margin:0; font-family:'Roboto Slab',serif; font-size:1.5rem; }
+    nav a { margin-left:1.5rem; font-weight:600; color:#fff; }
+    nav a:hover { color:var(--accent); }
+    #hero {
+      background: var(--secondary); color:#fff; text-align:center; padding:4rem 1rem;
+    }
+    #hero h2 { font-family:'Roboto Slab',serif; font-size:2.5rem; margin:0.5rem 0; }
+    #hero p { font-size:1.2rem; margin:0.5rem 0 2rem; }
+    .btn-primary {
+      background: var(--accent); color:#000; padding:0.75rem 1.5rem; border:none;
+      border-radius: var(--radius); font-weight:600; cursor:pointer;
+      transition: var(--transition);
+    }
+    .btn-primary:hover { background:#e0a800; }
+    section { padding:3rem 2rem; max-width:1200px; margin:auto; }
+    h3 { font-family:'Roboto Slab',serif; font-size:2rem; margin-bottom:1rem; color:var(--primary); }
+    .grid {
+      display:grid; gap:1.5rem;
+    }
+    @media (min-width:600px) {
+      .grid-3 { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (min-width:900px) {
+      .grid-3 { grid-template-columns: repeat(3,1fr); }
+    }
+    .card {
+      background: var(--surface); border-radius: var(--radius); overflow:hidden;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1); transition: var(--transition);
+    }
+    .card:hover { transform:translateY(-4px); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+    .card img { width:100%; height:auto; display:block; }
+    .card-content { padding:1rem; }
+    .card-content h4 { margin:0 0 .5rem; font-family:'Roboto Slab',serif; color:var(--primary); }
+    .progress {
+      background: #e0e0e0; border-radius: var(--radius); height:8px; overflow:hidden;
+    }
+    .progress div {
+      background: var(--primary); height:100%; width:0; transition: width 1s var(--transition);
+    }
+    /* Carousel */
+    .carousel { position:relative; overflow:hidden; }
+    .carousel-inner { display:flex; transition: transform 0.5s ease; }
+    .carousel-item { min-width:100%; padding:2rem; box-sizing:border-box; }
+    .carousel-controls { position:absolute; top:50%; left:0; right:0; display:flex; justify-content:space-between; transform:translateY(-50%); }
+    .carousel-controls button { background:rgba(0,0,0,0.5); border:none; color:#fff; padding:.5rem 1rem; cursor:pointer; border-radius: var(--radius); }
+    /* Form */
+    form { display:grid; gap:1rem; max-width:600px; margin:auto; }
+    label { font-weight:600; }
+    input, textarea {
+      padding:.75rem; border:1px solid #ccc; border-radius: var(--radius);
+      font:inherit; width:100%;
+    }
+    input:focus, textarea:focus { border-color:var(--primary); outline:none; }
+    button[type="submit"] { background:var(--primary); color:#fff; border:none; padding:.75rem 1.5rem; cursor:pointer; border-radius: var(--radius); }
+    button[type="submit"]:hover { background:#00396b; }
+    footer { background:var(--primary); color:#fff; text-align:center; padding:2rem 1rem; }
+    footer a { color:#fff; margin:0 .5rem; }
+    @media (max-width:599px) {
+      header, nav { flex-direction:column; }
+      nav a { margin:0.5rem 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ananya Rao</h1>
+    <nav>
+      <a href="#case-studies">Work</a>
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#testimonials">Testimonials</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section id="hero">
+    <h2>Freelance UX Designer</h2>
+    <p>Crafting intuitive experiences for digital products in Bengaluru and beyond.</p>
+    <button class="btn-primary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'});">Get in Touch</button>
+  </section>
+
+  <section id="case-studies">
+    <h3>Case Studies</h3>
+    <div class="grid grid-3">
+      <article class="card">
+        <img src="https://images.unsplash.com/photo-1581093588401-4c9d6c7c9c0c?auto=format&fit=crop&w=800&q=80" alt="Mobile banking app redesign">
+        <div class="card-content">
+          <h4>FinBank Mobile Redesign</h4>
+          <p>Improved onboarding flow and reduced task completion time by 30%.</p>
+        </div>
+      </article>
+      <article class="card">
+        <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=80" alt="E‑commerce checkout optimization">
+        <div class="card-content">
+          <h4>ShopEase Checkout Optimization</h4>
+          <p>Streamlined checkout, increasing conversion rate by 12%.</p>
+        </div>
+      </article>
+      <article class="card">
+        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" alt="Healthcare portal usability study">
+        <div class="card-content">
+          <h4>HealthPlus Patient Portal</h4>
+          <p>Conducted usability testing that led to a 40% drop in support tickets.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="about">
+    <h3>About Me</h3>
+    <p>Hello! I’m Ananya Rao, a UX designer based in Bengaluru with over 6 years of experience turning complex problems into elegant digital solutions. I blend user research, interaction design, and visual storytelling to create products that are both functional and delightful. When I’m not sketching wireframes, you’ll find me exploring the city’s street food or mentoring junior designers.</p>
+  </section>
+
+  <section id="skills">
+    <h3>Skills</h3>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
+      <div>
+        <h4>User Research</h4>
+        <div class="progress"><div style="width:90%;"></div></div>
+      </div>
+      <div>
+        <h4>Interaction Design</h4>
+        <div class="progress"><div style="width:85%;"></div></div>
+      </div>
+      <div>
+        <h4>Prototyping (Figma)</h4>
+        <div class="progress"><div style="width:95%;"></div></div>
+      </div>
+      <div>
+        <h4>Usability Testing</h4>
+        <div class="progress"><div style="width:80%;"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="testimonials">
+    <h3>What Clients Say</h3>
+    <div class="carousel" aria-label="Client testimonials">
+      <div class="carousel-inner">
+        <div class="carousel-item">
+          <p>“Ananya transformed our app’s user flow. The results were immediate – higher engagement and happier users.”</p>
+          <p><strong>— Rohan Mehta, Product Lead, FinBank</strong></p>
+        </div>
+        <div class="carousel-item">
+          <p>“Her attention to detail and empathy for users made the redesign a success beyond our expectations.”</p>
+          <p><strong>— Priya Singh, CEO, ShopEase</strong></p>
+        </div>
+        <div class="carousel-item">
+          <p>“The research insights she delivered helped us cut support calls by nearly half.”</p>
+          <p><strong>— Dr. Arvind Patel, CTO, HealthPlus</strong></p>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <button id="prevBtn" aria-label="Previous testimonial">&#9664;</button>
+        <button id="nextBtn" aria-label="Next testimonial">&#9654;</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <h3>Contact Me</h3>
+    <form id="contactForm" novalidate>
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required aria-required="true">
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required aria-required="true">
+
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="5" required aria-required="true"></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+    <p id="formStatus" role="alert" style="margin-top:1rem;"></p>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 Ananya Rao. All rights reserved.</p>
+    <p>
+      <a href="mailto:ananya@example.com">Email</a> |
+      <a href="https://www.linkedin.com/in/ananyarao" target="_blank" rel="noopener">LinkedIn</a> |
+      <a href="https://dribbble.com/ananyarao" target="_blank" rel="noopener">Dribbble</a>
+    </p>
+  </footer>
+
+  <script>
+    // Carousel logic
+    const carouselInner = document.querySelector('.carousel-inner');
+    const items = document.querySelectorAll('.carousel-item');
+    let current = 0;
+    function updateCarousel() {
+      carouselInner.style.transform = `translateX(-${current * 100}%)`;
+    }
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      current = (current - 1 + items.length) % items.length;
+      updateCarousel();
+    });
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      current = (current + 1) % items.length;
+      updateCarousel();
+    });
+    // Auto‑rotate every 7s
+    setInterval(() => {
+      current = (current + 1) % items.length;
+      updateCarousel();
+    }, 7000);
+
+    // Simple form handling (demo only)
+    const form = document.getElementById('contactForm');
+    const status = document.getElementById('formStatus');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      status.textContent = 'Sending…';
+      setTimeout(() => {
+        status.textContent = 'Thank you! Your message has been sent.';
+        form.reset();
+      }, 1200);
+    });
+  </script>
+</body>
+</html>

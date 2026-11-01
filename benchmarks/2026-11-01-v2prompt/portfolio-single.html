@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ananya Rao – UX Designer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00695c;      /* deep teal – Bengaluru tech vibe */
+      --secondary: #ffab00;    /* warm amber – creativity */
+      --accent: #ff6f61;       /* coral accent for calls to action */
+      --bg: #f5f7fa;           /* subtle light gradient background */
+      --surface: #ffffff;
+      --text: #212121;
+      --radius: .5rem;
+      --transition: .3s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin:0; font-family:'Inter',sans-serif; background: var(--bg);
+      color: var(--text); line-height:1.6;
+    }
+    a { color: var(--primary); text-decoration:none; }
+    a:focus, button:focus, input:focus, textarea:focus {
+      outline: 3px solid var(--secondary);
+      outline-offset: 2px;
+    }
+    header, nav, main, footer { padding:1rem 2rem; max-width:1200px; margin:auto; }
+    header { background: var(--surface); border-bottom:1px solid #e0e0e0; position:sticky; top:0; z-index:10; }
+    .logo { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--primary); }
+    nav { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+    .nav-links { display:flex; gap:1.5rem; }
+    .nav-links a { font-weight:600; }
+    .menu-toggle { display:none; background:none; border:none; font-size:1.5rem; cursor:pointer; }
+    @media (max-width:768px) {
+      .nav-links { display:none; flex-direction:column; width:100%; background:var(--surface); position:absolute; top:100%; left:0; padding:1rem 0; }
+      .nav-links.show { display:flex; }
+      .menu-toggle { display:block; }
+    }
+    section { padding:4rem 0; }
+    h1, h2, h3 { margin:0 0 .5rem; }
+    h1 { font-family:'Playfair Display',serif; font-size:2.5rem; color:var(--primary);}
+    h2 { font-size:2rem; color:var(--primary);}
+    h3 { font-size:1.5rem; color:var(--secondary);}
+    .container { display:grid; gap:2rem; }
+    @media (min-width:768px) {
+      .grid-2 { grid-template-columns: repeat(2,1fr); }
+      .grid-3 { grid-template-columns: repeat(3,1fr); }
+    }
+    .card {
+      background:var(--surface); border-radius:var(--radius);
+      padding:1.5rem; box-shadow:0 2px 6px rgba(0,0,0,.1);
+      transition:transform var(--transition);
+    }
+    .card:hover { transform:translateY(-4px); }
+    .btn {
+      display:inline-block; padding:.75rem 1.5rem; background:var(--accent);
+      color:#fff; border:none; border-radius:var(--radius);
+      cursor:pointer; font-weight:600; transition:background var(--transition);
+    }
+    .btn:hover { background:#e65a4f; }
+    footer { background:var(--primary); color:#fff; text-align:center; font-size:.9rem; }
+    footer a { color:#fff; }
+    /* Simple gradient background for hero */
+    #hero { background:linear-gradient(135deg, #e0f2f1, #fff3e0); text-align:center; }
+    #hero p { max-width:600px; margin:auto; }
+    /* Testimonials */
+    .testimonial { font-style:italic; position:relative; padding-left:2rem; }
+    .testimonial::before {
+      content:"“"; font-size:3rem; color:var(--secondary);
+      position:absolute; left:0; top:-10px;
+    }
+    .testimonial-author { margin-top:.5rem; font-weight:600; }
+    /* Contact form */
+    form { display:flex; flex-direction:column; gap:.75rem; max-width:600px; margin:auto; }
+    label { font-weight:600; }
+    input, textarea {
+      padding:.75rem; border:1px solid #ccc; border-radius:var(--radius);
+      font:inherit;
+    }
+    input:focus, textarea:focus { border-color:var(--primary); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav aria-label="Main navigation">
+      <div class="logo">Ananya Rao</div>
+      <button class="menu-toggle" aria-controls="nav-links" aria-expanded="false" aria-label="Toggle menu">☰</button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#hero">Home</a></li>
+        <li><a href="#case-studies">Work</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#testimonials">Testimonials</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="hero">
+      <h1>Hello, I’m Ananya Rao</h1>
+      <p>Freelance UX Designer based in Bengaluru, crafting intuitive digital experiences for startups and enterprises. I blend research, strategy, and visual design to turn complex problems into simple, delightful products.</p>
+      <a href="#contact" class="btn">Get in Touch</a>
+    </section>
+
+    <section id="case-studies">
+      <h2>Selected Case Studies</h2>
+      <div class="container grid-2">
+        <article class="card" tabindex="0">
+          <h3>FinEdge – Mobile Banking Redesign</h3>
+          <p>Reduced onboarding drop‑off by 38% through user‑flow simplification and a new visual language.</p>
+          <a href="#" class="btn">Read More</a>
+        </article>
+        <article class="card" tabindex="0">
+          <h3>EcoCart – E‑commerce Checkout</h3>
+          <p>Implemented progressive disclosure, cutting cart abandonment from 22% to 11%.</p>
+          <a href="#" class="btn">Read More</a>
+        </article>
+        <article class="card" tabindex="0">
+          <h3>HealthHub – Patient Portal</h3>
+          <p>Conducted remote usability testing; improved task success rate to 92%.</p>
+          <a href="#" class="btn">Read More</a>
+        </article>
+        <article class="card" tabindex="0">
+          <h3>EduPulse – Learning Management System</h3>
+          <p>Designed a modular dashboard, increasing daily active users by 27%.</p>
+          <a href="#" class="btn">Read More</a>
+        </article>
+      </div>
+    </section>
+
+    <section id="about">
+      <h2>About Me</h2>
+      <p>With 5+ years of experience in user research, interaction design, and prototyping, I partner closely with product teams to deliver user‑centered solutions. I’m passionate about inclusive design and love mentoring junior designers.</p>
+    </section>
+
+    <section id="skills">
+      <h2>Skills</h2>
+      <div class="container grid-3">
+        <div class="card">
+          <h3>Research</h3>
+          <p>User interviews, surveys, usability testing, persona creation.</p>
+        </div>
+        <div class="card">
+          <h3>Design</h3>
+          <p>Wireframes, high‑fidelity UI, design systems, Figma, Sketch.</p>
+        </div>
+        <div class="card">
+          <h3>Development</h3>
+          <p>HTML5, CSS3, basic JavaScript, prototyping with CodePen.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials">
+      <h2>What Clients Say</h2>
+      <div class="container grid-2">
+        <blockquote class="testimonial card">
+          <p>“Ananya transformed our chaotic onboarding flow into a seamless experience. Our users love the new design!”</p>
+          <div class="testimonial-author">— Rohan Mehta, Founder, FinEdge</div>
+        </blockquote>
+        <blockquote class="testimonial card">
+          <p>“Her attention to detail and empathy for users helped us launch a checkout that actually converts.”</p>
+          <div class="testimonial-author">— Priya Singh, Product Lead, EcoCart</div>
+        </blockquote>
+      </div>
+    </section>
+
+    <section id="contact">
+      <h2>Contact Me</h2>
+      <form id="contactForm" novalidate>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required aria-required="true">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required aria-required="true">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="5" required aria-required="true"></textarea>
+        <button type="submit" class="btn">Send Message</button>
+        <p id="formStatus" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Ananya Rao. All rights reserved. <a href="#hero">Back to top</a></p>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    const toggleBtn = document.querySelector('.menu-toggle');
+    const navLinks = document.getElementById('nav-links');
+    toggleBtn.addEventListener('click', () => {
+      const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+      toggleBtn.setAttribute('aria-expanded', !expanded);
+      navLinks.classList.toggle('show');
+    });
+
+    // Simple form handling (demo only)
+    const form = document.getElementById('contactForm');
+    const status = document.getElementById('formStatus');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      // Basic validation
+      if (form.checkValidity()) {
+        status.textContent = 'Thank you! Your message has been sent.';
+        form.reset();
+      } else {
+        status.textContent = 'Please fill out all fields correctly.';
+      }
+    });
+  </script>
+</body>
+</html>

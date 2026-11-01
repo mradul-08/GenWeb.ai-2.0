@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loom & Thread – Handmade Cotton Sarees</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #a0522d;
+      --secondary: #d2b48c;
+      --accent: #8b4513;
+      --bg: #ffffff;
+      --surface: #f5f5f5;
+      --text: #2f2f2f;
+      --radius: 8px;
+      --transition: 0.3s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+    img { max-width: 100%; height: auto; display: block; }
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      transition: var(--transition);
+    }
+    button:hover, button:focus { background: var(--accent); }
+    header {
+      position: sticky;
+      top:0;
+      background: var(--surface);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items:center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,.1);
+      z-index: 1000;
+    }
+    header h1 { font-family: 'Playfair Display', serif; font-size:1.5rem; color: var(--primary); }
+    .cart {
+      font-size:1rem;
+    }
+    .cart span {
+      background: var(--accent);
+      color:#fff;
+      border-radius:50%;
+      padding:0.2rem 0.5rem;
+      margin-left:0.5rem;
+    }
+    #hero {
+      position: relative;
+      overflow:hidden;
+      height: 60vh;
+    }
+    #hero img { width:100%; height:100%; object-fit:cover; animation: fade 12s infinite; }
+    @keyframes fade {
+      0%,33% {opacity:1;}
+      34%,66% {opacity:0;}
+      67%,100% {opacity:1;}
+    }
+    #hero::after {
+      content:"";
+      position:absolute;
+      inset:0;
+      background:rgba(255,255,255,.4);
+    }
+    #hero h2 {
+      position:absolute;
+      bottom:2rem;
+      left:2rem;
+      font-family:'Playfair Display',serif;
+      font-size:2rem;
+      color:var(--primary);
+      background:rgba(255,255,255,.8);
+      padding:0.5rem 1rem;
+      border-radius:var(--radius);
+    }
+    main { display:grid; grid-template-columns: 250px 1fr; gap:2rem; padding:2rem; }
+    @media (max-width:768px){
+      main { grid-template-columns:1fr; }
+    }
+    #filters {
+      background:var(--surface);
+      padding:1rem;
+      border-radius:var(--radius);
+    }
+    #filters h3 { margin-bottom:0.5rem; }
+    #filters label { display:block; margin-bottom:0.5rem; cursor:pointer; }
+    #products {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+      gap:1.5rem;
+    }
+    .product {
+      background:var(--surface);
+      border-radius:var(--radius);
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      transition: var(--transition);
+    }
+    .product:hover { box-shadow:0 2px 8px rgba(0,0,0,.1); }
+    .product h4 { font-family:'Playfair Display',serif; margin:0.5rem 0; }
+    .price { font-weight:600; margin:0.5rem 0; }
+    .add-to-cart { margin-top:auto; }
+    #shipping, #newsletter {
+      background:var(--surface);
+      padding:2rem;
+      margin:2rem;
+      border-radius:var(--radius);
+    }
+    #newsletter form { display:flex; flex-direction:column; max-width:400px; }
+    #newsletter input[type="email"] {
+      padding:0.5rem;
+      border:1px solid #ccc;
+      border-radius:var(--radius);
+      margin-bottom:1rem;
+    }
+    footer {
+      background:var(--primary);
+      color:#fff;
+      padding:2rem;
+      text-align:center;
+    }
+    footer a { color:#fff; margin:0 0.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Loom &amp; Thread</h1>
+    <div class="cart" aria-label="Shopping cart">
+      Cart <span id="cart-count">0</span>
+    </div>
+  </header>
+
+  <section id="hero" aria-label="Featured collection">
+    <img src="https://images.unsplash.com/photo-1606813908796-0c5c0f6e0d0c?auto=format&fit=crop&w=1600&q=80" alt="Handmade cotton saree draped elegantly">
+    <h2>Hand‑woven Elegance</h2>
+  </section>
+
+  <main>
+    <aside id="filters" aria-label="Product filters">
+      <h3>Categories</h3>
+      <label><input type="checkbox" value="traditional" checked> Traditional</label>
+      <label><input type="checkbox" value="modern" checked> Modern</label>
+      <label><input type="checkbox" value="festival" checked> Festival</label>
+    </aside>
+
+    <section id="products" aria-label="Product grid">
+      <!-- Sample products -->
+      <article class="product" data-category="traditional">
+        <img src="https://images.unsplash.com/photo-1589187150715-2c8b0f1e8d2d?auto=format&fit=crop&w=400&q=80" alt="Traditional cotton saree in earth tones">
+        <h4>Earthy Grace</h4>
+        <p class="price">$79.00</p>
+        <button class="add-to-cart">Add to cart</button>
+      </article>
+      <article class="product" data-category="modern">
+        <img src="https://images.unsplash.com/photo-1606813908796-0c5c0f6e0d0c?auto=format&fit=crop&w=400&q=80" alt="Modern cotton saree with abstract pattern">
+        <h4>Abstract Whisper</h4>
+        <p class="price">$85.00</p>
+        <button class="add-to-cart">Add to cart</button>
+      </article>
+      <article class="product" data-category="festival">
+        <img src="https://images.unsplash.com/photo-1578898888372-2c5c3c7c5c1e?auto=format&fit=crop&w=400&q=80" alt="Festival cotton saree with vibrant borders">
+        <h4>Vibrant Celebration</h4>
+        <p class="price">$92.00</p>
+        <button class="add-to-cart">Add to cart</button>
+      </article>
+      <!-- Add more products as needed -->
+    </section>
+  </main>
+
+  <section id="shipping" aria-label="Shipping information">
+    <h2>Free Shipping & Returns</h2>
+    <p>Enjoy complimentary worldwide shipping on orders over $150. All our sarees are hand‑crafted; we carefully package each piece to ensure it arrives in perfect condition. Returns are easy within 30 days of delivery.</p>
+  </section>
+
+  <section id="newsletter" aria-label="Newsletter signup">
+    <h2>Stay Inspired</h2>
+    <p>Join our newsletter for exclusive designs, styling tips, and early access to new collections.</p>
+    <form id="signup-form">
+      <label for="email">Email address</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      <button type="submit">Subscribe</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>&copy; 2024 Loom &amp; Thread. All rights reserved.</p>
+    <p>
+      <a href="#" aria-label="Facebook">Facebook</a> |
+      <a href="#" aria-label="Instagram">Instagram</a> |
+      <a href="#" aria-label="Pinterest">Pinterest</a>
+    </p>
+  </footer>
+
+  <script>
+    // Cart functionality
+    const cartCount = document.getElementById('cart-count');
+    let count = 0;
+    document.querySelectorAll('.add-to-cart').forEach(btn=>{
+      btn.addEventListener('click',()=> {
+        count++;
+        cartCount.textContent = count;
+        btn.textContent = 'Added';
+        btn.disabled = true;
+      });
+    });
+
+    // Filter functionality
+    const filters = document.querySelectorAll('#filters input[type="checkbox"]');
+    const products = document.querySelectorAll('.product');
+    const filterProducts = () => {
+      const active = Array.from(filters).filter(cb=>cb.checked).map(cb=>cb.value);
+      products.forEach(p=>{
+        const cat = p.dataset.category;
+        p.style.display = active.includes(cat) ? '' : 'none';
+      });
+    };
+    filters.forEach(cb=>cb.addEventListener('change',filterProducts));
+    filterProducts();
+
+    // Newsletter mock submit
+    document.getElementById('signup-form').addEventListener('submit',e=>{
+      e.preventDefault();
+      alert('Thank you for subscribing!');
+      e.target.reset();
+    });
+  </script>
+</body>
+</html>

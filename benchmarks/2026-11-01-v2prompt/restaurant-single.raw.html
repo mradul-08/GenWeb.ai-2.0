@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spice Route – Kerala Seafood Restaurant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00695c;   /* deep sea green */
+      --secondary: #ff7043; /* warm turmeric orange */
+      --accent: #ffca28;    /* mango yellow */
+      --bg: #f9f5e9;        /* parchment parchment */
+      --surface: #ffffff;
+      --text: #2e2e2e;
+      --radius: .5rem;
+      --transition: .3s ease;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:'Libre Franklin',sans-serif;
+      background: linear-gradient(135deg, var(--bg) 0%, #fff8e1 100%);
+      color:var(--text);
+      line-height:1.6;
+    }
+    a{color:var(--primary);text-decoration:none;}
+    a:focus{outline:2px solid var(--accent);}
+    header{
+      background:var(--primary);
+      color:#fff;
+      padding:1rem;
+    }
+    header h1{
+      font-family:'Playfair Display',serif;
+      font-size:2rem;
+      margin:0;
+    }
+    nav{
+      margin-top:.5rem;
+    }
+    nav button{
+      background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;
+    }
+    nav ul{
+      list-style:none;
+      display:flex;
+      gap:1rem;
+    }
+    nav a{
+      color:#fff;
+      font-weight:600;
+    }
+    main{
+      max-width:1200px;
+      margin:0 auto;
+      padding:1rem;
+    }
+    section{
+      margin-bottom:3rem;
+    }
+    h2{
+      font-family:'Playfair Display',serif;
+      font-size:1.8rem;
+      margin-bottom:.5rem;
+      color:var(--primary);
+    }
+    .menu, .specials{
+      display:grid;
+      gap:1rem;
+    }
+    @media(min-width:768px){
+      .menu, .specials{grid-template-columns:repeat(2,1fr);}
+    }
+    .menu-item, .special-item{
+      background:var(--surface);
+      padding:1rem;
+      border-radius:var(--radius);
+      box-shadow:0 2px 5px rgba(0,0,0,.1);
+    }
+    .menu-item h3,.special-item h3{
+      margin-bottom:.3rem;
+      color:var(--secondary);
+    }
+    .price{float:right;font-weight:600;color:var(--primary);}
+    .gallery{
+      display:grid;
+      gap:.5rem;
+      grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    }
+    .gallery img{
+      width:100%;height:auto;border-radius:var(--radius);
+      cursor:pointer;
+      transition:var(--transition);
+    }
+    .gallery img:focus{outline:2px solid var(--accent);}
+    .lightbox{
+      position:fixed;top:0;left:0;width:100vw;height:100vh;
+      background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;
+    }
+    .lightbox img{max-width:90vw;max-height:90vh;border-radius:var(--radius);}
+    .lightbox:focus{outline:none;}
+    .hours table{
+      width:100%;border-collapse:collapse;
+    }
+    .hours th,.hours td{
+      padding:.5rem;
+      border-bottom:1px solid #ddd;
+    }
+    .reservation form{
+      background:var(--surface);
+      padding:1.5rem;
+      border-radius:var(--radius);
+      box-shadow:0 2px 5px rgba(0,0,0,.1);
+      display:grid;
+      gap:1rem;
+    }
+    .reservation label{
+      display:block;
+      font-weight:600;
+    }
+    .reservation input, .reservation select, .reservation textarea{
+      width:100%;padding:.5rem;border:1px solid #ccc;border-radius:var(--radius);
+    }
+    .reservation button{
+      background:var(--secondary);color:#fff;border:none;padding:.7rem 1.2rem;
+      border-radius:var(--radius);cursor:pointer;transition:var(--transition);
+    }
+    .reservation button:hover,.reservation button:focus{background:var(--accent);}
+    footer{
+      background:var(--primary);color:#fff;padding:1rem;text-align:center;
+    }
+    @media(max-width:767px){
+      nav ul{display:none;flex-direction:column;background:var(--primary);position:absolute;top:100%;left:0;width:100%;}
+      nav ul.show{display:flex;}
+      nav button{display:block;}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Spice Route</h1>
+  <nav aria-label="Main navigation">
+    <button aria-controls="nav-list" aria-expanded="false" id="nav-toggle">☰ Menu</button>
+    <ul id="nav-list">
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#specials">Chef's Specials</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#hours">Opening Hours</a></li>
+      <li><a href="#reservation">Reserve a Table</a></li>
+      <li><a href="#location">Location</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <section id="menu">
+    <h2>Our Menu</h2>
+    <div class="menu">
+      <div class="menu-item">
+        <h3>Kerala Fish Curry <span class="price">₹250</span></h3>
+        <p>Fresh caught fish simmered in a blend of coconut milk, tamarind, and traditional spices.</p>
+      </div>
+      <div class="menu-item">
+        <h3>Prawn Moilee <span class="price">₹280</span></h3>
+        <p>Succulent prawns cooked in a creamy coconut gravy with fragrant curry leaves.</p>
+      </div>
+      <div class="menu-item">
+        <h3>Crab Roast <span class="price">₹320</span></h3>
+        <p>Spicy roasted crab tossed with mustard seeds, red chilies and a hint of lemon.</p>
+      </div>
+      <div class="menu-item">
+        <h3>Malabar Fish Fry <span class="price">₹260</span></h3>
+        <p>Crispy fried fish marinated in turmeric, chili powder and fresh lime.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="specials">
+    <h2>Chef's Specials</h2>
+    <div class="specials">
+      <div class="special-item">
+        <h3>Kerala Lobster Thermidor <span class="price">₹550</span></h3>
+        <p>Lobster tail baked with a rich coconut‑cream sauce, topped with toasted breadcrumbs.</p>
+      </div>
+      <div class="special-item">
+        <h3>Spiced Tuna Tartare <span class="price">₹420</span></h3>
+        <p>Finely diced tuna mixed with mango, lime, and a whisper of black pepper.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <h2>Photo Gallery</h2>
+    <div class="gallery" role="list">
+      <!-- Using inline SVG fish icons as placeholders -->
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%2360955c' d='M32 2c-5 0-9 4-9 9v42c0 5 4 9 9 9s9-4 9-9V11c0-5-4-9-9-9z'/%3E%3C/svg%3E" alt="Dish 1" tabindex="0">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23ff7043'/%3E%3Ctext x='32' y='38' font-size='28' text-anchor='middle' fill='%23fff' font-family='Arial'>&#x1F41F;</text%3E%3C/svg%3E" alt="Dish 2" tabindex="0">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='58' height='58' x='3' y='3' fill='%23ffca28' rx='8'/%3E%3Ctext x='32' y='38' font-size='28' text-anchor='middle' fill='%232e2e2e' font-family='Arial'>&#x1F363;</text%3E%3C/svg%3E" alt="Dish 3" tabindex="0">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpolygon points='32,4 60,60 4,60' fill='%2360955c'/%3E%3Ctext x='32' y='48' font-size='20' text-anchor='middle' fill='%23fff' font-family='Arial'>&#x1F35C;</text%3E%3C/svg%3E" alt="Dish 4" tabindex="0">
+    </div>
+    <div class="lightbox" id="lightbox" tabindex="-1" aria-modal="true" role="dialog">
+      <img src="" alt="">
+    </div>
+  </section>
+
+  <section id="hours" class="hours">
+    <h2>Opening Hours</h2>
+    <table>
+      <tr><th>Monday – Friday</th><td>11:00 am – 10:00 pm</td></tr>
+      <tr><th>Saturday</th><td>12:00 pm – 11:00 pm</td></tr>
+      <tr><th>Sunday</th><td>Closed</td></tr>
+    </table>
+  </section>
+
+  <section id="reservation" class="reservation">
+    <h2>Reserve a Table</h2>
+    <form id="reserve-form" novalidate>
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required>
+      
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+      
+      <label for="phone">Phone</label>
+      <input type="tel" id="phone" name="phone" required pattern="[0-9]{10,}">
+      
+      <label for="date">Date</label>
+      <input type="date" id="date" name="date" required>
+      
+      <label for="time">Time</label>
+      <select id="time" name="time" required>
+        <option value="">Select time</option>
+        <option>12:00 pm</option>
+        <option>12:30 pm</option>
+        <option>1:00 pm</option>
+        <option>1:30 pm</option>
+        <option>2:00 pm</option>
+        <option>6:00 pm</option>
+        <option>6:30 pm</option>
+        <option>7:00 pm</option>
+        <option>7:30 pm</option>
+      </select>
+      
+      <label for="guests">Number of Guests</label>
+      <input type="number" id="guests" name="guests" min="1" max="20" required>
+      
+      <button type="submit">Book Now</button>
+    </form>
+    <p id="form-message" aria-live="polite"></p>
+  </section>
+
+  <section id="location">
+    <h2>Location</h2>
+    <p>Spice Route, Marine Drive, Kochi, Kerala 682001, India</p>
+    <div style="width:100%;height:200px;background:linear-gradient(135deg,#00695c,#ff7043);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;">
+      📍 Map placeholder
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>&copy; 2024 Spice Route. All rights reserved.</p>
+</footer>
+
+<script>
+  // Mobile navigation toggle
+  const navToggle = document.getElementById('nav-toggle');
+  const navList = document.getElementById('nav-list');
+  navToggle.addEventListener('click', () => {
+    const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+    navToggle.setAttribute('aria-expanded', !expanded);
+    navList.classList.toggle('show');
+  });
+
+  // Lightbox for gallery
+  const gallery = document.querySelectorAll('.gallery img');
+  const lightbox = document.getElementById('lightbox');
+  const lightImg = lightbox.querySelector('img');
+  gallery.forEach(img => {
+    img.addEventListener('click', () => {
+      lightImg.src = img.src;
+      lightImg.alt = img.alt;
+      lightbox.style.display = 'flex';
+      lightbox.focus();
+    });
+    img.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        img.click();
+      }
+    });
+  });
+  lightbox.addEventListener('click', () => {
+    lightbox.style.display = 'none';
+  });
+  lightbox.addEventListener('keydown', e => {
+    if(e.key === 'Escape') lightbox.click();
+  });
+
+  // Reservation form validation & mock submission
+  const form = document.getElementById('reserve-form');
+  const msg = document.getElementById('form-message');
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    // Mock async submission
+    msg.textContent = 'Sending...';
+    setTimeout(() => {
+      msg.textContent = 'Your reservation request has been sent! We will contact you shortly.';
+      form.reset();
+    }, 1000);
+  });
+</script>
+</body>
+</html>

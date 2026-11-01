@@ -1,0 +1,38 @@
+node_modules
+.env
+.env.*
+*.log
+dist
+!.env.example
+
+# Credentials and private keys (never commit; keep them in the platform's env settings)
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+serviceAccount*.json
+*firebase-adminsdk*.json
+.npmrc
+
+# Hosting / tool state
+.vercel
+.firebase
+.render
+
+# Database dumps and backups
+dump/
+*.bson
+*.bak
+*.sql
+*.dump
+
+# Test output
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

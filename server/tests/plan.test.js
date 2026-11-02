@@ -118,7 +118,7 @@ test("checklist reports missing sections and features that lack their behaviour"
 const planReq = (user, prompt = "A bakery called Crumb & Co with an order form") =>
   request(app).post("/api/website/plan").set("Cookie", sessionCookie(user)).send({ prompt })
 const genReq = (user, body) =>
-  request(app).post("/api/website/generate").set("Cookie", sessionCookie(user)).send({ prompt: "A bakery called Crumb & Co with an order form", ...body })
+  request(app).post("/api/website/generate").set("Cookie", sessionCookie(user)).send({ prompt: "A bakery called Crumb & Co with an order form", engine: "ai", ...body })
 
 test("POST /plan returns a cleaned plan, uses no credits and is cached for the same prompt", async () => {
   const user = await legacyUser({ credits: 100 })

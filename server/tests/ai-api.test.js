@@ -46,7 +46,7 @@ function stubPipeline({ generation = () => GENERATED, edit } = {}) {
   })
 }
 const generate = (user, prompt = "A bakery called Crumb & Co") =>
-  request(app).post("/api/website/generate").set("Cookie", sessionCookie(user)).send({ prompt })
+  request(app).post("/api/website/generate").set("Cookie", sessionCookie(user)).send({ prompt, engine: "ai" })
 const edit = (user, site, prompt) =>
   request(app).put(`/api/website/${site._id}`).set("Cookie", sessionCookie(user)).send({ prompt })
 

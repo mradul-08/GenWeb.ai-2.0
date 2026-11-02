@@ -43,7 +43,7 @@ const legacySite = (user, code = page("Original")) =>
 test("generation creates version 1 and it is the current version", async () => {
   const user = await legacyUser({ credits: 100 })
   stub = stubAiFetch(() => chatOk(wrap(VALID_PAGE)))
-  const gen = await request(app).post("/api/website/generate").set("Cookie", sessionCookie(user)).send({ prompt: "A bakery called Crumb & Co" })
+  const gen = await request(app).post("/api/website/generate").set("Cookie", sessionCookie(user)).send({ prompt: "A bakery called Crumb & Co", engine: "ai" })
   assert.equal(gen.status, 201, JSON.stringify(gen.body))
 
   const site = await Website.findById(gen.body.websiteId)

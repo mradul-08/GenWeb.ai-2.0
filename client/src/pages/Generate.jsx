@@ -391,6 +391,9 @@ export default function Generate() {
   const [charCount,         setCharCount]         = useState(0)
   const [activePalette,     setActivePalette]     = useState(null)
 
+  // "hybrid": tested templates + AI-written content (complete pages, few tokens).
+  // "ai": the model writes the whole page (more freedom, may be cut off).
+  const [engine,         setEngine]         = useState('hybrid')
   // Plan mode: an editable plan reviewed before generating (null = direct mode).
   const [plan,           setPlan]           = useState(null)
   const [planning,       setPlanning]       = useState(false)
@@ -528,7 +531,7 @@ export default function Generate() {
     setPreviewDoc(null)
     startTimers(getStoredAvg())
     try {
-      const body = { prompt: buildEnrichedPrompt(), ...(plan ? { plan } : {}) }
+      const body = { prompt: buildEnrichedPrompt(), engine, ...(plan ? { plan } : {}) }
       const { response: res, data } = await fetchJsonWithTimeout(`${serverUrl}/api/website/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -743,6 +746,18 @@ export default function Generate() {
 
             {/* GENERATE BUTTON */}
             <div>
+              <div role="radiogroup" aria-label="Generation engine" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px', marginBottom:'10px' }}>
+                {[
+                  { id:'hybrid', label:'⚡ Templates', hint:'Recommended · always a complete site' },
+                  { id:'ai',     label:'🎨 Free-form AI', hint:'More freedom · may be cut short' },
+                ].map(o => (
+                  <button key={o.id} role="radio" aria-checked={engine === o.id} onClick={() => setEngine(o.id)} disabled={generating} title={o.hint}
+                    style={{ padding:'8px 6px', borderRadius:'9px', cursor:'pointer', fontFamily:'inherit', textAlign:'center', border:`1px solid ${engine === o.id ? 'rgba(59,130,246,0.45)' : 'rgba(255,255,255,0.08)'}`, background: engine === o.id ? 'rgba(59,130,246,0.1)' : 'transparent', color: engine === o.id ? '#93c5fd' : 'rgba(255,255,255,0.4)' }}>
+                    <div style={{ fontSize:'12px', fontWeight:700 }}>{o.label}</div>
+                    <div style={{ fontSize:'9.5px', opacity:0.75, marginTop:'2px' }}>{o.hint}</div>
+                  </button>
+                ))}
+              </div>
               {!plan && (
                 <button onClick={handlePlan} disabled={!canPlan}
                   title="See which sections and features the AI will build, edit them, then generate"

@@ -9,11 +9,11 @@ import { getAiConfig, effectiveModels, peekAiConfig } from "./config.js"
 import { recordCall } from "./usage.js"
 import { reserve, providerCounterId, msUntilNextUtcDay } from "./quota.js"
 
-const TASK_TIMEOUT_MS   = { generate: 90000, edit: 90000, design_brief: 30000, enhance: 30000, plan: 30000 }
+const TASK_TIMEOUT_MS   = { generate: 90000, edit: 90000, design_brief: 30000, enhance: 30000, plan: 30000, content: 75000 }
 const MIN_CALL_MS       = 15000   // not worth starting a call with less time left
 // Smallest useful output per task; a provider whose per-request token budget
 // cannot fit this (input + output) is skipped rather than truncating the page.
-const MIN_OUTPUT_TOKENS = { generate: 3000, edit: 1200, design_brief: 300, enhance: 300, plan: 400 }
+const MIN_OUTPUT_TOKENS = { generate: 3000, edit: 1200, design_brief: 300, enhance: 300, plan: 400, content: 1500 }
 
 const HOUR = 3600000
 const COOLDOWN_MS = {

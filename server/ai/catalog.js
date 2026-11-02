@@ -19,7 +19,7 @@
 const keysFromEnv = (prefix) =>
   [1, 2, 3, 4, 5].map(i => process.env[`${prefix}_${i}`]).filter(Boolean).map(key => ({ key }))
 
-export const TASKS = ["generate", "edit", "design_brief", "enhance", "plan"]
+export const TASKS = ["generate", "edit", "design_brief", "enhance", "plan", "content"]
 
 export const PROVIDERS = {
   groq: {
@@ -63,7 +63,7 @@ export const PROVIDERS = {
   },
 }
 
-const LONG  = ["generate", "edit"]
+const LONG  = ["generate", "edit", "content"]
 const SHORT = ["design_brief", "enhance", "plan"]
 
 // lockedReason: the model is unusable with the current accounts. Locked models
@@ -89,5 +89,10 @@ export const DEFAULT_MODELS = [
 ].map(m => ({
   ...m, tier: "free",
   // Planning is a short structured task like the design brief: same model preference.
-  priority: m.tasks.includes("plan") ? { plan: m.priority.design_brief ?? m.priority.enhance, ...m.priority } : m.priority,
+  priority: {
+    ...(m.tasks.includes("plan") ? { plan: m.priority.design_brief ?? m.priority.enhance } : {}),
+    // Hybrid content writing needs the same strong models as generation.
+    ...(m.tasks.includes("content") ? { content: m.priority.generate } : {}),
+    ...m.priority,
+  },
 }))

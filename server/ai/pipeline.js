@@ -10,6 +10,7 @@ import { chooseStrategy } from "./strategy.js"
 import { getAiConfig } from "./config.js"
 import { replaceExternalImages } from "./sanitize.js"
 import { normalizePlan, renderPlan } from "./plan.js"
+import { generateHybrid } from "./hybrid.js"
 import {
   buildDesignBriefPrompt, parseDesignBrief, buildGenerationPrompt, buildFullEditPrompt, buildPlanPrompt,
   buildSectionEditPrompt, buildStyleEditPrompt, buildTextEditPrompt, buildScriptRepairPrompt, buildEnhancePrompt,
@@ -104,9 +105,17 @@ async function designBrief(prompt, { deadline, ctx }) {
   return { brief, status: brief ? "ok" : "failed" }
 }
 
-// plan: a normalized plan (ai/plan.js) the user reviewed; it replaces the
-// design brief, which would only repeat the planning step.
-export async function generateSite(prompt, { deadline, ctx, strategy, plan = null }) {
+export const ENGINES = ["hybrid", "ai"]
+
+// engine "hybrid" (default): library templates + AI-written content (ai/hybrid.js).
+// engine "ai": the model writes the whole document (single call or brief + call).
+// plan: a normalized plan (ai/plan.js) the user reviewed; in "ai" mode it
+// replaces the design brief, which would only repeat the planning step.
+export async function generateSite(prompt, { deadline, ctx, strategy, plan = null, engine = "hybrid", rand }) {
+  if (engine === "hybrid") {
+    const result = await generateHybrid(prompt, { deadline, ctx, plan, rand })
+    return { ...result, strategy: "hybrid", briefStatus: "skipped" }
+  }
   const config = await getAiConfig()
   const chosen = plan ? "plan" : (strategy || chooseStrategy(prompt, config.designStrategy))
   let brief = null, briefStatus = "skipped"

@@ -40,7 +40,7 @@ test("a refund applies once even when called repeatedly", async () => {
 test("failed generation refunds the reserved credits", async () => {
   // Tests run with no AI provider keys, so generation fails without network calls.
   const user = await createUserWithSignupCredits({ name: "G", email: "g@example.com" })
-  const res = await request(app).post("/api/website/generate").set("Cookie", sessionCookie(user)).send({ prompt: "a bakery site" })
+  const res = await request(app).post("/api/website/generate").set("Cookie", sessionCookie(user)).send({ prompt: "a bakery site", engine: "ai" })
   assert.equal(res.status, 503)
   assert.equal((await User.findById(user._id)).credits, 100)
   const types = (await CreditTransaction.find({ user: user._id }).sort({ createdAt: 1 })).map(r => r.type)
@@ -49,7 +49,7 @@ test("failed generation refunds the reserved credits", async () => {
 
 test("generation is refused when credits are insufficient", async () => {
   const user = await legacyUser({ credits: 10 })
-  const res = await request(app).post("/api/website/generate").set("Cookie", sessionCookie(user)).send({ prompt: "x" })
+  const res = await request(app).post("/api/website/generate").set("Cookie", sessionCookie(user)).send({ prompt: "x", engine: "ai" })
   assert.equal(res.status, 403)
   assert.equal((await User.findById(user._id)).credits, 10)
   assert.equal(await CreditTransaction.countDocuments(), 0)

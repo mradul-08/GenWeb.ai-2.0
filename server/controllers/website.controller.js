@@ -4,7 +4,7 @@ import { getAiConfig } from "../ai/config.js"
 import { startRequest, finishRequest } from "../ai/usage.js"
 import { AiRequest } from "../models/ai.models.js"
 import { reserve as reserveQuota, release as releaseQuota, userCounterId } from "../ai/quota.js"
-import { generateSite, editSite, enhanceIdea, planSite } from "../ai/pipeline.js"
+import { generateSite, editSite, enhanceIdea, planSite, ENGINES } from "../ai/pipeline.js"
 import { normalizePlan, checkPlan } from "../ai/plan.js"
 import { insertAt } from "../ai/htmlPatch.js"
 import { allowedOrigins } from "../config/origins.js"
@@ -214,6 +214,9 @@ export const generateWebsite = async (req, res) => {
       plan = normalizePlan(req.body.plan)
       if (!plan) return res.status(400).json({ success: false, message: "The plan needs at least one section." })
     }
+    // "hybrid" (default): templates + AI-written content; "ai": free-form page.
+    const engine = req.body.engine ?? "hybrid"
+    if (!ENGINES.includes(engine)) return res.status(400).json({ success: false, message: `engine must be one of: ${ENGINES.join(", ")}` })
     const user = req.user
 
     slot = await reserveDailySlot(user._id)
@@ -222,7 +225,7 @@ export const generateWebsite = async (req, res) => {
     if (!reservation) { await releaseQuota(slot); slot = null; return res.status(403).json({ success: false, message: `Need ${cost} credits` }) }
 
     await startRequest({ requestId, userId: user._id, task: "generate" })
-    const result = await generateSite(prompt.trim(), { deadline: Date.now() + REQUEST_BUDGET_MS, ctx: { requestId, userId: user._id }, plan })
+    const result = await generateSite(prompt.trim(), { deadline: Date.now() + REQUEST_BUDGET_MS, ctx: { requestId, userId: user._id }, plan, engine })
 
     if (!result.parsed) {
       await refundCredits(user._id, reservation, "generation failed"); reservation = null
@@ -236,6 +239,9 @@ export const generateWebsite = async (req, res) => {
       return res.status(503).json({ success: false, message: "Generation failed", nextResetHuman: humanTime(s.earliestReset) })
     }
     const parsed = result.parsed
+    // Hybrid sites always get a plan (derived when none was reviewed), so the
+    // requirement checklist works for them too.
+    const sitePlan = result.plan || plan
 
     const title = (parsed.title || prompt.trim()).slice(0, 80)
     const { thumbnailBg, thumbnailAccent, thumbnailTitle } = extractThumbnailMeta(parsed.code, title)
@@ -248,7 +254,7 @@ export const generateWebsite = async (req, res) => {
       thumbnailBg,
       thumbnailAccent,
       thumbnailTitle,
-      plan,
+      plan: sitePlan,
       conversation: [
         { role: "user", content: prompt.trim() },
         { role: "ai",   content: parsed.message || "Website generated." },
@@ -273,7 +279,9 @@ export const generateWebsite = async (req, res) => {
       websiteId: website._id,
       website:   { id: website._id, title: website.title, slug: website.slug },
       credits:   { used: cost, remaining: reservation.balance },
-      checklist: checkPlan(parsed.code, plan),
+      checklist: checkPlan(parsed.code, sitePlan),
+      engine,
+      ...(result.hybrid ? { hybrid: result.hybrid } : {}),
     })
   } catch (e) {
     if (reservation) await refundCredits(req.user._id, reservation, "generation error")

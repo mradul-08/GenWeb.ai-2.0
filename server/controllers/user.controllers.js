@@ -16,7 +16,7 @@ export const getUserWebsites = async (req, res) => {
     // latestCode is omitted — the dashboard doesn't use it and it is the bulk of each document.
     const websites = await Website.find({ user: req.user._id })
       .sort({ createdAt: -1 })
-      .select('title deployed deployUrl slug createdAt updatedAt thumbnailBg thumbnailAccent thumbnailTitle')
+      .select('title deployed deployUrl slug kind files.path createdAt updatedAt thumbnailBg thumbnailAccent thumbnailTitle')
     return res.json({ websites })
   } catch (error) {
     console.error("[getUserWebsites]", error)

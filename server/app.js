@@ -30,6 +30,7 @@ app.use(cookieParser())
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
+  exposedHeaders: ["Content-Disposition"],  // export ZIP filename
 }))
 
 app.get("/health", (req, res) => {

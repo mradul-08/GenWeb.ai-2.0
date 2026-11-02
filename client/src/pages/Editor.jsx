@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { setUserData } from '../redux/userSlice'
 import { serverUrl } from '../config'
 import axios from 'axios'
-import { buildPreviewDoc, PREVIEW_SANDBOX } from '../utils/previewDoc'
+import { buildPreviewDoc, PREVIEW_SANDBOX, isPageNavMessage } from '../utils/previewDoc'
 import VersionHistory from '../components/VersionHistory'
 import PlanChecklist from '../components/PlanChecklist'
 
@@ -88,7 +88,7 @@ function useVersionHistory() {
   }
 }
 
-function CodeViewer({ code, onCodeChange }) {
+function CodeViewer({ code, onCodeChange, fileName = 'website.html' }) {
   const [copied,  setCopied]  = useState(false)
   const [editing, setEditing] = useState(false)
   const [draft,   setDraft]   = useState(code)
@@ -121,7 +121,7 @@ function CodeViewer({ code, onCodeChange }) {
         <div style={{ display:'flex', gap:6 }}>
           {['#FF5F56','#FFBD2E','#27C93F'].map((c,i) => <div key={i} style={{ width:11, height:11, borderRadius:'50%', background:c }} />)}
         </div>
-        <span style={{ fontSize:11, color:'rgba(255,255,255,0.2)', fontFamily:'monospace' }}>website.html · {lines.length} lines</span>
+        <span style={{ fontSize:11, color:'rgba(255,255,255,0.2)', fontFamily:'monospace' }}>{fileName} · {lines.length} lines</span>
         <div style={{ display:'flex', gap:8 }}>
           <button onClick={() => setEditing(true)} style={{ padding:'4px 12px', borderRadius:6, border:'1px solid rgba(129,140,248,0.3)', background:'rgba(129,140,248,0.08)', color:'#818cf8', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>✎ Edit</button>
           <button onClick={() => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
@@ -255,6 +255,15 @@ export default function Editor() {
   const [loadingWebsite, setLoadingWebsite] = useState(true)
   const [currentCode,    setCurrentCode]    = useState('')
   const [previewDoc,     setPreviewDoc]     = useState(null)
+  // Multi-page sites: every page and the one being viewed/edited. Refs mirror
+  // the state so async handlers always use the page that is open right now.
+  const [files,          setFilesState]     = useState(null)
+  const [currentPath,    setCurrentPathState] = useState('index.html')
+  const filesRef = useRef(null)
+  const pathRef  = useRef('index.html')
+  const setFiles = useCallback((next) => { filesRef.current = next; setFilesState(next) }, [])
+  const setCurrentPath = useCallback((p) => { pathRef.current = p; setCurrentPathState(p) }, [])
+  const isMulti = !!files && files.length > 1
 
   const versionHistory = useVersionHistory()
 
@@ -326,10 +335,13 @@ export default function Editor() {
         if (data.success && data.website) {
           setWebsite(data.website)
           setChecklist(data.checklist || null)
+          const multi = data.website.kind === 'static' && data.website.files?.length > 1
+          setFiles(multi ? data.website.files : null)
+          setCurrentPath('index.html')
           setCurrentCode(data.website.latestCode)
           versionHistory.reset(data.website.latestCode)
           if (data.website.deployUrl) setDeployUrl(data.website.deployUrl)
-          setPreviewDoc(buildPreviewDoc(data.website.latestCode))
+          setPreviewDoc(buildPreviewDoc(data.website.latestCode, { pages: multi }))
           const conv = data.website.conversation || []
           if (conv.length) {
             setMessages(conv.map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content })))
@@ -355,10 +367,35 @@ export default function Editor() {
     return () => { cancelled = true }
   }, [historyKey, hasPlan, websiteId])
 
-  const updatePreview = useCallback((code) => {
-    setPreviewDoc(buildPreviewDoc(code))
+  // Shows new code for the open page (and keeps the page list in sync).
+  const updatePreview = useCallback((code, { scrollTo = '' } = {}) => {
+    const fs = filesRef.current
+    if (fs) setFiles(fs.map(f => (f.path === pathRef.current ? { ...f, content: code } : f)))
+    setPreviewDoc(buildPreviewDoc(code, { pages: !!fs && fs.length > 1, scrollTo }))
     setCurrentCode(code)
-  }, [])
+  }, [setFiles])
+
+  // Opens another page of a multi-page site (page tabs, or a link clicked
+  // inside the preview). Undo/redo history is per page.
+  const showPage = useCallback((path, hash = '') => {
+    const page = filesRef.current?.find(f => f.path === path)
+    if (!page) return
+    setCurrentPath(path)
+    versionHistory.reset(page.content)
+    updatePreview(page.content, { scrollTo: hash })
+  }, [setCurrentPath, versionHistory.reset, updatePreview])
+
+  useEffect(() => {
+    const onMessage = (e) => {
+      const fs = filesRef.current
+      if (fs && isPageNavMessage(e.data, fs.map(f => f.path))) showPage(e.data.page, e.data.hash)
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [showPage])
+
+  // The page path to send with saves and edits (multi-page sites only).
+  const pagePath = () => (filesRef.current ? pathRef.current : undefined)
 
   const startTimers = useCallback(() => {
     startTime.current = Date.now(); setElapsedMs(0); setEditStep(0)
@@ -379,7 +416,7 @@ export default function Editor() {
     try {
       const { res, data } = await fetchWithTimeout(
         `${serverUrl}/api/website/${websiteId}/code`,
-        { method:'PATCH', headers:{ 'Content-Type':'application/json' }, credentials:'include', body: JSON.stringify({ code }) },
+        { method:'PATCH', headers:{ 'Content-Type':'application/json' }, credentials:'include', body: JSON.stringify({ code, path: pagePath() }) },
         30000
       )
       if (!res.ok || !data.success) throw new Error(data.message || 'Save failed')
@@ -389,13 +426,21 @@ export default function Editor() {
     }
   }, [websiteId, bumpHistory])
 
-  // The server already saved the restored code as a new version.
-  const handleRestored = useCallback((code, seq) => {
-    versionHistory.push(code)
-    updatePreview(code)
+  // The server already saved the restored code as a new version. Multi-page
+  // restores bring back every page; stay on the open page if it still exists.
+  const handleRestored = useCallback((code, seq, restoredFiles) => {
+    let shown = code
+    if (restoredFiles?.length > 1) {
+      setFiles(restoredFiles)
+      const page = restoredFiles.find(f => f.path === pathRef.current) || restoredFiles[0]
+      setCurrentPath(page.path)
+      shown = page.content
+    }
+    versionHistory.push(shown)
+    updatePreview(shown)
     bumpHistory()
     setMessages(prev => [...prev, { role:'assistant', content:`↺ Restored version ${seq}. It is now the current version — your previous one is still in History.` }])
-  }, [versionHistory.push, updatePreview, bumpHistory])
+  }, [versionHistory.push, updatePreview, bumpHistory, setFiles, setCurrentPath])
 
   const handleUndo = useCallback(() => {
     const code = versionHistory.undo()
@@ -427,11 +472,13 @@ export default function Editor() {
     try {
       const { res, data } = await fetchWithTimeout(
         `${serverUrl}/api/website/${websiteId}`,
-        { method:'PUT', headers:{ 'Content-Type':'application/json' }, credentials:'include', body: JSON.stringify({ prompt }) },
+        { method:'PUT', headers:{ 'Content-Type':'application/json' }, credentials:'include', body: JSON.stringify({ prompt, path: pagePath() }) },
         240000
       )
       if (!res.ok || !data.success) throw new Error(data.message || 'Edit failed')
       stopTimers()
+      // Site-wide edits change other pages too: take the server's page list.
+      if (data.files && filesRef.current) setFiles(data.files)
       versionHistory.push(data.code)
       updatePreview(data.code)
       bumpHistory()
@@ -463,7 +510,7 @@ export default function Editor() {
   const handleDownload = () => {
     const a = document.createElement('a')
     a.href     = URL.createObjectURL(new Blob([currentCode], { type:'text/html' }))
-    a.download = `${website?.title || 'website'}.html`
+    a.download = isMulti ? currentPath : `${website?.title || 'website'}.html`
     a.click()
   }
 
@@ -474,7 +521,7 @@ export default function Editor() {
     try {
       const { data } = await axios.post(
         `${serverUrl}/api/website/${websiteId}/deploy`,
-        { code: currentCode },
+        { code: currentCode, path: pagePath() },
         { withCredentials: true }
       )
       if (data.success && data.deployUrl) {
@@ -721,6 +768,21 @@ export default function Editor() {
               </button>
             ))}
 
+            {isMulti && (activeTab === 'preview' || activeTab === 'code') && (
+              <div role="tablist" aria-label="Pages" style={{ display:'flex', alignItems:'center', gap:3, marginLeft:4, paddingLeft:8, borderLeft:'1px solid rgba(255,255,255,0.08)', overflowX:'auto', maxWidth:'38vw' }}>
+                {files.map(f => {
+                  const active = f.path === currentPath
+                  const label = f.path === 'index.html' ? 'Home' : f.path.replace(/\.html$/, '').replace(/-/g, ' ')
+                  return (
+                    <button key={f.path} role="tab" aria-selected={active} onClick={() => showPage(f.path)} disabled={isEditing} title={f.path}
+                      style={{ padding:'4px 10px', borderRadius:99, border:`1px solid ${active ? 'rgba(56,189,248,0.4)' : 'rgba(255,255,255,0.07)'}`, background: active ? 'rgba(56,189,248,0.1)' : 'transparent', color: active ? '#7dd3fc' : 'rgba(255,255,255,0.4)', fontSize:11.5, fontWeight:600, cursor: isEditing ? 'not-allowed' : 'pointer', fontFamily:'inherit', whiteSpace:'nowrap', textTransform:'capitalize' }}>
+                      📄 {label}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
             {activeTab === 'preview' && previewDoc && (
               <>
                 <div style={{ width:1, height:20, background:'rgba(255,255,255,0.08)', margin:'0 6px' }} />
@@ -808,7 +870,7 @@ export default function Editor() {
             {activeTab === 'code' && (
               <div style={{ height:'100%', width:'100%', overflow:'hidden' }}>
                 {currentCode
-                  ? <CodeViewer code={currentCode} onCodeChange={handleDirectEdit} />
+                  ? <CodeViewer code={currentCode} onCodeChange={handleDirectEdit} fileName={isMulti ? currentPath : 'website.html'} />
                   : <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:'rgba(255,255,255,0.3)', fontSize:14 }}>No code loaded</div>
                 }
               </div>

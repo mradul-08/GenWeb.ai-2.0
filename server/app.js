@@ -38,6 +38,9 @@ app.get("/health", (req, res) => {
 })
 
 app.get("/s/:slug", serveDeployedSite)
+// Other pages of multi-page sites. Relative links ("menu.html") resolve here
+// because "/s/:slug" is redirected to "/s/:slug/" (see below).
+app.get("/s/:slug/:page", serveDeployedSite)
 
 app.use("/api", rateLimit({ name: "api", windowMs: 60 * 1000, max: 300, keyFn: (req) => `ip:${req.ip}` }))
 app.use("/api", checkOrigin)

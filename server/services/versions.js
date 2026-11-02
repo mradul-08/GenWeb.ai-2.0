@@ -38,14 +38,29 @@ export async function readBlob(blobId, session) {
   return zlib.gunzipSync(b.data.buffer ?? b.data).toString("utf8")
 }
 
-async function insertVersion({ projectId, head, content, source, label, userId, session }) {
-  const { blob, size } = await putBlob(projectId, content, session)
-  if (head && head.files.length === 1 && head.files[0].blob === blob) return { version: head, created: false }
+// The website's current files: multi-page ("static") sites keep them in
+// website.files; single-page sites are one index.html held in latestCode.
+export const currentFiles = (website) =>
+  website.kind === "static" && website.files?.length
+    ? website.files.map(f => ({ path: f.path, content: f.content }))
+    : [{ path: MAIN_FILE, content: website.latestCode ?? "" }]
+
+const sameManifest = (a, b) =>
+  a.length === b.length && a.every((f, i) => f.path === b[i].path && f.blob === b[i].blob)
+
+async function insertVersion({ projectId, head, files, source, label, userId, session }) {
+  // File order is kept as given (it is the site's page order).
+  const manifest = []
+  for (const f of files) {
+    const { blob, size } = await putBlob(projectId, f.content, session)
+    manifest.push({ path: f.path, blob, size })
+  }
+  if (head && sameManifest(head.files, manifest)) return { version: head, created: false }
   const [version] = await ProjectVersion.create([{
     project: projectId,
     seq: (head?.seq ?? 0) + 1,
     parent: head?._id ?? null,
-    files: [{ path: MAIN_FILE, blob, size }],
+    files: manifest,
     source,
     label: cleanLabel(label),
     createdBy: userId ?? null,
@@ -53,25 +68,33 @@ async function insertVersion({ projectId, head, content, source, label, userId, 
   return { version, created: true }
 }
 
-// Saves code as the website's current state and records it as a version.
-// set/push: extra website fields to write in the same transaction (e.g.
-// thumbnail fields, conversation messages). Returns the head version summary.
-export async function commitCode(websiteId, code, { source, label = "", userId = null, set = {}, push = null }) {
+// Core of every save. nextFiles(website) returns the complete new file set.
+// In ONE transaction: content blobs, a new immutable version (skipped when
+// nothing changed), and the website itself (files, latestCode = index.html,
+// headVersion and any extra set/push fields). Websites created before
+// version history first get their previous state as a "migration" version.
+async function commit(websiteId, nextFiles, { source, label = "", userId = null, set = {}, push = null }) {
   // Two writers racing for the same seq hit the unique index; the loser
   // re-reads the new head and tries again (rare, so a few attempts suffice).
   for (let attempt = 1; ; attempt++) {
     try {
       return await inTransaction(async (session) => {
-        const website = await Website.findById(websiteId).select("latestCode headVersion").session(session).lean()
+        const website = await Website.findById(websiteId).select("latestCode headVersion kind files").session(session).lean()
         if (!website) throw new Error(`website missing: ${websiteId}`)
+        const before = currentFiles(website)
+        const files = nextFiles(website, before)
 
         let head = website.headVersion ? await ProjectVersion.findById(website.headVersion).session(session).lean() : null
-        if (!head && website.latestCode && website.latestCode !== code) {
-          ;({ version: head } = await insertVersion({ projectId: websiteId, head: null, content: website.latestCode, source: "migration", label: "Before version history", userId, session }))
+        const unchanged = before.length === files.length && before.every((f, i) => f.path === files[i].path && f.content === files[i].content)
+        if (!head && website.latestCode && !unchanged) {
+          ;({ version: head } = await insertVersion({ projectId: websiteId, head: null, files: before, source: "migration", label: "Before version history", userId, session }))
         }
-        const { version, created } = await insertVersion({ projectId: websiteId, head, content: code, source, label, userId, session })
+        const { version, created } = await insertVersion({ projectId: websiteId, head, files, source, label, userId, session })
 
-        const update = { $set: { ...set, latestCode: code, headVersion: version._id } }
+        const index = files.find(f => f.path === MAIN_FILE) ?? files[0]
+        const fields = { ...set, latestCode: index.content, headVersion: version._id }
+        if (website.kind === "static") fields.files = files
+        const update = { $set: fields }
         if (push) update.$push = push
         await Website.updateOne({ _id: websiteId }, update, { session })
         return { id: version._id, seq: version.seq, created }
@@ -82,11 +105,34 @@ export async function commitCode(websiteId, code, { source, label = "", userId =
   }
 }
 
+export class UnknownPageError extends Error {}
+
+// Saves one file (default index.html). On a multi-page site only that page
+// changes; the other pages are carried into the new version unchanged.
+export function commitCode(websiteId, code, { path = MAIN_FILE, ...opts }) {
+  return commit(websiteId, (website, before) => {
+    if (!before.some(f => f.path === path)) throw new UnknownPageError(`No page "${path}" in this website`)
+    return before.map(f => (f.path === path ? { path, content: code } : f))
+  }, opts)
+}
+
+// Replaces the complete file set (generation, restore of a version).
+export function commitFiles(websiteId, files, opts) {
+  return commit(websiteId, () => files.map(f => ({ path: f.path, content: f.content })), opts)
+}
+
+// Derives the new file set from the CURRENT files inside the transaction, so
+// changes that touch several pages never overwrite a concurrent save with a
+// stale snapshot. transform(files) → files.
+export function commitTransform(websiteId, transform, opts) {
+  return commit(websiteId, (website, before) => transform(before), opts)
+}
+
 // Gives a website created before version history its first version, so the
 // history is never empty. Idempotent.
 export async function ensureVersioned(website) {
   if (website.headVersion) return
-  await commitCode(website._id, website.latestCode, { source: "migration", label: "Before version history" })
+  await commitFiles(website._id, currentFiles(website), { source: "migration", label: "Before version history" })
 }
 
 export async function listVersions(websiteId) {
@@ -97,12 +143,14 @@ export async function listVersions(websiteId) {
     .lean()
 }
 
-// Returns { version, code } for a version of this website, or null.
+// Returns { version, code, files } for a version of this website, or null.
+// code = its index.html (what single-page callers and previews need).
 export async function getVersionCode(websiteId, versionId) {
   const version = await ProjectVersion.findOne({ _id: versionId, project: websiteId }).lean()
   if (!version) return null
-  const file = version.files.find(f => f.path === MAIN_FILE)
-  return { version, code: await readBlob(file.blob) }
+  const files = []
+  for (const f of version.files) files.push({ path: f.path, content: await readBlob(f.blob) })
+  return { version, code: (files.find(f => f.path === MAIN_FILE) ?? files[0]).content, files }
 }
 
 export async function deleteHistory(websiteId) {

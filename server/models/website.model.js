@@ -33,6 +33,19 @@ const websiteSchema = new mongoose.Schema(
       required: true,
     },
 
+    // "single_html": one page, the code is latestCode (all sites before R2).
+    // "static": several self-contained pages in `files`; latestCode mirrors
+    // index.html so older code paths (thumbnails, lists) keep working.
+    kind: {
+      type: String,
+      enum: ["single_html", "static"],
+      default: "single_html",
+    },
+    files: {
+      type: [{ _id: false, path: { type: String, required: true }, content: { type: String, required: true } }],
+      default: undefined,
+    },
+
     conversation: [messageSchema],
 
     // Reviewed plan the site was generated from (ai/plan.js normalizePlan

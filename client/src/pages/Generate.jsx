@@ -394,6 +394,8 @@ export default function Generate() {
   // "hybrid": tested templates + AI-written content (complete pages, few tokens).
   // "ai": the model writes the whole page (more freedom, may be cut off).
   const [engine,         setEngine]         = useState('hybrid')
+  // "single": one long page; "multi": home + a page per major section (Templates engine only).
+  const [pageMode,       setPageMode]       = useState('single')
   // Plan mode: an editable plan reviewed before generating (null = direct mode).
   const [plan,           setPlan]           = useState(null)
   const [planning,       setPlanning]       = useState(false)
@@ -531,7 +533,7 @@ export default function Generate() {
     setPreviewDoc(null)
     startTimers(getStoredAvg())
     try {
-      const body = { prompt: buildEnrichedPrompt(), engine, ...(plan ? { plan } : {}) }
+      const body = { prompt: buildEnrichedPrompt(), engine, pages: engine === 'hybrid' ? pageMode : 'single', ...(plan ? { plan } : {}) }
       const { response: res, data } = await fetchJsonWithTimeout(`${serverUrl}/api/website/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -758,6 +760,17 @@ export default function Generate() {
                   </button>
                 ))}
               </div>
+              {engine === 'hybrid' && (
+                <div role="radiogroup" aria-label="Pages" style={{ display:'flex', gap:'6px', marginBottom:'10px' }}>
+                  {[{ id:'single', label:'📄 Single page' }, { id:'multi', label:'🗂 Multi-page' }].map(o => (
+                    <button key={o.id} role="radio" aria-checked={pageMode === o.id} onClick={() => setPageMode(o.id)} disabled={generating}
+                      title={o.id === 'multi' ? 'Home page plus separate pages for menu, gallery, contact…' : 'Everything on one scrolling page'}
+                      style={{ flex:1, padding:'7px 6px', borderRadius:'9px', cursor:'pointer', fontFamily:'inherit', fontSize:'11.5px', fontWeight:600, border:`1px solid ${pageMode === o.id ? 'rgba(56,189,248,0.45)' : 'rgba(255,255,255,0.08)'}`, background: pageMode === o.id ? 'rgba(56,189,248,0.1)' : 'transparent', color: pageMode === o.id ? '#7dd3fc' : 'rgba(255,255,255,0.4)' }}>
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              )}
               {!plan && (
                 <button onClick={handlePlan} disabled={!canPlan}
                   title="See which sections and features the AI will build, edit them, then generate"

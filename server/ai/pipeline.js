@@ -111,9 +111,9 @@ export const ENGINES = ["hybrid", "ai"]
 // engine "ai": the model writes the whole document (single call or brief + call).
 // plan: a normalized plan (ai/plan.js) the user reviewed; in "ai" mode it
 // replaces the design brief, which would only repeat the planning step.
-export async function generateSite(prompt, { deadline, ctx, strategy, plan = null, engine = "hybrid", rand }) {
+export async function generateSite(prompt, { deadline, ctx, strategy, plan = null, engine = "hybrid", rand, multiPage = false }) {
   if (engine === "hybrid") {
-    const result = await generateHybrid(prompt, { deadline, ctx, plan, rand })
+    const result = await generateHybrid(prompt, { deadline, ctx, plan, rand, multiPage })
     return { ...result, strategy: "hybrid", briefStatus: "skipped" }
   }
   const config = await getAiConfig()

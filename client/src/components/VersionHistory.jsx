@@ -65,7 +65,7 @@ export default function VersionHistory({ websiteId, refreshKey, disabled, onRest
     try {
       const { data } = await api(`${websiteId}/versions/${v.id}/restore`, 'post')
       setPreview(null)
-      onRestored(data.code, v.seq)
+      onRestored(data.code, v.seq, data.files)
       await load()
     } catch (e) { setError(errorText(e, 'Restore failed. Nothing was changed.')) }
     finally { setBusyId(null) }

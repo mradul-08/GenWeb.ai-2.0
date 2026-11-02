@@ -66,7 +66,8 @@ function derivePlan(blueprint, site) {
 }
 
 // Returns the same shape as pipeline.runDocumentTask plus { hybrid, plan }.
-export async function generateHybrid(request, { deadline, ctx, plan = null, rand }) {
+// multiPage: files = index.html + one page per major section (kind "static").
+export async function generateHybrid(request, { deadline, ctx, plan = null, rand, multiPage = false }) {
   const blueprint = buildBlueprint({ text: request, plan, rand })
   const prompt = buildContentPrompt(request, blueprint, plan)
   let content = null, model = null, last = { reason: "no_model_available" }
@@ -80,19 +81,22 @@ export async function generateHybrid(request, { deadline, ctx, plan = null, rand
   }
   if (!content) return { parsed: null, reason: last.reason, validation: { passed: false, reasons: [last.reason] }, repairs: [] }
 
-  const site = assembleSite(blueprint, content, { plan, requestText: request })
-  const check = validateDocument(site.html)
-  if (!check.valid) {
+  const site = assembleSite(blueprint, content, { plan, requestText: request, multiPage })
+  const checks = site.files.map(f => ({ path: f.path, ...validateDocument(f.content) }))
+  const bad = checks.find(c => !c.valid)
+  if (bad) {
     // The library's own output is invalid: a bug in our code, never the model's.
-    console.error("[hybrid] assembled document invalid:", check.reasons)
-    return { parsed: null, reason: "assembly_invalid", validation: { passed: false, reasons: check.reasons }, repairs: [] }
+    console.error("[hybrid] assembled document invalid:", bad.path, bad.reasons)
+    return { parsed: null, reason: "assembly_invalid", validation: { passed: false, reasons: bad.reasons }, repairs: [] }
   }
+  const pagesNote = multiPage ? ` across ${site.files.length} pages` : ""
   return {
-    parsed: { title: site.title, message: `Built "${site.title}" from the ${blueprint.template} template with ${site.sections.length} sections.${site.dropped.length ? ` Left out (no content yet): ${site.dropped.join(", ")}.` : ""}`, code: site.html },
-    model, validation: { passed: true, reasons: [], warnings: check.warnings }, repairs: [],
+    parsed: { title: site.title, message: `Built "${site.title}" from the ${blueprint.template} template with ${site.sections.length} sections${pagesNote}.${site.dropped.length ? ` Left out (no content yet): ${site.dropped.join(", ")}.` : ""}`, code: site.html },
+    files: multiPage ? site.files : null,
+    model, validation: { passed: true, reasons: [], warnings: [...new Set(checks.flatMap(c => c.warnings))] }, repairs: [],
     // dropped: planned sections the model wrote no usable content for (they
     // are left out rather than filled with invented text; the checklist shows them).
-    hybrid: { template: blueprint.template, templateScore: blueprint.templateScore, preset: blueprint.preset.id, sections: site.sections.map(s => ({ id: s.id, kind: s.kind, variant: s.variant })), dropped: site.dropped },
+    hybrid: { template: blueprint.template, templateScore: blueprint.templateScore, preset: blueprint.preset.id, sections: site.sections.map(s => ({ id: s.id, kind: s.kind, variant: s.variant })), dropped: site.dropped, pages: site.pages },
     plan: plan || derivePlan(blueprint, site),
   }
 }

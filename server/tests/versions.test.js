@@ -210,6 +210,7 @@ test("deleting a website deletes its versions and stored content", async () => {
 test("slugs are readable: words joined by hyphens plus a 4-character suffix", () => {
   assert.match(generateSlug("Business Solutions"), /^business-solutions-[a-z0-9]{4}$/)
   assert.match(generateSlug("  Sunset   Bistro -- Restaurant! "), /^sunset-bistro-restaurant-[a-z0-9]{4}$/)
+  assert.match(generateSlug("Chai Corner Café"), /^chai-corner-cafe-[a-z0-9]{4}$/)
   assert.match(generateSlug("!!!"), /^site-[a-z0-9]{4}$/)
   assert.match(generateSlug(""), /^site-[a-z0-9]{4}$/)
   const long = generateSlug("a very long website title that keeps going far beyond forty characters")

@@ -10,7 +10,8 @@ import { insertAt } from "../ai/htmlPatch.js"
 import { allowedOrigins } from "../config/origins.js"
 import Website from "../models/website.model.js"
 import { reserveCredits, refundCredits } from "../services/credits.js"
-import { commitCode, ensureVersioned, listVersions, getVersionCode, deleteHistory } from "../services/versions.js"
+import { commitCode, commitFiles, commitTransform, currentFiles, UnknownPageError, MAIN_FILE, ensureVersioned, listVersions, getVersionCode, deleteHistory } from "../services/versions.js"
+import { PAGE_PATH } from "../library/assemble.js"
 
 const CREDITS_CONFIG = {
   COST_PER_GENERATION: 50,
@@ -86,7 +87,7 @@ function extractThumbnailMeta(html, fallbackTitle = "") {
 // Readable slug + random suffix: "Business Solutions" → "business-solutions-k3f9".
 // Only new slugs use this; existing slugs are never changed (shared links).
 export const generateSlug = (title) => {
-  const base = String(title || "").toLowerCase().trim()
+  const base = String(title || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().trim()
     .replace(/[^a-z0-9\s-]/g, "").replace(/[\s-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "")
   return (base || "site") + "-" + Math.random().toString(36).slice(2, 6).padEnd(4, "0")
 }
@@ -106,6 +107,25 @@ function validateUserCode(code) {
 }
 
 const notFound = (res) => res.status(404).json({ success: false, message: "Not found" })
+
+// ── Pages (multi-page "static" sites) ─────────────────────────────────────────
+// The page a request targets: absent → index.html; otherwise a plain
+// "name.html" (no folders, no "..") that must exist in the site.
+const requestedPath = (p) => (p === undefined || p === null || p === "" ? MAIN_FILE : typeof p === "string" && PAGE_PATH.test(p) ? p : null)
+const findPage = (website, path) => currentFiles(website).find(f => f.path === path) || null
+const pageMissing = (res) => res.status(404).json({ success: false, message: "Page not found in this website" })
+// The checklist looks across every page of the site.
+const siteHtml = (files) => files.map(f => f.content).join("\n")
+// Files to return to the editor: all pages for multi-page sites only.
+const filesFor = (website, files) => (website.kind === "static" ? files : undefined)
+
+// A style edit's added rules (the last <style data-gw-edit> block) and a
+// helper to add the same block to another page: one AI call restyles every page.
+const lastEditStyle = (html) => [...html.matchAll(/<style data-gw-edit>[\s\S]*?<\/style>\n?/g)].pop()?.[0] || null
+function appendToHead(html, block) {
+  const headEnd = html.search(/<\/head>/i)
+  return headEnd === -1 ? html : insertAt(html, headEnd, block)
+}
 
 // Loads the requesting user's website, or null for missing/invalid ids.
 async function findOwnWebsite(req) {
@@ -217,6 +237,10 @@ export const generateWebsite = async (req, res) => {
     // "hybrid" (default): templates + AI-written content; "ai": free-form page.
     const engine = req.body.engine ?? "hybrid"
     if (!ENGINES.includes(engine)) return res.status(400).json({ success: false, message: `engine must be one of: ${ENGINES.join(", ")}` })
+    // "single" (default): one page; "multi": home + one page per major section.
+    const pages = req.body.pages ?? "single"
+    if (!["single", "multi"].includes(pages)) return res.status(400).json({ success: false, message: "pages must be \"single\" or \"multi\"" })
+    if (pages === "multi" && engine !== "hybrid") return res.status(400).json({ success: false, message: "Multi-page sites are built with the Templates engine." })
     const user = req.user
 
     slot = await reserveDailySlot(user._id)
@@ -225,7 +249,7 @@ export const generateWebsite = async (req, res) => {
     if (!reservation) { await releaseQuota(slot); slot = null; return res.status(403).json({ success: false, message: `Need ${cost} credits` }) }
 
     await startRequest({ requestId, userId: user._id, task: "generate" })
-    const result = await generateSite(prompt.trim(), { deadline: Date.now() + REQUEST_BUDGET_MS, ctx: { requestId, userId: user._id }, plan, engine })
+    const result = await generateSite(prompt.trim(), { deadline: Date.now() + REQUEST_BUDGET_MS, ctx: { requestId, userId: user._id }, plan, engine, multiPage: pages === "multi" })
 
     if (!result.parsed) {
       await refundCredits(user._id, reservation, "generation failed"); reservation = null
@@ -242,6 +266,9 @@ export const generateWebsite = async (req, res) => {
     // Hybrid sites always get a plan (derived when none was reviewed), so the
     // requirement checklist works for them too.
     const sitePlan = result.plan || plan
+    // Multi-page results carry every page; single-page results are index.html only.
+    const files = result.files || [{ path: MAIN_FILE, content: parsed.code }]
+    const kind = result.files ? "static" : "single_html"
 
     const title = (parsed.title || prompt.trim()).slice(0, 80)
     const { thumbnailBg, thumbnailAccent, thumbnailTitle } = extractThumbnailMeta(parsed.code, title)
@@ -255,6 +282,8 @@ export const generateWebsite = async (req, res) => {
       thumbnailAccent,
       thumbnailTitle,
       plan: sitePlan,
+      kind,
+      ...(kind === "static" ? { files } : {}),
       conversation: [
         { role: "user", content: prompt.trim() },
         { role: "ai",   content: parsed.message || "Website generated." },
@@ -264,7 +293,7 @@ export const generateWebsite = async (req, res) => {
     // History is secondary to the generated site: a failure here is logged,
     // never charged back (the next change creates the missing first version).
     try {
-      await commitCode(website._id, parsed.code, { source: "generate", label: prompt.trim(), userId: user._id })
+      await commitFiles(website._id, files, { source: "generate", label: prompt.trim(), userId: user._id })
     } catch (e) { console.error("[versions] generate", e) }
 
     await finishRequest(requestId, {
@@ -279,8 +308,10 @@ export const generateWebsite = async (req, res) => {
       websiteId: website._id,
       website:   { id: website._id, title: website.title, slug: website.slug },
       credits:   { used: cost, remaining: reservation.balance },
-      checklist: checkPlan(parsed.code, sitePlan),
+      checklist: checkPlan(siteHtml(files), sitePlan),
       engine,
+      kind,
+      ...(kind === "static" ? { files } : {}),
       ...(result.hybrid ? { hybrid: result.hybrid } : {}),
     })
   } catch (e) {
@@ -305,7 +336,7 @@ export const getWebsite = async (req, res) => {
     const w = await findOwnWebsite(req)
     if (!w) return notFound(res)
     // Checklist is recomputed from the current code, so it reflects later edits.
-    return res.json({ success: true, website: w, checklist: checkPlan(w.latestCode, w.plan) })
+    return res.json({ success: true, website: w, checklist: checkPlan(siteHtml(currentFiles(w)), w.plan) })
   } catch (e) { return serverError(res, "getWebsite", e) }
 }
 
@@ -321,6 +352,11 @@ export const updateWebsite = async (req, res) => {
     const user    = req.user
     const website = await findOwnWebsite(req)
     if (!website) return notFound(res)
+    // Which page to edit (multi-page sites); single-page sites only have index.html.
+    const path = requestedPath(req.body.path)
+    if (!path) return res.status(400).json({ success: false, message: "Invalid page" })
+    const page = findPage(website, path)
+    if (!page) return pageMissing(res)
 
     slot = await reserveDailySlot(user._id)
     if (!slot) return quotaResponse(res)
@@ -328,7 +364,7 @@ export const updateWebsite = async (req, res) => {
     if (!reservation) { await releaseQuota(slot); slot = null; return res.status(403).json({ success: false, message: "Insufficient credits" }) }
 
     await startRequest({ requestId, userId: user._id, task: "edit", websiteId: website._id })
-    const r = await editSite(website.latestCode, prompt.trim(), { deadline: Date.now() + REQUEST_BUDGET_MS, ctx: { requestId, userId: user._id } })
+    const r = await editSite(page.content, prompt.trim(), { deadline: Date.now() + REQUEST_BUDGET_MS, ctx: { requestId, userId: user._id } })
     console.log(`[SmartEdit] ${r.plan.editType} → ${r.mode}${r.fellBackToFull ? " (fallback)" : ""} | needs ${JSON.stringify(r.plan.needs)}`)
 
     if (!r.parsed) {
@@ -342,16 +378,26 @@ export const updateWebsite = async (req, res) => {
       return res.status(503).json({ success: false, message: "Update failed — try again." })
     }
 
-    // Code, conversation and version are written together; if this throws,
-    // nothing was saved and the catch below refunds the credits.
-    await commitCode(website._id, r.parsed.code, {
-      source: "ai_edit", label: prompt.trim(), userId: user._id,
-      set: extractThumbnailMeta(r.parsed.code, website.title),
+    // On multi-page sites a style edit (override rules appended to <head>) is
+    // applied to every page: the pages share their design tokens and classes,
+    // so one AI call restyles the whole site consistently.
+    const styleBlock = website.kind === "static" && r.mode === "style_append" ? lastEditStyle(r.parsed.code) : null
+    const siteWide = !!styleBlock && currentFiles(website).length > 1
+    const editOpts = {
+      source: "ai_edit", label: siteWide ? `${prompt.trim()} (all pages)` : prompt.trim(), userId: user._id,
       push: { conversation: { $each: [
         { role: "user", content: prompt.trim() },
-        { role: "ai",   content: `Done! Applied: ${prompt.trim().slice(0, 80)}` },
+        { role: "ai",   content: `Done! Applied${siteWide ? " to all pages" : ""}: ${prompt.trim().slice(0, 80)}` },
       ] } },
-    })
+    }
+    let finalFiles
+    const transform = (files) => (finalFiles = files.map(f =>
+      f.path === path ? { path, content: r.parsed.code } : siteWide ? { path: f.path, content: appendToHead(f.content, styleBlock) } : f))
+    // Code, conversation and version are written together; if this throws,
+    // nothing was saved and the catch below refunds the credits. The
+    // thumbnail follows the home page.
+    const newIndex = transform(currentFiles(website)).find(f => f.path === MAIN_FILE)?.content
+    await commitTransform(website._id, transform, { ...editOpts, set: newIndex ? extractThumbnailMeta(newIndex, website.title) : {} })
 
     await finishRequest(requestId, {
       outcome: "success", modelUsed: r.model?.id, editType: r.plan.editType, editMode: r.mode,
@@ -363,13 +409,16 @@ export const updateWebsite = async (req, res) => {
 
     return res.json({
       success:  true,
-      message:  `Applied: ${prompt.trim().slice(0, 60)}`,
+      message:  `Applied${siteWide ? " to all pages" : ""}: ${prompt.trim().slice(0, 60)}`,
       code:     r.parsed.code,
+      path,
+      files:    filesFor(website, finalFiles),
+      siteWide,
       editType: r.plan.editType,
       mode:     r.mode,
       usage:    totals ? { inputTokens: totals.inputTokens, outputTokens: totals.outputTokens, aiCalls: totals.attempts } : null,
       credits:  { used: cost, remaining: reservation.balance },
-      checklist: checkPlan(r.parsed.code, website.plan),
+      checklist: checkPlan(siteHtml(finalFiles), website.plan),
     })
   } catch (e) {
     if (reservation) await refundCredits(req.user._id, reservation, "edit error")
@@ -380,22 +429,26 @@ export const updateWebsite = async (req, res) => {
 }
 
 // Saves code edited directly in the editor (source edit, undo/redo). No AI, no credits.
-// PATCH /api/website/:id/code  body: { code }
+// PATCH /api/website/:id/code  body: { code, path? } (path: page of a multi-page site)
 export const saveWebsiteCode = async (req, res) => {
   try {
     const { code } = req.body
     const invalid = validateUserCode(code)
     if (invalid) return res.status(400).json({ success: false, message: invalid })
+    const path = requestedPath(req.body.path)
+    if (!path) return res.status(400).json({ success: false, message: "Invalid page" })
 
     const website = await findOwnWebsite(req)
     if (!website) return notFound(res)
+    if (!findPage(website, path)) return pageMissing(res)
 
     const version = await commitCode(website._id, code, {
-      source: "manual_save", label: "Manual edit", userId: req.user._id,
-      set: extractThumbnailMeta(code, website.title),
+      path, source: "manual_save", label: path === MAIN_FILE ? "Manual edit" : `Manual edit (${path})`, userId: req.user._id,
+      set: path === MAIN_FILE ? extractThumbnailMeta(code, website.title) : {},
     })
     return res.json({ success: true, message: "Saved", version })
   } catch (e) {
+    if (e instanceof UnknownPageError) return pageMissing(res)
     return serverError(res, "saveWebsiteCode", e)
   }
 }
@@ -448,8 +501,8 @@ export const getWebsiteVersion = async (req, res) => {
   try {
     const found = await findOwnVersion(req, res)
     if (!found) return
-    const { version, code } = found
-    return res.json({ success: true, version: { id: version._id, seq: version.seq, source: version.source, label: version.label, createdAt: version.createdAt }, code })
+    const { version, code, files } = found
+    return res.json({ success: true, version: { id: version._id, seq: version.seq, source: version.source, label: version.label, createdAt: version.createdAt }, code, files })
   } catch (e) { return serverError(res, "getWebsiteVersion", e) }
 }
 
@@ -460,12 +513,13 @@ export const restoreWebsiteVersion = async (req, res) => {
   try {
     const found = await findOwnVersion(req, res)
     if (!found) return
-    const { website, version, code } = found
-    const head = await commitCode(website._id, code, {
+    const { website, version, code, files } = found
+    // Every page of the version comes back together.
+    const head = await commitFiles(website._id, files, {
       source: "restore", label: `Restored version ${version.seq}`, userId: req.user._id,
       set: extractThumbnailMeta(code, website.title),
     })
-    return res.json({ success: true, message: `Restored version ${version.seq}`, code, version: head })
+    return res.json({ success: true, message: `Restored version ${version.seq}`, code, files: filesFor(website, files), version: head })
   } catch (e) { return serverError(res, "restoreWebsiteVersion", e) }
 }
 
@@ -483,9 +537,12 @@ export const deployWebsite = async (req, res) => {
     if (req.body?.code !== undefined) {
       const invalid = validateUserCode(req.body.code)
       if (invalid) return res.status(400).json({ success: false, message: invalid })
+      const path = requestedPath(req.body.path)
+      if (!path) return res.status(400).json({ success: false, message: "Invalid page" })
+      if (!findPage(website, path)) return pageMissing(res)
       await commitCode(website._id, req.body.code, {
-        source: "deploy", label: "Saved when deploying", userId: req.user._id,
-        set: extractThumbnailMeta(req.body.code, website.title),
+        path, source: "deploy", label: "Saved when deploying", userId: req.user._id,
+        set: path === MAIN_FILE ? extractThumbnailMeta(req.body.code, website.title) : {},
       })
     }
 
@@ -494,7 +551,7 @@ export const deployWebsite = async (req, res) => {
     }
 
     const baseUrl  = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 3002}`
-    const deployUrl = `${baseUrl}/s/${website.slug}`
+    const deployUrl = `${baseUrl}/s/${website.slug}${website.kind === "static" ? "/" : ""}`
 
     website.deployed  = true
     website.deployUrl = deployUrl
@@ -544,7 +601,10 @@ const DEPLOY_CSP = [
 export const serveDeployedSite = async (req, res) => {
   try {
     const { slug } = req.params
-    const website  = await Website.findOne({ slug: String(slug), deployed: true })
+    // /s/:slug → index.html; /s/:slug/:page → another page of a multi-page site.
+    const pagePath = req.params.page === undefined ? MAIN_FILE : requestedPath(req.params.page)
+    const found    = pagePath ? await Website.findOne({ slug: String(slug), deployed: true }) : null
+    const website  = found && findPage(found, pagePath) ? found : null
     const clientUrl = process.env.CLIENT_URL || "http://localhost:5173"
 
     if (!website) {
@@ -584,7 +644,13 @@ export const serveDeployedSite = async (req, res) => {
   ✦ Built with GenWeb.ai
 </a>`
 
-    let html = website.latestCode
+    // Multi-page sites live under "/s/:slug/" so their relative links
+    // ("menu.html") resolve inside the site.
+    if (website.kind === "static" && req.params.page === undefined && !req.path.endsWith("/")) {
+      return res.redirect(302, `/s/${encodeURIComponent(website.slug)}/`)
+    }
+
+    let html = findPage(website, pagePath).content
 
     const headOpen = html.match(/<head[^>]*>/i)
     html = headOpen

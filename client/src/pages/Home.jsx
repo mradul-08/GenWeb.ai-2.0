@@ -6,7 +6,8 @@ import { setUserData } from '../redux/userSlice'
 import { signOut } from 'firebase/auth'
 import { auth } from '../firebase'
 import { serverUrl } from '../config'
-import { Coins, LogOut, X, Menu, Zap, Globe, Code2, Sparkles, ArrowRight, ChevronRight } from "lucide-react"
+import { Hero, Examples, HowItWorks, Features, FinalCta, SiteFooter } from '../components/Landing'
+import { LogOut, X, Menu, Zap } from "lucide-react"
 
 /* ── Animated gradient orb background ── */
 function OrbBackground() {
@@ -54,81 +55,6 @@ function OrbBackground() {
   )
 }
 
-/* ── Floating badge ── */
-function Badge({ children }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-        padding: '6px 14px', borderRadius: 999,
-        background: 'rgba(139,92,246,0.12)',
-        border: '1px solid rgba(139,92,246,0.3)',
-        fontSize: 12, fontWeight: 600, color: '#a78bfa',
-        letterSpacing: '0.05em', textTransform: 'uppercase',
-        marginBottom: 24,
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      <Sparkles size={12} />
-      {children}
-    </motion.div>
-  )
-}
-
-/* ── Feature card ── */
-function FeatureCard({ icon: Icon, title, desc, color, delay }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay }}
-      whileHover={{ y: -6, borderColor: `${color}60` }}
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 20, padding: '28px 24px',
-        transition: 'all 0.3s ease',
-        cursor: 'default',
-      }}
-    >
-      <div style={{
-        width: 48, height: 48, borderRadius: 14,
-        background: `${color}18`,
-        border: `1px solid ${color}30`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        marginBottom: 16,
-      }}>
-        <Icon size={22} color={color} />
-      </div>
-      <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>
-        {title}
-      </h3>
-      <p style={{ margin: 0, fontSize: 13.5, color: 'rgba(255,255,255,0.42)', lineHeight: 1.7 }}>
-        {desc}
-      </p>
-    </motion.div>
-  )
-}
-
-/* ── Stat item ── */
-function Stat({ value, label }) {
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{
-        fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 800,
-        color: '#fff', letterSpacing: '-0.04em', lineHeight: 1,
-        background: 'linear-gradient(135deg, #a78bfa, #38bdf8)',
-        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-      }}>{value}</div>
-      <div style={{ marginTop: 6, fontSize: 12, color: 'rgba(255,255,255,0.35)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</div>
-    </div>
-  )
-}
-
 export default function Home() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -163,11 +89,6 @@ export default function Home() {
     navigate('/')
   }
 
-  const features = [
-    { icon: Sparkles, title: 'AI-Generated Code', color: '#a78bfa', delay: 0, desc: 'Production-ready HTML, CSS and JS generated in seconds. Clean, semantic, and fully functional.' },
-    { icon: Globe, title: 'Fully Responsive', color: '#38bdf8', delay: 0.1, desc: 'Every website is mobile-first and adapts perfectly to any screen size out of the box.' },
-    { icon: Code2, title: 'Export Ready', color: '#34d399', delay: 0.2, desc: 'Download the complete HTML file and host it anywhere — Netlify, Vercel, or your own server.' },
-  ]
 
   return (
     <div style={{
@@ -380,222 +301,13 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* ── HERO ── */}
-      <section style={{
-        position: 'relative', zIndex: 10,
-        minHeight: '100vh',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        padding: 'clamp(100px,15vw,140px) clamp(20px,5vw,60px) 80px',
-        textAlign: 'center',
-      }}>
-        <Badge>AI-Powered Website Builder</Badge>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.6 }}
-          style={{
-            margin: '0 0 24px',
-            fontSize: 'clamp(2.8rem, 8vw, 6rem)',
-            fontWeight: 800,
-            lineHeight: 1.05,
-            letterSpacing: '-0.04em',
-            color: '#fff',
-            maxWidth: 820,
-          }}
-        >
-          Build Stunning Websites{' '}
-          <span style={{
-            background: 'linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%)',
-            backgroundSize: '200% auto',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            animation: 'shimmer 4s linear infinite',
-          }}>with AI</span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.5 }}
-          style={{
-            margin: '0 0 40px',
-            fontSize: 'clamp(15px, 2.5vw, 18px)',
-            color: 'rgba(255,255,255,0.5)',
-            lineHeight: 1.75,
-            maxWidth: 520,
-          }}
-        >
-          Describe your idea in plain English. Your AI agent writes the code, crafts the design, and ships a production-ready website in seconds.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.5 }}
-          style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 64 }}
-        >
-          <motion.button
-            whileHover={{ scale: 1.04, boxShadow: '0 0 50px rgba(139,92,246,0.55)' }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => userData ? navigate('/dashboard') : navigate('/login')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: 'clamp(12px,2vw,16px) clamp(24px,3vw,36px)',
-              borderRadius: 14,
-              background: 'linear-gradient(135deg, #8b5cf6, #3b82f6)',
-              border: 'none', color: '#fff',
-              fontSize: 'clamp(14px,2vw,16px)', fontWeight: 700,
-              cursor: 'pointer', fontFamily: 'inherit',
-              boxShadow: '0 0 30px rgba(139,92,246,0.35)',
-              transition: 'box-shadow 0.2s',
-            }}
-          >
-            {userData ? 'Go to Dashboard' : 'Start Building Free'}
-            <ArrowRight size={18} />
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.03, borderColor: 'rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.06)' }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => navigate('/pricing')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: 'clamp(12px,2vw,16px) clamp(24px,3vw,36px)',
-              borderRadius: 14,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: 'rgba(255,255,255,0.7)',
-              fontSize: 'clamp(14px,2vw,16px)', fontWeight: 600,
-              cursor: 'pointer', fontFamily: 'inherit',
-              transition: 'all 0.2s',
-            }}
-          >
-            View Pricing <ChevronRight size={16} />
-          </motion.button>
-        </motion.div>
-
-        {/* Stats row */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          style={{
-            display: 'flex', gap: 'clamp(32px,6vw,72px)', flexWrap: 'wrap', justifyContent: 'center',
-            padding: '32px 40px',
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 20,
-            backdropFilter: 'blur(12px)',
-          }}
-        >
-          <Stat value="10s" label="avg build time" />
-          <div style={{ width: 1, background: 'rgba(255,255,255,0.08)', alignSelf: 'stretch' }} />
-          <Stat value="100%" label="responsive" />
-          <div style={{ width: 1, background: 'rgba(255,255,255,0.08)', alignSelf: 'stretch' }} />
-          <Stat value="Free" label="to start" />
-        </motion.div>
-      </section>
-
-      {/* ── FEATURES ── */}
-      <section style={{ position: 'relative', zIndex: 10, padding: 'clamp(60px,10vw,100px) clamp(20px,5vw,60px)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            style={{ textAlign: 'center', marginBottom: 56 }}
-          >
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 999, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', fontSize: 11, fontWeight: 700, color: '#34d399', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 16 }}>
-              ✦ Features
-            </div>
-            <h2 style={{ margin: '0 0 14px', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em' }}>
-              Everything you need to ship
-            </h2>
-            <p style={{ margin: 0, fontSize: 15, color: 'rgba(255,255,255,0.4)', lineHeight: 1.7, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto' }}>
-              From AI generation to export-ready code — no design or coding skills required.
-            </p>
-          </motion.div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px,1fr))', gap: 18 }}>
-            {features.map((f, i) => <FeatureCard key={i} {...f} />)}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA BANNER ── */}
-      <section style={{ position: 'relative', zIndex: 10, padding: 'clamp(40px,8vw,80px) clamp(20px,5vw,60px)' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            style={{
-              borderRadius: 28,
-              background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.1))',
-              border: '1px solid rgba(139,92,246,0.25)',
-              padding: 'clamp(40px,6vw,64px)',
-              textAlign: 'center',
-              position: 'relative', overflow: 'hidden',
-            }}
-          >
-            {/* Glow */}
-            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '60%', height: '60%', background: 'radial-gradient(ellipse, rgba(139,92,246,0.15), transparent 70%)', pointerEvents: 'none' }} />
-
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ fontSize: 40, marginBottom: 16 }}>🚀</div>
-              <h2 style={{ margin: '0 0 14px', fontSize: 'clamp(1.6rem,3.5vw,2.4rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em' }}>
-                Ready to build your website?
-              </h2>
-              <p style={{ margin: '0 0 32px', fontSize: 15, color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto' }}>
-                Join thousands of creators shipping stunning websites with AI. Start for free today.
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(139,92,246,0.55)' }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => userData ? navigate('/dashboard') : navigate('/login')}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 10,
-                  padding: '14px 36px', borderRadius: 14,
-                  background: 'linear-gradient(135deg, #8b5cf6, #3b82f6)',
-                  border: 'none', color: '#fff',
-                  fontSize: 16, fontWeight: 700,
-                  cursor: 'pointer', fontFamily: 'inherit',
-                  boxShadow: '0 0 30px rgba(139,92,246,0.35)',
-                }}
-              >
-                {userData ? 'Go to Dashboard' : 'Get Started Free'}
-                <ArrowRight size={18} />
-              </motion.button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── FOOTER ── */}
-      <footer style={{
-        position: 'relative', zIndex: 10,
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        padding: 'clamp(24px,4vw,36px) clamp(20px,5vw,60px)',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        flexWrap: 'wrap', gap: 16,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 26, height: 26, borderRadius: 8, background: 'linear-gradient(135deg,#8b5cf6,#3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>✦</div>
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>GenWeb<span style={{ color: '#8b5cf6' }}>.ai</span></span>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {[['Pricing', '/pricing'], ['Dashboard', '/dashboard']].map(([label, path]) => (
-            <span key={label} onClick={() => navigate(path)} style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', cursor: 'pointer', padding: '4px 10px', borderRadius: 6, transition: 'color 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
-            >{label}</span>
-          ))}
-        </div>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.18)' }}>© 2026 GenWeb.ai</span>
-      </footer>
+      {/* Landing sections (components/Landing.jsx) */}
+      <Hero userData={userData} navigate={navigate} />
+      <Examples userData={userData} navigate={navigate} />
+      <HowItWorks />
+      <Features />
+      <FinalCta userData={userData} navigate={navigate} />
+      <SiteFooter navigate={navigate} />
 
       <style>{`
         @media (max-width: 640px) {

@@ -174,7 +174,8 @@ export default function Login() {
       }
       const data = await createServerSession('email', user)
       dispatch(setUserData(data.user))
-      navigate('/dashboard')
+      // An idea typed on the landing page continues straight to generation.
+      navigate(sessionStorage.getItem('pendingPrompt') ? '/generate' : '/dashboard')
     } catch (err) {
       setError(authErrorMessage(err))
     } finally {
@@ -200,7 +201,8 @@ export default function Login() {
       const { user } = await signInWithPopup(auth, provider)
       const data = await createServerSession('google', user)
       dispatch(setUserData(data.user))
-      navigate('/dashboard')
+      // An idea typed on the landing page continues straight to generation.
+      navigate(sessionStorage.getItem('pendingPrompt') ? '/generate' : '/dashboard')
     } catch (err) {
       console.error('GOOGLE ERROR =', err)
       setError(authErrorMessage(err))

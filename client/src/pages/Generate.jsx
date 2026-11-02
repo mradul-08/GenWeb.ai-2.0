@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion as Motion, AnimatePresence } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, Wand2, ClipboardList, Rocket, LayoutTemplate, Palette, FileText, Files, Monitor, Code2, Maximize2, Download, ArrowRight, X, Check, Shuffle, AlertTriangle, Loader2, Megaphone, PanelsTopLeft } from 'lucide-react'
+import { Sparkles, Wand2, ClipboardList, Rocket, LayoutTemplate, Palette, FileText, Files, Monitor, Code2, Maximize2, Download, ArrowRight, X, Check, Shuffle, AlertTriangle, Loader2, Megaphone, PanelsTopLeft, ShieldCheck } from 'lucide-react'
 import { setUserData } from '../redux/userSlice'
 import { serverUrl } from '../config'
 import axios from 'axios'
@@ -221,6 +221,7 @@ export default function Generate() {
   const [generatingStep, setGeneratingStep] = useState(0)
   const [generated,      setGenerated]      = useState(false)
   const [generatedCode,  setGeneratedCode]  = useState('')
+  const [quality,        setQuality]        = useState(null)
   const [websiteId,      setWebsiteId]      = useState(null)
   const [previewDoc,     setPreviewDoc]     = useState(null)
   const [error,          setError]          = useState('')
@@ -358,6 +359,7 @@ export default function Generate() {
     if (!prompt.trim() || generating) return
     clearTimeout(redirectTimer.current); setRedirecting(false)
     setGenerating(true); setGenerated(false); setError(''); setGeneratingStep(0); setElapsedMs(0)
+    setQuality(null)
     setTipIndex(Math.floor(Math.random() * TIPS.length)); setShowFullPreview(false)
     setPreviewDoc(null)
     startTimers(getStoredAvg())
@@ -371,6 +373,7 @@ export default function Generate() {
       }, 240000)
       if (!res.ok || !data.success) throw new Error(data.message || 'Generation failed')
       setGeneratedCode(data.code)
+      setQuality(data.quality || null)
       setPlan(null)
       setGeneratingStep(GEN_STEPS.length)
       setPreviewDoc(buildPreviewDoc(data.code))
@@ -622,6 +625,11 @@ export default function Generate() {
                 ))}
               </div>
               {activeTab === 'preview' && <button onClick={() => setShowFullPreview(true)} style={{ ...btn.ghost, fontSize: 13 }}><Maximize2 size={15} /> Full page</button>}
+              {quality && (
+                <div title="Deterministic checks for content, structure, mobile, accessibility and interactions" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 10px', borderRadius: 999, background: quality.overall >= 85 ? 'rgba(104,123,104,0.12)' : quality.overall >= 70 ? 'rgba(190,137,72,0.13)' : 'rgba(199,105,87,0.12)', color: quality.overall >= 85 ? C.green : quality.overall >= 70 ? '#9a6b2f' : C.terracotta, fontSize: 12.5, fontWeight: 700 }}>
+                  <ShieldCheck size={14} /> Quality {quality.overall}/100
+                </div>
+              )}
               <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
                 <button onClick={handleDownload} disabled={exporting} style={{ ...btn.secondary, padding: '8px 14px', fontSize: 13.5 }}><Download size={15} /> {exporting ? 'Preparing…' : 'Download'}</button>
                 <button onClick={openEditor} style={{ ...btn.primary, padding: '8px 16px', fontSize: 13.5, boxShadow: 'none' }}>Open in editor <ArrowRight size={15} /></button>

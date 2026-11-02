@@ -52,6 +52,12 @@ export const TEMPLATES = [
     preset: "corporate-blue",
   },
   {
+    id: "studio", label: "Wellness / local studio / practice",
+    tags: ["wellness studio", "wellness", "therapy", "therapist", "physio", "physiotherapy", "practice", "appointment", "consulting studio", "creative studio", "pilates studio", "mindfulness", "nutrition", "counselling", "counseling"],
+    sections: [["nav", "bar"], ["hero", "split"], ["features", "numbered"], ["highlight", "left"], ["steps", "row"], ["testimonials", "spotlight"], ["faq", "accordion"], ["hours", "table"], ["contact", "card"], ["footer", "minimal"]],
+    preset: "studio-sage", booking: "appointment",
+  },
+  {
     id: "portfolio", label: "Portfolio / personal",
     tags: ["portfolio", "personal", "resume", "cv", "freelancer", "designer", "developer", "photographer", "artist", "writer", "my work", "projects", "myself"],
     sections: [["nav", "center"], ["hero", null], ["about", null], ["gallery", null], ["events", null], ["testimonials", null], ["contact", null], ["footer", null]],
@@ -125,6 +131,7 @@ const countTags = (text, tags) => tags.reduce((n, t) => n + (new RegExp(`(^|[^a-
 // Returns [{ template, score }] best first. Score components (0–1 each):
 // category tags, coverage of planned section kinds, and feature fit.
 export function rankTemplates(text, planKinds = []) {
+  planKinds = Array.isArray(planKinds) ? planKinds : []
   const t = words(text)
   return TEMPLATES.map(tpl => {
     const category = Math.min(1, countTags(t, tpl.tags) / 2)

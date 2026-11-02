@@ -8,6 +8,8 @@ import { normalizePlan } from "./plan.js"
 import { KINDS } from "../library/sections.js"
 import { ICON_NAMES } from "../library/icons.js"
 import { buildBlueprint, assembleSite, serializeBlueprint } from "../library/assemble.js"
+import { scoreQuality } from "./quality.js"
+import { repairQualityIssues } from "./qualityRepair.js"
 
 const CONTENT_MAX_TOKENS = 3500
 // Section kinds whose facts the owner must confirm (shown after generation).
@@ -92,26 +94,39 @@ export async function generateHybrid(request, { deadline, ctx, plan = null, rand
   if (!content) return { parsed: null, reason: last.reason, validation: { passed: false, reasons: [last.reason] }, repairs: [] }
 
   const site = assembleSite(blueprint, content, { plan, requestText: request, multiPage })
-  const checks = site.files.map(f => ({ path: f.path, ...validateDocument(f.content) }))
-  const bad = checks.find(c => !c.valid)
-  if (bad) {
-    // The library's own output is invalid: a bug in our code, never the model's.
-    console.error("[hybrid] assembled document invalid:", bad.path, bad.reasons)
-    return { parsed: null, reason: "assembly_invalid", validation: { passed: false, reasons: bad.reasons }, repairs: [] }
-  }
   const pagesNote = multiPage ? ` across ${site.files.length} pages` : ""
   // The model writes believable examples; facts a visitor would rely on must
   // be checked by the owner before publishing.
   const toVerify = [...new Set(site.sections.map(x => VERIFY[x.kind]).filter(Boolean))]
   const verifyNote = toVerify.length ? ` Before publishing, check the AI-written ${toVerify.join(", ")} and replace any examples with your real ones (Design tab → Content, no credits).` : ""
+  const resolvedPlan = plan || derivePlan(blueprint, site)
+  const initialQuality = scoreQuality(site.files, resolvedPlan)
+  const repairs = []
+  const repairedFiles = site.files.map(file => {
+    const pageQuality = initialQuality?.pages?.find(page => page.path === file.path) || initialQuality
+    const content = repairQualityIssues(file.content, pageQuality)
+    if (content !== file.content) repairs.push({ path: file.path, type: "mechanical_quality_repair" })
+    return { ...file, content }
+  })
+  site.files = repairedFiles
+  site.html = repairedFiles.find(file => file.path === "index.html")?.content || repairedFiles[0]?.content || site.html
+  const checks = site.files.map(f => ({ path: f.path, ...validateDocument(f.content) }))
+  const bad = checks.find(c => !c.valid)
+  if (bad) {
+    // The library's own output is invalid: a bug in our code, never the model's.
+    console.error("[hybrid] assembled document invalid:", bad.path, bad.reasons)
+    return { parsed: null, reason: "assembly_invalid", validation: { passed: false, reasons: bad.reasons }, repairs }
+  }
+  const quality = scoreQuality(site.files, resolvedPlan)
   return {
     parsed: { title: site.title, message: `Built "${site.title}" from the ${blueprint.template} template with ${site.sections.length} sections${pagesNote}.${site.dropped.length ? ` Left out (no content yet): ${site.dropped.join(", ")}.` : ""}${verifyNote}`, code: site.html },
     files: multiPage ? site.files : null,
-    model, validation: { passed: true, reasons: [], warnings: [...new Set(checks.flatMap(c => c.warnings))] }, repairs: [],
+    model, validation: { passed: true, reasons: [], warnings: [...new Set(checks.flatMap(c => c.warnings))] }, repairs,
     // dropped: planned sections the model wrote no usable content for (they
     // are left out rather than filled with invented text; the checklist shows them).
     hybrid: { template: blueprint.template, templateScore: blueprint.templateScore, preset: blueprint.preset.id, sections: site.sections.map(s => ({ id: s.id, kind: s.kind, variant: s.variant })), dropped: site.dropped, pages: site.pages },
-    plan: plan || derivePlan(blueprint, site),
+    plan: resolvedPlan,
+    quality,
     // Everything needed to rebuild the site without AI (design editor).
     build: makeBuild({ blueprint, content, multiPage, request, plan }),
   }

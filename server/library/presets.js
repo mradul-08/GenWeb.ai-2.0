@@ -48,6 +48,11 @@ export const PRESETS = [
     colors: { primary: "#0e7490", secondary: "#67c6d9", accent: "#f97316", bg: "#f5fbfd", surface: "#dff1f6", text: "#0f2a33", muted: "#4a6670" },
     fonts: { heading: "Nunito", body: "Inter" }, radius: "12px", shadow: "0 6px 22px rgba(14,116,144,0.12)", dark: false,
   },
+  {
+    id: "studio-sage", tags: ["studio", "wellness", "therapy", "physio", "practice", "appointment", "calm", "editorial", "sage", "local service", "consulting"],
+    colors: { primary: "#496451", secondary: "#8fa58e", accent: "#c97858", bg: "#f7f4ee", surface: "#eeebe3", text: "#202622", muted: "#657066" },
+    fonts: { heading: "DM Serif Display", body: "DM Sans" }, radius: "14px", shadow: "0 8px 26px rgba(73,100,81,0.12)", dark: false,
+  },
 ]
 
 // Library v2 themes.

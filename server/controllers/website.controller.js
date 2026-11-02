@@ -316,6 +316,8 @@ export const generateWebsite = async (req, res) => {
       kind,
       ...(kind === "static" ? { files } : {}),
       ...(result.hybrid ? { hybrid: result.hybrid } : {}),
+      ...(result.quality ? { quality: result.quality } : {}),
+      ...(result.repairs?.length ? { repairs: result.repairs } : {}),
     })
   } catch (e) {
     if (reservation) await refundCredits(req.user._id, reservation, "generation error")

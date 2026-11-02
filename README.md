@@ -35,6 +35,8 @@ Deploy a project to a shareable public URL served directly by the backend. The d
 - AI website generation from natural-language prompts
 - Prompt enhancement for turning short ideas into detailed briefs
 - Multiple AI provider fallbacks with key rotation and availability tracking
+- Deterministic template quality scoring across content, structure, mobile, accessibility, and interactions
+- Safe automatic repair for mechanical HTML quality issues before a generated site is saved
 - Natural-language website editing with targeted HTML patching
 - Full HTML source viewer and direct editing mode
 - Undo and redo history in the editor

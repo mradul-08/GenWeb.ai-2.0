@@ -45,6 +45,9 @@ function hostile(kind, text = EVIL) {
     contact: { heading: "", intro: "", address: "", phone: "", email: "", hours: "", formTitle: "", submitLabel: "" },
     cta: { heading: "", text: "", button: "", newsletter: false }, footer: { tagline: "", address: "", hours: "", copyright: "" },
     content: { heading: "", intro: "", paragraphs: [""], items: [{ title: "", text: "" }] },
+    hours: { heading: "", items: [{ day: "", time: "" }], note: "" },
+    steps: { heading: "", intro: "", items: [{ title: "", text: "" }] },
+    highlight: { heading: "", text: "", points: [""], button: "", emoji: "" },
   }[kind]
   return deep(shape)
 }
@@ -134,7 +137,7 @@ test("planned sections map to the right library kinds", () => {
     [{ id: "nav", name: "Navigation" }, "nav"], [{ id: "menu", name: "Menu" }, "menu"], [{ id: "events", name: "Live Music" }, "events"],
     [{ id: "reviews", name: "Reviews" }, "testimonials"], [{ id: "book", name: "Book a table" }, "contact"], [{ id: "gallery", name: "Photo Gallery" }, "gallery"],
     [{ id: "our-story", name: "Our Story" }, "about"], [{ id: "services", name: "Services" }, "features"], [{ id: "plans", name: "Plans" }, "pricing"],
-    [{ id: "speakers", name: "Speakers" }, "team"], [{ id: "how", name: "How it works" }, "events"], [{ id: "faq", name: "FAQ" }, "faq"],
+    [{ id: "speakers", name: "Speakers" }, "team"], [{ id: "how", name: "How it works" }, "steps"], [{ id: "faq", name: "FAQ" }, "faq"],
     [{ id: "products", name: "Our Products" }, "menu"], [{ id: "newsletter", name: "Newsletter" }, "cta"], [{ id: "x", name: "Sustainability" }, "content"],
     [{ id: "footer", name: "Footer" }, "footer"], [{ id: "hero", name: "Hero" }, "hero"],
   ]
@@ -204,8 +207,9 @@ test("the content prompt is small and lists only the chosen sections", () => {
 const contentFor = (prompt) => {
   const ids = [...prompt.matchAll(/^- "([^"]+)" \((\w+)/gm)].map(m => [m[1], m[2]])
   const sections = Object.fromEntries(ids.map(([id, kind]) => [id, {
-    heading: `${id} heading`, intro: "Fresh and local.", items: [{ name: "Masala Chai", description: "Spiced tea", price: "₹40", title: "Masala Chai", text: "Spiced tea", quote: "Lovely place", q: "Open Sundays?", a: "Yes, 8am to 10pm.", caption: "Morning brew", emoji: "☕" }],
+    heading: `${id} heading`, intro: "Fresh and local.", items: [{ name: "Masala Chai", description: "Spiced tea", price: "₹40", title: "Masala Chai", text: "Spiced tea", quote: "Lovely place", q: "Open Sundays?", a: "Yes, 8am to 10pm.", caption: "Morning brew", emoji: "☕", day: "Mon – Sun", time: "8 AM – 10 PM" }],
     members: [{ name: "Ravi", role: "Head chef" }], plans: [{ name: "Regular", price: "₹999", features: ["Free chai"] }],
+    text: "Our signature kulhad chai.", points: ["Brewed fresh"],
     paragraphs: ["Since 2019 in Ghaziabad."], subheading: "Chai, snacks and music.", primaryCta: "See menu", address: "RDC, Ghaziabad", phone: "+91 98765 43210",
   }]))
   return JSON.stringify({ title: "Chai Corner Café", brand: "Chai Corner", tagline: "Masala chai since 2019", sections })

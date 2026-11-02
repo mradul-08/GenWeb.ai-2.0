@@ -5,49 +5,81 @@
 import { KINDS } from "./sections.js"
 import { PRESETS } from "./presets.js"
 
-// sections: [kind, preferred variant or null (= random among the kind's variants)]
+// sections: [kind, preferred variant or null (= random among the kind's
+// variants, for variety between sites)]. More specific templates come before
+// the generic "service" one: on equal scores the earlier template wins.
 export const TEMPLATES = [
   {
     id: "restaurant", label: "Restaurant / café",
-    tags: ["restaurant", "cafe", "café", "bakery", "food", "dining", "bistro", "kitchen", "dhaba", "chai", "coffee", "tea", "pizza", "bar", "catering", "sweets", "dessert", "menu", "chef", "cuisine"],
-    sections: [["nav", "bar"], ["hero", null], ["about", "split"], ["menu", null], ["testimonials", null], ["gallery", "grid"], ["contact", "split"], ["footer", "columns"]],
-    preset: "warm-bakery", booking: true,
+    tags: ["restaurant", "cafe", "café", "bakery", "food", "dining", "bistro", "kitchen", "dhaba", "chai", "coffee", "tea", "pizza", "bar", "catering", "sweets", "dessert", "menu", "chef", "cuisine", "biryani", "thali", "cloud kitchen"],
+    sections: [["nav", "bar"], ["hero", null], ["about", null], ["menu", null], ["highlight", null], ["testimonials", null], ["gallery", null], ["hours", null], ["contact", null], ["footer", null]],
+    preset: "warm-bakery", booking: "table",
+  },
+  {
+    id: "salon", label: "Salon / spa / beauty",
+    tags: ["salon", "spa", "beauty", "parlour", "parlor", "makeup", "bridal", "nails", "nail art", "hair", "skincare", "barber", "grooming", "mehndi", "facial"],
+    sections: [["nav", "bar"], ["hero", null], ["about", null], ["menu", null], ["highlight", null], ["gallery", null], ["team", null], ["testimonials", null], ["hours", null], ["contact", null], ["footer", null]],
+    preset: "rose-blush", booking: "appointment",
+  },
+  {
+    id: "fitness", label: "Gym / fitness / yoga / dance",
+    tags: ["gym", "fitness", "yoga", "crossfit", "trainer", "workout", "pilates", "martial arts", "karate", "dance", "zumba", "boxing", "sports academy", "athlete"],
+    sections: [["nav", "bar"], ["hero", null], ["features", null], ["steps", null], ["stats", null], ["pricing", null], ["team", null], ["testimonials", null], ["hours", null], ["contact", null], ["footer", null]],
+    preset: "slate-pro", booking: "appointment",
+  },
+  {
+    id: "education", label: "Coaching / school / courses",
+    tags: ["school", "coaching", "tuition", "academy", "course", "courses", "classes", "institute", "tutor", "training", "learning", "ielts", "jee", "neet", "upsc", "kindergarten", "preschool", "university"],
+    sections: [["nav", "bar"], ["hero", null], ["menu", null], ["events", null], ["team", null], ["stats", null], ["testimonials", null], ["faq", "accordion"], ["contact", null], ["footer", null]],
+    preset: "ocean-calm",
+  },
+  {
+    id: "realestate", label: "Real estate / property",
+    tags: ["real estate", "property", "properties", "flats", "apartments", "villa", "plots", "builder", "realtor", "homes", "rent", "broker", "interior", "architect"],
+    sections: [["nav", "bar"], ["hero", null], ["menu", null], ["highlight", null], ["features", null], ["stats", null], ["testimonials", null], ["contact", null], ["footer", null]],
+    preset: "corporate-blue", booking: "appointment",
+  },
+  {
+    id: "nonprofit", label: "NGO / charity / community",
+    tags: ["ngo", "nonprofit", "non-profit", "charity", "foundation", "trust", "volunteer", "donate", "donation", "cause", "welfare", "community", "animal rescue"],
+    sections: [["nav", "bar"], ["hero", null], ["about", null], ["stats", null], ["steps", null], ["events", null], ["team", null], ["cta", null], ["contact", null], ["footer", null]],
+    preset: "fresh-green",
   },
   {
     id: "business", label: "Business / agency / services",
-    tags: ["business", "company", "agency", "consulting", "consultant", "services", "firm", "studio", "marketing", "law", "lawyer", "finance", "accounting", "construction", "real estate", "startup", "b2b", "solutions"],
-    sections: [["nav", "bar"], ["hero", null], ["features", null], ["about", null], ["stats", "band"], ["testimonials", null], ["cta", "banner"], ["contact", null], ["footer", null]],
+    tags: ["business", "company", "agency", "consulting", "consultant", "services", "firm", "studio", "marketing", "law", "lawyer", "finance", "accounting", "construction", "startup", "b2b", "solutions", "ca firm"],
+    sections: [["nav", "bar"], ["hero", null], ["features", null], ["steps", null], ["about", null], ["stats", null], ["testimonials", null], ["cta", null], ["contact", null], ["footer", null]],
     preset: "corporate-blue",
   },
   {
     id: "portfolio", label: "Portfolio / personal",
     tags: ["portfolio", "personal", "resume", "cv", "freelancer", "designer", "developer", "photographer", "artist", "writer", "my work", "projects", "myself"],
-    sections: [["nav", "center"], ["hero", "bold"], ["about", "split"], ["gallery", "grid"], ["events", "timeline"], ["testimonials", null], ["contact", "stacked"], ["footer", "simple"]],
+    sections: [["nav", "center"], ["hero", null], ["about", null], ["gallery", null], ["events", null], ["testimonials", null], ["contact", null], ["footer", null]],
     preset: "minimal-mono",
   },
   {
     id: "saas", label: "SaaS / app / product",
     tags: ["saas", "app", "software", "platform", "tool", "product", "ai", "dashboard", "api", "subscription", "tech", "launch", "beta", "users"],
-    sections: [["nav", "bar"], ["hero", "centered"], ["features", "cards"], ["stats", "band"], ["pricing", "cards"], ["testimonials", null], ["faq", "accordion"], ["cta", null], ["footer", null]],
+    sections: [["nav", "bar"], ["hero", null], ["features", null], ["steps", null], ["stats", null], ["pricing", null], ["testimonials", null], ["faq", "accordion"], ["cta", null], ["footer", null]],
     preset: "midnight-tech",
   },
   {
     id: "shop", label: "Shop / products",
     tags: ["shop", "store", "ecommerce", "e-commerce", "boutique", "products", "buy", "sell", "jewellery", "jewelry", "clothing", "fashion", "handmade", "crafts", "online store", "catalog", "collection"],
-    sections: [["nav", "bar"], ["hero", "split"], ["menu", "cards"], ["features", "list"], ["testimonials", null], ["faq", "accordion"], ["contact", null], ["footer", "columns"]],
-    preset: "sunset-bold", filter: true,
+    sections: [["nav", "bar"], ["hero", null], ["menu", null], ["highlight", null], ["features", null], ["testimonials", null], ["faq", "accordion"], ["contact", null], ["footer", null]],
+    preset: "citrus-fresh", filter: true,
   },
   {
     id: "event", label: "Event / conference / wedding",
     tags: ["event", "conference", "festival", "concert", "wedding", "meetup", "summit", "workshop", "party", "fest", "tickets", "speakers", "schedule"],
-    sections: [["nav", "bar"], ["hero", "bold"], ["about", "centered"], ["events", "timeline"], ["team", "grid"], ["pricing", "cards"], ["faq", "accordion"], ["contact", null], ["footer", "simple"]],
+    sections: [["nav", "bar"], ["hero", null], ["about", null], ["events", null], ["team", null], ["pricing", null], ["faq", "accordion"], ["contact", null], ["footer", null]],
     preset: "sunset-bold",
   },
   {
-    id: "service", label: "Clinic / school / gym / local service",
-    tags: ["clinic", "doctor", "dental", "hospital", "school", "coaching", "tuition", "academy", "course", "gym", "fitness", "yoga", "salon", "spa", "repair", "plumber", "travel", "hotel", "homestay", "ngo"],
-    sections: [["nav", "bar"], ["hero", "split"], ["features", null], ["about", null], ["team", "grid"], ["testimonials", null], ["faq", "accordion"], ["contact", null], ["footer", "columns"]],
-    preset: "ocean-calm", booking: true,
+    id: "service", label: "Clinic / local service",
+    tags: ["clinic", "doctor", "dental", "dentist", "hospital", "physio", "repair", "plumber", "electrician", "travel", "hotel", "homestay", "laundry", "cleaning", "pest control", "pet", "vet", "car service", "tailor"],
+    sections: [["nav", "bar"], ["hero", null], ["features", null], ["about", null], ["steps", null], ["team", null], ["testimonials", null], ["hours", null], ["faq", "accordion"], ["contact", null], ["footer", null]],
+    preset: "ocean-calm", booking: "appointment",
   },
 ]
 
@@ -61,13 +93,16 @@ const KIND_RULES = [
   ["faq",          /\bfaqs?\b|questions/],
   ["pricing",      /pricing|\bprices\b|\bplans?\b|packages?|membership|\btickets?\b|\brates\b|tariff/],
   ["testimonials", /testimonials?|reviews?|clients say|feedback|what (our|people) say/],
+  ["highlight",    /^(highlight|spotlight|featured)(-|$)|\bspotlight\b|featured (project|product|dish|item|property)|chef'?s special|signature (dish|service)/],
   ["team",         /\bteam\b|\bstaff\b|our people|\bchefs?\b|instructors?|doctors?|founders?|speakers?|trainers?|teachers?|artists? lineup/],
   ["stats",        /\bstats?\b|statistics|numbers|achievements|impact|metrics|milestones/],
   ["gallery",      /gallery|photos?|portfolio|our work|\bprojects?\b|showcase|lookbook/],
+  ["hours",        /opening hours|\bhours\b|timings|open(ing)? times|business hours/],
   ["contact",      /contact|booking|\bbook\b|reserv|appointment|enquir|inquir|get in touch|location|visit us|find us|order form/],
-  ["cta",          /\bcta\b|call to action|newsletter|subscribe|join us|sign ?up|download/],
-  ["events",       /events?|schedule|timeline|program(me)?|agenda|live music|itinerary|history|journey|experience|process|how it works|steps|classes|courses?|batches/],
-  ["menu",         /\bmenu\b|dishes|\bfood\b|drinks|beverages|products?|\bshop\b|catalog(ue)?|collection|\bstore\b|\bitems\b|treatments|rooms/],
+  ["cta",          /\bcta\b|call to action|newsletter|subscribe|join us|sign ?up|download|get involved/],
+  ["steps",        /how it works|process|\bsteps\b|getting started|our approach|how to (join|order|book|help|start)|how you can help/],
+  ["events",       /events?|schedule|timeline|program(me)?s?\b|agenda|live music|itinerary|history|journey|experience|classes|batches/],
+  ["menu",         /\bmenu\b|dishes|\bfood\b|drinks|beverages|products?|\bshop\b|catalog(ue)?|collection|\bstore\b|\bitems\b|treatments|rooms|courses?|listings?|price list|rate card/],
   ["about",        /about|our story|\bstory\b|who we are|mission|vision|values|philosophy/],
   ["features",     /features?|services?|benefits|why (us|choose)|what we (do|offer)|offerings?|solutions|amenities|specialit|facilities|highlights/],
 ]

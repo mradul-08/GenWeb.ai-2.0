@@ -16,10 +16,12 @@ const str = (v, max, fallback = "") => {
   return t || fallback
 }
 const list = (v, max) => (Array.isArray(v) ? v.filter(x => x !== null && x !== undefined).slice(0, max) : [])
-// One emoji / short symbol only (icons are text, never markup).
+// One emoji / short symbol only (icons are text, never markup). Joined
+// emoji such as "👨‍🍳" are several code points, so up to 8 are allowed, but
+// no letters, digits or markup characters.
 const icon = (v, fallback) => {
-  const s = str(v, 8)
-  return s && !/[<>&"']/.test(s) && [...s].length <= 3 ? s : fallback
+  const s = str(v, 16)
+  return s && !/[<>&"'A-Za-z0-9]/.test(s) && [...s].length <= 8 ? s : fallback
 }
 const num = (v) => {
   const n = typeof v === "number" ? v : parseFloat(String(v ?? "").replace(/[^0-9.]/g, ""))
@@ -357,7 +359,11 @@ function contactInfo(c) {
   return [["📍", c.address], ["📞", c.phone], ["✉️", c.email], ["🕒", c.hours]].filter(([, v]) => v).map(([i, v]) => `<li><span aria-hidden="true">${i}</span>${esc(v)}</li>`).join("")
 }
 function contactForm(c, ctx, cls = "") {
-  const booking = ctx.booking ? `<div class="gw-form-row"><label>Date<input type="date" name="date" required></label><label>Guests<input type="number" name="guests" min="1" max="50" value="2" required></label></div>` : ""
+  // booking "table" (restaurants): date + guests; any other booking: date + time.
+  const booking = !ctx.booking ? ""
+    : ctx.booking === "appointment"
+      ? `<div class="gw-form-row"><label>Date<input type="date" name="date" required></label><label>Time<input type="time" name="time" required></label></div>`
+      : `<div class="gw-form-row"><label>Date<input type="date" name="date" required></label><label>Guests<input type="number" name="guests" min="1" max="50" value="2" required></label></div>`
   return `<form class="gw-form gw-card ${cls}" novalidate><h3>${esc(c.formTitle)}</h3><label>Name<input type="text" name="name" autocomplete="name" required></label><label>Phone or email<input type="text" name="contact" autocomplete="email" required></label>${booking}<label>Message<textarea name="message" rows="4"${ctx.booking ? "" : " required"}></textarea></label><button class="gw-btn" type="submit">${esc(c.submitLabel)}</button><p class="gw-form-status" role="status" aria-live="polite"></p></form>`
 }
 const CONTACT_CSS = `.gw-contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}.gw-contact-info{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:14px}.gw-contact-info li{display:flex;gap:12px}.gw-form{display:grid;gap:14px}.gw-form h3{margin:0 0 4px}.gw-form label{display:grid;gap:6px;font-weight:600;font-size:.92rem}.gw-form input,.gw-form textarea{padding:12px 14px;border-radius:calc(var(--radius)*.7);border:1px solid color-mix(in srgb,var(--text) 18%,transparent);background:var(--bg);color:var(--text);font:inherit}.gw-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gw-form-status{margin:0;min-height:1.2em;font-weight:600;color:var(--primary)}.gw-form .is-invalid{border-color:#d63f3f}@media(max-width:768px){.gw-contact-grid{grid-template-columns:1fr}}`
@@ -371,3 +377,155 @@ function newsletterRender(c, ctx) {
 }
 const CTA_CSS = `.gw-cta-box{text-align:center;padding:56px 32px;border-radius:calc(var(--radius)*2);background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 60%,var(--accent)));color:var(--on-primary)}.gw-cta-box .gw-h2{color:var(--on-primary)}.gw-cta-box p{max-width:560px;margin:0 auto 22px;opacity:.92}.gw-cta-box .gw-btn{background:var(--on-primary);color:var(--primary)}`
 const FOOTER_CSS = `.gw-footer{padding:56px 0 32px;background:var(--footer-bg);color:var(--footer-text);border-top:1px solid color-mix(in srgb,var(--footer-text) 12%,transparent)}.gw-footer p,.gw-footer a{color:var(--footer-text);opacity:.85}.gw-footer a{text-decoration:none}.gw-footer a:hover{opacity:1;text-decoration:underline}.gw-footer strong,.gw-footer h3{font-family:var(--font-heading);font-size:1.25rem;color:var(--footer-text)}.gw-footer small{opacity:.75}`
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Library v2: more designs for existing kinds and three new kinds (opening
+// hours, steps, highlight). Same rules: content is escaped, styling uses only
+// the theme tokens, lists are never padded with invented entries.
+// ══════════════════════════════════════════════════════════════════════════════
+const pad2 = (n) => String(n).padStart(2, "0")
+const TILE_CSS = `.gw-tile{margin:0;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:54px;color:var(--on-primary);box-shadow:var(--shadow);transition:transform .25s}.gw-tile:hover{transform:scale(1.03)}.gw-tile figcaption{font-size:.95rem;font-weight:600}.gw-tile-0{background:linear-gradient(135deg,var(--primary),var(--secondary))}.gw-tile-1{background:linear-gradient(135deg,var(--accent),var(--primary))}.gw-tile-2{background:linear-gradient(135deg,var(--secondary),var(--accent))}.gw-tile-3{background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 70%,#000),var(--primary))}`
+
+Object.assign(KINDS.hero.variants, {
+  minimal: (c, ctx) => ({
+    html: `<section id="${esc(ctx.id)}" class="gw-hero gw-hero-minimal"><div class="gw-wrap">${heroText(c, ctx)}</div></section>`,
+    css: `.gw-hero-minimal{padding:128px 0 88px;border-bottom:1px solid color-mix(in srgb,var(--text) 10%,transparent)}.gw-hero-minimal h1{font-size:clamp(2.6rem,6.5vw,4.8rem);max-width:16ch}.gw-hero-minimal .gw-hero-sub{max-width:560px}`,
+  }),
+  panel: (c, ctx) => ({
+    html: `<section id="${esc(ctx.id)}" class="gw-hero gw-hero-panel"><div class="gw-wrap"><div class="gw-panel"><div class="gw-panel-emoji" aria-hidden="true">${esc(c.emoji)}</div>${heroText(c, ctx)}</div></div></section>`,
+    css: `.gw-hero-panel{padding:96px 0;background:radial-gradient(color-mix(in srgb,var(--primary) 22%,transparent) 1.2px,transparent 1.3px) 0 0/22px 22px,var(--bg)}.gw-panel{max-width:780px;margin:0 auto;text-align:center;background:var(--bg);border:1px solid color-mix(in srgb,var(--text) 10%,transparent);border-radius:calc(var(--radius)*2);padding:56px 40px;box-shadow:var(--shadow)}.gw-panel-emoji{font-size:56px;margin-bottom:10px}.gw-hero-panel .gw-hero-actions{justify-content:center}.gw-hero-panel .gw-hero-sub{margin-inline:auto}@media(max-width:768px){.gw-panel{padding:40px 22px}}`,
+  }),
+})
+
+KINDS.features.variants.numbered = (c, ctx) => ({
+  html: section(ctx, "gw-features", `${h2(c)}<ol class="gw-numbered">${c.items.map((i, n) => `<li class="gw-card gw-reveal"><span class="gw-num" aria-hidden="true">${pad2(n + 1)}</span><h3>${esc(i.title)}</h3><p>${esc(i.text)}</p></li>`).join("")}</ol>`),
+  css: `.gw-numbered{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px}.gw-num{display:block;font-family:var(--font-heading);font-size:2.6rem;font-weight:800;line-height:1;color:var(--primary);opacity:.85;margin-bottom:14px}`,
+})
+
+KINDS.about.variants.quote = (c, ctx) => ({
+  html: section(ctx, "gw-about", `<div class="gw-about-quote"><p class="gw-eyebrow">${esc(c.heading)}</p><blockquote>${esc(c.paragraphs[0])}</blockquote>${c.paragraphs.slice(1).map(p => `<p class="gw-lead">${esc(p)}</p>`).join("")}${highlights(c)}</div>`),
+  css: `.gw-about-quote{max-width:860px;margin:0 auto;text-align:center}.gw-about-quote blockquote{margin:0 0 24px;font-family:var(--font-heading);font-size:clamp(1.5rem,3.2vw,2.3rem);line-height:1.35;color:var(--text)}.gw-about-quote blockquote::before{content:"“";display:block;font-size:4rem;line-height:.6;color:var(--primary)}.gw-about-quote .gw-lead{margin-inline:auto}.gw-about-quote .gw-highlights{justify-content:center}` + HIGHLIGHT_CSS,
+})
+
+KINDS.menu.variants.compact = (c, ctx) => ({
+  html: section(ctx, "gw-menu", `${h2(c)}${filterBox(ctx)}<ul class="gw-compact">${c.items.map(i => `<li class="gw-filter-item"><div><strong>${esc(i.name)}</strong>${i.tag ? ` <span class="gw-tag">${esc(i.tag)}</span>` : ""}${i.description ? `<span class="gw-compact-desc">${esc(i.description)}</span>` : ""}</div>${i.price ? `<span class="gw-price">${esc(i.price)}</span>` : ""}</li>`).join("")}</ul>${c.note ? `<p class="gw-note">${esc(c.note)}</p>` : ""}`),
+  css: `.gw-compact{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 48px}.gw-compact li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-bottom:1px solid color-mix(in srgb,var(--text) 10%,transparent)}.gw-compact-desc{display:block;font-size:.9rem;color:var(--muted);margin-top:2px}` + MENU_CSS,
+})
+
+KINDS.pricing.variants.compact = (c, ctx) => ({
+  html: section(ctx, "gw-pricing gw-alt", `${h2(c)}<div class="gw-price-rows">${c.plans.map(p => `<article class="gw-price-row${p.highlighted ? " is-hot" : ""}"><div><h3>${esc(p.name)}</h3>${p.features.length ? `<p>${p.features.map(esc).join(" · ")}</p>` : ""}</div><strong class="gw-row-price">${esc(p.price)}<span>${esc(p.period)}</span></strong><a class="gw-btn${p.highlighted ? "" : " gw-btn-ghost"}" href="${esc(ctx.link(ctx.contactId || ctx.id))}">${esc(p.cta)}</a></article>`).join("")}</div>`),
+  css: `.gw-price-rows{display:grid;gap:14px}.gw-price-row{display:grid;grid-template-columns:1fr auto auto;gap:24px;align-items:center;padding:22px 26px;border-radius:var(--radius);background:var(--bg);border:1px solid color-mix(in srgb,var(--text) 10%,transparent)}.gw-price-row.is-hot{border:2px solid var(--primary);box-shadow:var(--shadow)}.gw-price-row h3{margin:0 0 4px}.gw-price-row p{margin:0;color:var(--muted);font-size:.92rem}.gw-row-price{font-family:var(--font-heading);font-size:1.8rem;white-space:nowrap}.gw-row-price span{font-size:.9rem;font-weight:500;opacity:.75}@media(max-width:768px){.gw-price-row{grid-template-columns:1fr;gap:12px}}`,
+})
+
+KINDS.testimonials.variants.spotlight = (c, ctx) => {
+  const [first, ...rest] = c.items
+  return {
+    html: section(ctx, "gw-testimonials", `<h2 class="gw-h2">${esc(c.heading)}</h2><figure class="gw-spotlight"><blockquote>“${esc(first.quote)}”</blockquote><figcaption><strong>${esc(first.name)}</strong>${first.role ? ` · ${esc(first.role)}` : ""}</figcaption></figure>${rest.length ? `<div class="gw-grid">${rest.map(i => quoteCard(i)).join("")}</div>` : ""}`),
+    css: QUOTE_CSS + `.gw-spotlight{margin:0 auto 40px;max-width:820px;text-align:center}.gw-spotlight blockquote{margin:0 0 16px;font-family:var(--font-heading);font-size:clamp(1.4rem,3vw,2.1rem);line-height:1.4}.gw-spotlight figcaption{color:var(--muted)}.gw-spotlight figcaption strong{color:var(--primary)}`,
+  }
+}
+
+KINDS.gallery.variants.masonry = (c, ctx) => ({
+  html: section(ctx, "gw-gallery gw-alt", `${h2(c)}<div class="gw-masonry">${c.items.map((i, n) => `<figure class="gw-tile gw-tile-${n % 4} gw-h-${n % 3}"><span aria-hidden="true">${esc(i.emoji)}</span><figcaption>${esc(i.caption)}</figcaption></figure>`).join("")}</div>`),
+  css: TILE_CSS + `.gw-masonry{columns:3 220px;column-gap:16px}.gw-masonry .gw-tile{break-inside:avoid;margin:0 0 16px}.gw-h-0{height:200px}.gw-h-1{height:290px}.gw-h-2{height:240px}`,
+})
+
+KINDS.team.variants.list = (c, ctx) => ({
+  html: section(ctx, "gw-team gw-alt", `${h2(c)}<div class="gw-team-list">${c.members.map(m => `<article class="gw-member-row gw-reveal"><div class="gw-avatar-sm" aria-hidden="true">${esc(m.emoji)}</div><div><h3>${esc(m.name)}</h3>${m.role ? `<p class="gw-role">${esc(m.role)}</p>` : ""}${m.bio ? `<p>${esc(m.bio)}</p>` : ""}</div></article>`).join("")}</div>`),
+  css: `.gw-team-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}.gw-member-row{display:flex;gap:16px;align-items:flex-start;padding:20px;border-radius:var(--radius);background:var(--bg)}.gw-avatar-sm{flex-shrink:0;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:30px;background:var(--surface)}.gw-member-row h3{margin:0 0 2px}.gw-member-row p{margin:0;color:var(--muted)}.gw-member-row .gw-role{color:var(--primary);font-weight:700;margin-bottom:6px}`,
+})
+
+KINDS.stats.variants.cards = (c, ctx) => ({
+  html: section(ctx, "gw-stats-cards", `${c.heading ? `<h2 class="gw-h2">${esc(c.heading)}</h2>` : ""}<div class="gw-grid">${c.items.map(i => `<div class="gw-card gw-stat-card"><strong><span data-count="${esc(i.value)}">${esc(i.value)}</span>${esc(i.suffix)}</strong><span>${esc(i.label)}</span></div>`).join("")}</div>`),
+  css: `.gw-stat-card{text-align:center;border-top:4px solid var(--primary)}.gw-stat-card strong{display:block;font-family:var(--font-heading);font-size:clamp(2.2rem,5vw,3rem);color:var(--primary)}.gw-stat-card>span{color:var(--muted)}`,
+  scripts: ["counter"],
+})
+
+KINDS.faq.variants.columns = (c, ctx) => ({
+  html: section(ctx, "gw-faq gw-alt", `<h2 class="gw-h2">${esc(c.heading)}</h2><dl class="gw-faq-cols">${c.items.map(i => `<div class="gw-faq-card"><dt>${esc(i.q)}</dt><dd>${esc(i.a)}</dd></div>`).join("")}</dl>`),
+  css: `.gw-faq-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin:0}.gw-faq-card{padding:22px;border-radius:var(--radius);background:var(--bg)}.gw-faq-card dt{font-weight:700;margin-bottom:8px}.gw-faq-card dd{margin:0;color:var(--muted)}`,
+})
+
+KINDS.events.variants.cards = (c, ctx) => ({
+  html: section(ctx, "gw-events", `${h2(c)}<div class="gw-grid">${c.items.map(i => `<article class="gw-card gw-event-card gw-reveal">${i.date ? `<span class="gw-date-badge">${esc(i.date)}</span>` : ""}<h3>${esc(i.title)}</h3>${i.text ? `<p>${esc(i.text)}</p>` : ""}</article>`).join("")}</div>`),
+  css: `.gw-date-badge{display:inline-block;margin-bottom:12px;padding:5px 12px;border-radius:99px;background:var(--primary);color:var(--on-primary);font-size:.8rem;font-weight:700;letter-spacing:.03em}`,
+})
+
+KINDS.contact.variants.card = (c, ctx) => ({
+  html: section(ctx, "gw-contact gw-alt", `<div class="gw-contact-card"><div class="gw-narrow">${h2(c)}</div><ul class="gw-contact-info gw-contact-chips">${contactInfo(c)}</ul>${contactForm(c, ctx, "gw-form-center")}</div>`),
+  css: CONTACT_CSS + `.gw-narrow{max-width:760px;margin:0 auto;text-align:center}.gw-contact-card{max-width:760px;margin:0 auto}.gw-contact-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:0 0 28px}.gw-contact-chips li{padding:8px 14px;border-radius:99px;background:var(--bg);font-size:.92rem}.gw-form-center{max-width:560px;margin:0 auto}`,
+  scripts: ["forms"],
+})
+
+KINDS.cta.variants.split = (c, ctx) => c.newsletter ? newsletterRender(c, ctx) : ({
+  html: section(ctx, "gw-cta", `<div class="gw-cta-split"><div><h2 class="gw-h2">${esc(c.heading)}</h2><p>${esc(c.text)}</p></div><a class="gw-btn" href="${esc(ctx.link(ctx.contactId || "top"))}">${esc(c.button)}</a></div>`),
+  css: `.gw-cta-split{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:40px 44px;border-radius:calc(var(--radius)*1.5);background:var(--surface);border-left:6px solid var(--primary)}.gw-cta-split .gw-h2{margin-bottom:6px}.gw-cta-split p{margin:0;color:var(--muted)}@media(max-width:768px){.gw-cta-split{flex-direction:column;align-items:flex-start;padding:30px 24px}}`,
+})
+
+KINDS.footer.variants.minimal = (c, ctx) => ({
+  html: `<footer id="${esc(ctx.id)}" class="gw-footer gw-footer-min"><div class="gw-wrap gw-footer-row"><strong>${esc(c.brand)}</strong><nav aria-label="Footer">${ctx.navLinks.map(l => `<a href="${esc(l.href)}">${esc(l.label)}</a>`).join("")}</nav><small>${esc(c.copyright)}</small></div></footer>`,
+  css: FOOTER_CSS + `.gw-footer-min{padding:28px 0}.gw-footer-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px}.gw-footer-row nav{display:flex;flex-wrap:wrap;gap:6px 18px}`,
+})
+
+// ── New kinds ─────────────────────────────────────────────────────────────────
+KINDS.hours = {
+  schema: `{"heading":"e.g. Opening hours","items":[{"day":"e.g. Mon – Fri","time":"e.g. 8 AM – 10 PM or Closed"}] (2-7 rows),"note":"optional, e.g. holiday timings"}`,
+  normalize: (c, ctx) => ({
+    heading: heading(c, ctx), note: str(c?.note, 160),
+    items: fill(list(c?.items, 7).map(i => ({ day: str(i?.day, 30), time: str(i?.time, 40) })).filter(i => i.day && i.time)),
+  }),
+  variants: {
+    table: (c, ctx) => ({
+      html: section(ctx, "gw-hours", `<div class="gw-hours-box"><h2 class="gw-h2">${esc(c.heading)}</h2><table class="gw-hours-table"><tbody>${c.items.map(i => `<tr><th scope="row">${esc(i.day)}</th><td>${esc(i.time)}</td></tr>`).join("")}</tbody></table>${c.note ? `<p class="gw-hours-note">${esc(c.note)}</p>` : ""}</div>`),
+      css: `.gw-hours-box{max-width:560px;margin:0 auto;text-align:center}.gw-hours-table{width:100%;border-collapse:collapse;text-align:left}.gw-hours-table th,.gw-hours-table td{padding:14px 6px;border-bottom:1px dashed color-mix(in srgb,var(--text) 18%,transparent)}.gw-hours-table th{font-weight:700}.gw-hours-table td{text-align:right;color:var(--muted)}.gw-hours-note{margin:20px 0 0;font-size:.9rem;color:var(--muted)}`,
+    }),
+    band: (c, ctx) => ({
+      html: section(ctx, "gw-hours gw-hours-band", `<h2 class="gw-h2">${esc(c.heading)}</h2><div class="gw-hours-grid">${c.items.map(i => `<div><span>${esc(i.day)}</span><strong>${esc(i.time)}</strong></div>`).join("")}</div>${c.note ? `<p class="gw-hours-note">${esc(c.note)}</p>` : ""}`),
+      css: `.gw-hours-band{background:var(--primary);color:var(--on-primary);text-align:center}.gw-hours-band .gw-h2{color:var(--on-primary)}.gw-hours-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:16px}.gw-hours-grid div{min-width:150px;padding:16px 20px;border-radius:var(--radius);background:color-mix(in srgb,var(--on-primary) 12%,transparent)}.gw-hours-grid span{display:block;font-size:.9rem;opacity:.85}.gw-hours-grid strong{font-size:1.1rem}.gw-hours-band .gw-hours-note{margin:20px 0 0;opacity:.85}`,
+    }),
+  },
+}
+
+KINDS.steps = {
+  schema: `{"heading":"e.g. How it works","intro":"one sentence","items":[{"title":"2-4 words","text":"one sentence"}] (3-5 steps, in order)}`,
+  normalize: (c, ctx) => ({
+    heading: heading(c, ctx), intro: intro(c, ctx),
+    items: fill(list(c?.items, 6).map(i => ({ title: str(i?.title, 60), text: str(i?.text, 220) })).filter(i => i.title)),
+  }),
+  variants: {
+    row: (c, ctx) => ({
+      html: section(ctx, "gw-steps", `${h2(c)}<ol class="gw-steps-row">${c.items.map((i, n) => `<li class="gw-reveal"><span class="gw-step-dot" aria-hidden="true">${n + 1}</span><h3>${esc(i.title)}</h3>${i.text ? `<p>${esc(i.text)}</p>` : ""}</li>`).join("")}</ol>`),
+      css: `.gw-steps-row{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px}.gw-steps-row li{text-align:center}.gw-steps-row .gw-step-dot{width:56px;height:56px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-heading);font-weight:800;font-size:1.3rem;background:var(--primary);color:var(--on-primary);box-shadow:0 0 0 8px color-mix(in srgb,var(--primary) 16%,transparent)}.gw-steps-row p{color:var(--muted);margin:0}`,
+    }),
+    stack: (c, ctx) => ({
+      html: section(ctx, "gw-steps gw-alt", `<div class="gw-steps-narrow">${h2(c)}<ol class="gw-steps-stack">${c.items.map((i, n) => `<li class="gw-reveal"><span class="gw-step-num" aria-hidden="true">${pad2(n + 1)}</span><div><h3>${esc(i.title)}</h3>${i.text ? `<p>${esc(i.text)}</p>` : ""}</div></li>`).join("")}</ol></div>`),
+      css: `.gw-steps-narrow{max-width:800px;margin:0 auto}.gw-steps-stack{list-style:none;margin:0;padding:0;display:grid;gap:14px}.gw-steps-stack li{display:flex;gap:18px;align-items:flex-start;padding:20px 22px;border-radius:var(--radius);background:var(--bg)}.gw-step-num{flex-shrink:0;font-family:var(--font-heading);font-weight:800;font-size:1.5rem;color:var(--primary)}.gw-steps-stack h3{margin:0 0 4px}.gw-steps-stack p{margin:0;color:var(--muted)}`,
+    }),
+  },
+}
+
+KINDS.highlight = {
+  schema: `{"heading":"…","text":"2-3 sentences","points":["3-4 short points"],"button":"button text or empty","emoji":"one emoji"}`,
+  normalize: (c, ctx) => ({
+    heading: heading(c, ctx), text: str(c?.text, 500, ctx.purpose), emoji: icon(c?.emoji, "⭐"), button: str(c?.button, 28),
+    points: (Array.isArray(c?.points) ? c.points : []).map(p => str(p, 120)).filter(Boolean).slice(0, 5),
+  }),
+  variants: {
+    left: (c, ctx) => highlightRender(c, ctx, false),
+    right: (c, ctx) => highlightRender(c, ctx, true),
+  },
+}
+function highlightRender(c, ctx, flip) {
+  return {
+    html: section(ctx, "gw-highlight", `<div class="gw-hl${flip ? " gw-hl-flip" : ""}"><div class="gw-hl-art" aria-hidden="true">${esc(c.emoji)}</div><div><h2 class="gw-h2">${esc(c.heading)}</h2>${c.text ? `<p class="gw-lead">${esc(c.text)}</p>` : ""}${c.points.length ? `<ul class="gw-hl-points">${c.points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}${c.button ? `<a class="gw-btn" href="${esc(ctx.link(ctx.contactId || "top"))}">${esc(c.button)}</a>` : ""}</div></div>`),
+    css: `.gw-hl{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center}.gw-hl-flip .gw-hl-art{order:2}.gw-hl-art{aspect-ratio:1;border-radius:calc(var(--radius)*2);display:grid;place-items:center;font-size:clamp(80px,13vw,150px);background:conic-gradient(from 210deg,var(--primary),var(--secondary),var(--accent),var(--primary));box-shadow:var(--shadow)}.gw-hl .gw-lead{margin-bottom:20px}.gw-hl-points{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:10px}.gw-hl-points li{padding-left:32px;position:relative}.gw-hl-points li::before{content:"✓";position:absolute;left:0;top:2px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:800;background:var(--primary);color:var(--on-primary)}@media(max-width:768px){.gw-hl{grid-template-columns:1fr}.gw-hl-flip .gw-hl-art{order:0}.gw-hl-art{max-width:260px;margin:0 auto}}`,
+  }
+}
+
+LIST_KEY.hours = "items"
+LIST_KEY.steps = "items"
+Object.assign(KIND_UI, {
+  hours:     { label: "Opening hours", fields: [t("heading", "Heading", 90), items("items", "Rows", 7, [t("day", "Day(s)", 30), t("time", "Time", 40)]), t("note", "Note", 160)] },
+  steps:     { label: "Steps / how it works", fields: [t("heading", "Heading", 90), ta("intro", "Intro", 260), items("items", "Steps", 6, [t("title", "Title", 60), ta("text", "Text", 220)])] },
+  highlight: { label: "Highlight", fields: [t("heading", "Heading", 90), ta("text", "Text", 500), { key: "points", label: "Points", type: "strings", maxItems: 5, max: 120 }, t("button", "Button (optional)", 28), em("emoji")] },
+})

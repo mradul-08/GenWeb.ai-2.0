@@ -50,4 +50,23 @@ export const PRESETS = [
   },
 ]
 
+// Library v2 themes.
+PRESETS.push(
+  {
+    id: "rose-blush", tags: ["salon", "spa", "beauty", "bridal", "makeup", "wedding", "feminine", "soft", "pink", "rose", "boutique", "skincare"],
+    colors: { primary: "#a3324f", secondary: "#e8a3b5", accent: "#7c6a4f", bg: "#fff8f9", surface: "#fbe6eb", text: "#2e1a20", muted: "#6b4f57" },
+    fonts: { heading: "Cormorant Garamond", body: "Poppins" }, radius: "20px", shadow: "0 10px 30px rgba(163,50,79,0.10)", dark: false,
+  },
+  {
+    id: "slate-pro", tags: ["dark", "gym", "fitness", "sports", "strong", "bold", "industrial", "automotive", "car", "garage", "modern", "professional"],
+    colors: { primary: "#f97316", secondary: "#facc15", accent: "#22d3ee", bg: "#121417", surface: "#1d2126", text: "#f3f4f6", muted: "#a5adb8" },
+    fonts: { heading: "Oswald", body: "Inter" }, radius: "8px", shadow: "0 10px 30px rgba(0,0,0,0.5)", dark: true,
+  },
+  {
+    id: "citrus-fresh", tags: ["fresh", "fun", "juice", "snacks", "kids", "playful", "summer", "shop", "store", "colourful", "colorful", "bright", "street food"],
+    colors: { primary: "#2f7d32", secondary: "#f9c74f", accent: "#f3722c", bg: "#fffdf3", surface: "#fff3c4", text: "#1f2a12", muted: "#55603f" },
+    fonts: { heading: "Fredoka", body: "Nunito" }, radius: "18px", shadow: "0 8px 24px rgba(47,125,50,0.12)", dark: false,
+  },
+)
+
 export const presetById = (id) => PRESETS.find(p => p.id === id) || null

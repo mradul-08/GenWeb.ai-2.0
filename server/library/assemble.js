@@ -12,13 +12,19 @@ const DEFAULT_LABELS = {
   nav: "Navigation", hero: "Home", features: "Services", about: "About", menu: "Menu", pricing: "Pricing",
   testimonials: "Reviews", gallery: "Gallery", team: "Team", stats: "Highlights", faq: "FAQ",
   events: "Schedule", contact: "Contact", cta: "Join us", footer: "Footer", content: "More",
+  hours: "Opening hours", steps: "How it works", highlight: "Highlight",
 }
 const TEMPLATE_LABELS = {
-  shop: { menu: "Products", features: "Why us" },
+  shop: { menu: "Products", features: "Why us", highlight: "Bestseller" },
   portfolio: { gallery: "Work", events: "Experience" },
   event: { events: "Schedule", team: "Speakers", pricing: "Tickets", about: "About the event" },
   service: { team: "Our team" },
-  restaurant: { contact: "Book a table" },
+  restaurant: { contact: "Book a table", highlight: "Chef's special" },
+  salon: { menu: "Services", team: "Stylists", highlight: "Signature treatment", contact: "Book an appointment" },
+  fitness: { features: "Programs", pricing: "Memberships", team: "Trainers", steps: "Get started", stats: "Results" },
+  education: { menu: "Courses", events: "Batches", team: "Faculty", stats: "Results", contact: "Enquire" },
+  realestate: { menu: "Listings", features: "Amenities", highlight: "Featured project", contact: "Schedule a visit" },
+  nonprofit: { stats: "Our impact", events: "Programs", steps: "How you can help", cta: "Get involved" },
 }
 const MAX_SECTIONS = 12
 
@@ -87,6 +93,7 @@ export function buildBlueprint({ text = "", plan = null, rand = Math.random }) {
   // 4. Variants: required by a feature, else the template's choice, else random.
   for (const s of sections) {
     if (s.kind === "testimonials" && features.has("carousel")) s.variant = "carousel"
+    else if (s.kind === "faq" && features.has("accordion")) s.variant = "accordion"
     else if (s.kind === "cta" && features.has("newsletter")) s.variant = "newsletter"
     else s.variant = preferred[s.kind] && variantsOf(s.kind).includes(preferred[s.kind]) ? preferred[s.kind] : pick(variantsOf(s.kind), rand)
   }
@@ -96,7 +103,8 @@ export function buildBlueprint({ text = "", plan = null, rand = Math.random }) {
     preset: choosePreset(fullText, template, rand),
     sections,
     features: [...features],
-    booking: !!template.booking || BOOKING.test(lower),
+    // "table" (date + guests) or "appointment" (date + time); false = plain contact form.
+    booking: template.booking || (BOOKING.test(lower) ? (/\btable\b|dine|dinner|lunch/.test(lower) ? "table" : "appointment") : false),
     filter: features.has("filter_search") || !!template.filter,
   }
 }
@@ -185,7 +193,7 @@ export function applyTheme(html, preset) {
 export const serializeBlueprint = (b) => ({
   template: b.template, preset: b.preset.id, pureTheme: !!b.pureTheme,
   sections: b.sections.map(s => ({ id: s.id, name: s.name, purpose: s.purpose || "", kind: s.kind, variant: s.variant })),
-  features: [...b.features], booking: !!b.booking, filter: !!b.filter,
+  features: [...b.features], booking: b.booking === true ? "table" : (b.booking || false), filter: !!b.filter,
 })
 export const hydrateBlueprint = (s) => ({ ...s, templateScore: 1, preset: presetById(s.preset) || PRESETS[0], sections: s.sections.map(x => ({ ...x })) })
 
@@ -203,7 +211,7 @@ export function assembleSite(blueprint, content = {}, { plan = null, requestText
   // for (never fill them with invented reviews, prices or people).
   const baseCtx = (s) => ({
     id: s.id, name: s.name, purpose: s.purpose, site,
-    booking: blueprint.booking && s.kind === "contact", filter: blueprint.filter && s.kind === "menu",
+    booking: s.kind === "contact" ? blueprint.booking : false, filter: blueprint.filter && s.kind === "menu",
     themeToggle: blueprint.features.includes("theme_toggle"), newsletter: blueprint.features.includes("newsletter"),
   })
   const kept = []

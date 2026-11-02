@@ -29,7 +29,8 @@ const contentFor = (prompt) => {
   const ids = [...prompt.matchAll(/^- "([^"]+)" \((\w+)/gm)].map(m => m[1])
   return JSON.stringify({ title: "Chai Corner Café", brand: "Chai Corner", sections: Object.fromEntries(ids.map(id => [id, {
     heading: `${id} heading`, intro: "Fresh and local.", paragraphs: ["Since 2019."], subheading: "Chai and snacks.",
-    items: [{ name: "Masala Chai", price: "₹40", title: "Masala Chai", text: "Spiced", quote: "Lovely", q: "Open Sundays?", a: "Yes.", caption: "Morning brew", emoji: "☕" }],
+    items: [{ name: "Masala Chai", price: "₹40", title: "Masala Chai", text: "Spiced", quote: "Lovely", q: "Open Sundays?", a: "Yes.", caption: "Morning brew", emoji: "☕", day: "Mon – Sun", time: "8 AM – 10 PM" }],
+    text: "Our signature kulhad chai.", points: ["Brewed fresh"],
   }])) })
 }
 const pagesOf = (html) => [...html.matchAll(/href="([a-z0-9-]+\.html)(#[^"]*)?"/g)].map(m => m[1])

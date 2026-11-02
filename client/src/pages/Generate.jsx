@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion as Motion, AnimatePresence } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { Sparkles, Wand2, ClipboardList, Rocket, LayoutTemplate, Palette, FileText, Files, Monitor, Code2, Maximize2, Download, ArrowRight, X, Check, Shuffle, AlertTriangle, Loader2 } from 'lucide-react'
 import { setUserData } from '../redux/userSlice'
 import { serverUrl } from '../config'
 import axios from 'axios'
 import { buildPreviewDoc, PREVIEW_SANDBOX } from '../utils/previewDoc'
 import PlanReview from '../components/PlanReview'
+import AppHeader from '../components/AppHeader'
+import { C, FONT, GLOBAL_CSS, pageBackground, btn, shadow, pill } from '../theme'
 
 // ─── Palettes ─────────────────────────────────────────────────────────────────
 const RANDOM_PALETTES = [
@@ -27,14 +30,14 @@ const STEP_WEIGHTS = [0.10, 0.15, 0.20, 0.25, 0.20, 0.10]
 
 const STYLE_PRESETS = [
   // Auto: no style is forced; the template and the business decide the look.
-  { id: 'auto',          label: 'Auto',       icon: '✦', desc: 'Best fit for your business' },
+  { id: 'auto',          label: 'Auto',      icon: '✦', desc: 'Best fit for your business' },
   { id: 'minimal',       label: 'Minimal',   icon: '◻', desc: 'Clean, lots of whitespace' },
-  { id: 'bold',          label: 'Bold',       icon: '◼', desc: 'Strong colors, big typography' },
-  { id: 'glassmorphism', label: 'Glass',      icon: '◈', desc: 'Frosted glass effects' },
-  { id: 'dark',          label: 'Dark',       icon: '◉', desc: 'Dark theme, premium feel' },
-  { id: 'colorful',      label: 'Colorful',   icon: '◍', desc: 'Vibrant, playful palette' },
-  { id: 'corporate',     label: 'Corporate',  icon: '◫', desc: 'Professional, trustworthy' },
-  { id: 'random',        label: 'Random',     icon: '🎲', desc: 'Surprise color palette' },
+  { id: 'bold',          label: 'Bold',      icon: '◼', desc: 'Strong colours, big type' },
+  { id: 'glassmorphism', label: 'Glass',     icon: '◈', desc: 'Frosted glass effects' },
+  { id: 'dark',          label: 'Dark',      icon: '◉', desc: 'Dark theme, premium feel' },
+  { id: 'colorful',      label: 'Colourful', icon: '◍', desc: 'Vibrant, playful palette' },
+  { id: 'corporate',     label: 'Corporate', icon: '◫', desc: 'Professional, trustworthy' },
+  { id: 'random',        label: 'Random',    icon: '🎲', desc: 'Surprise colour palette' },
 ]
 
 const SECTIONS = [
@@ -49,39 +52,39 @@ const SECTIONS = [
 ]
 
 const EXAMPLES = [
-  'A dark SaaS landing page for a project management tool with animated hero, feature cards, and pricing table',
-  'Minimalist portfolio for a product designer with case studies grid and contact form',
-  'E-commerce store for handmade jewellery with product grid, filters, and cart',
-  'Restaurant website with full-screen hero, online menu, and reservation form',
-  'Fitness coaching landing page with transformation gallery and program tiers',
-  'Crypto analytics dashboard with charts, portfolio tracker, and news feed',
+  ['💇', 'Salon', 'Glow Studio – a unisex salon in Sector 18 Noida with haircuts, colour, facials, bridal makeup, prices and online appointments'],
+  ['☕', 'Café', 'Chai Corner – a cosy café in Ghaziabad with a menu of chai and snacks, opening hours, photos and table booking'],
+  ['🏋️', 'Gym', 'IronHouse – a gym in Indirapuram with strength programs, trainers, monthly memberships and a free trial form'],
+  ['🩺', 'Clinic', 'SmileCare – a dental clinic with treatments, doctors, timings, patient reviews and appointment booking'],
+  ['🎓', 'Coaching', 'BrightPath – a coaching institute with courses, batches, faculty, results and an enquiry form'],
+  ['🎨', 'Portfolio', 'Portfolio of Ananya, a freelance UI designer, with selected work, experience and a contact form'],
 ]
 
 const GEN_STEPS = [
-  'Analyzing your prompt…',
-  'Choosing design system…',
-  'Building layout structure…',
-  'Generating components…',
-  'Polishing styles & animations…',
-  'Finalizing & validating code…',
+  'Understanding your business…',
+  'Choosing a template and theme…',
+  'Laying out the sections…',
+  'Writing your content…',
+  'Assembling the pages…',
+  'Checking and saving…',
 ]
 
 const TIPS = [
-  '💡 Add "with dark mode toggle" to your prompt for a theme switcher.',
-  '🎨 Mention a brand color like "blue #2563EB" for more accurate results.',
-  '📱 Every generated site is fully mobile-responsive out of the box.',
-  '⚡ Use the Enhance button to turn a short idea into a perfect prompt.',
-  '🧩 Select only the sections you actually need for a tighter layout.',
-  '🚀 Generated sites are export-ready — paste the HTML anywhere.',
-  '✨ Try "glassmorphism" style for a modern frosted-glass look.',
-  '📝 Mention your target audience for better copy and tone.',
-  '🔥 Add "with FAQ accordion" or "with pricing toggle" for extra interactivity.',
+  '💡 Mention your city or area — it makes the copy feel local.',
+  '📞 Add your real phone, address and hours to the prompt; we never invent them.',
+  '🎨 After building, the Design tab changes theme, sections and text without AI or credits.',
+  '🗂 Choose Multi-page for a separate Menu, Gallery or Contact page.',
+  '📱 Every site works on phones out of the box.',
+  '🕘 Every change is saved in History — you can always go back.',
+  '⬇️ You can download the whole site as a ZIP and host it anywhere.',
+  '📋 Review the plan first to add or remove sections before building — it is free.',
 ]
 
 // ─── Timer persistence ─────────────────────────────────────────────────────────
 const STORAGE_KEY    = 'gen_avg_ms'
 const DEFAULT_EST_MS = 30000
 const PROMPT_CHAR_LIMIT = 1500
+const GENERATION_COST = 50
 
 function getStoredAvg() {
   try { const v = localStorage.getItem(STORAGE_KEY); return v ? parseFloat(v) : DEFAULT_EST_MS } catch { return DEFAULT_EST_MS }
@@ -90,14 +93,13 @@ function updateStoredAvg(ms) {
   try {
     const old = getStoredAvg()
     localStorage.setItem(STORAGE_KEY, String(old === DEFAULT_EST_MS ? ms : old * 0.7 + ms * 0.3))
-  } catch {}
+  } catch { /* storage unavailable */ }
 }
 function formatTime(s) {
   if (s <= 0) return '0s'
   const m = Math.floor(s / 60), sec = Math.round(s % 60)
   return m > 0 ? `${m}m ${sec}s` : `${sec}s`
 }
-
 
 async function fetchJsonWithTimeout(url, options, timeoutMs) {
   const controller = new AbortController()
@@ -114,32 +116,31 @@ async function fetchJsonWithTimeout(url, options, timeoutMs) {
   }
 }
 
-// ─── Circular progress ─────────────────────────────────────────────────────────
-function CircularProgress({ pct = 0, size = 176, stroke = 8 }) {
-  const r      = (size - stroke) / 2
+// ─── Small pieces ─────────────────────────────────────────────────────────────
+const LBL = { display: 'flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, color: C.ink, margin: '0 0 10px' }
+const choice = (on) => ({
+  padding: '10px 12px', borderRadius: 12, cursor: 'pointer', textAlign: 'left', fontFamily: FONT,
+  border: `1.5px solid ${on ? C.violet : C.border}`, background: on ? 'rgba(124,58,237,0.06)' : C.surface,
+  boxShadow: on ? '0 0 0 3px rgba(124,58,237,0.08)' : 'none', transition: 'border-color .15s, background .15s',
+})
+const Spin = ({ size = 16 }) => <Loader2 size={size} style={{ animation: 'gw-spin 1s linear infinite' }} />
+
+function CircularProgress({ pct = 0, size = 168, stroke = 10 }) {
+  const r = (size - stroke) / 2
   const circum = 2 * Math.PI * r
-  const offset = circum * (1 - pct / 100)
   return (
-    <svg width={size} height={size} style={{ transform:'rotate(-90deg)', display:'block' }}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={stroke+4} />
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(59,130,246,0.07)" strokeWidth={stroke} />
-      <motion.circle
-        cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#cGrad)"
-        strokeWidth={stroke} strokeLinecap="round" strokeDasharray={circum}
-        animate={{ strokeDashoffset: offset }}
-        transition={{ duration: 0.55, ease: 'easeOut' }}
-      />
+    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }} aria-hidden="true">
       <defs>
-        <linearGradient id="cGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor="#1d4ed8" />
-          <stop offset="100%" stopColor="#93c5fd" />
-        </linearGradient>
+        <linearGradient id="gw-prog" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#7c3aed" /><stop offset="100%" stopColor="#2563eb" /></linearGradient>
       </defs>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#ece9fb" strokeWidth={stroke} />
+      <Motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#gw-prog)" strokeWidth={stroke} strokeLinecap="round"
+        strokeDasharray={circum} animate={{ strokeDashoffset: circum * (1 - pct / 100) }} transition={{ duration: 0.55, ease: 'easeOut' }} />
     </svg>
   )
 }
 
-// ─── Syntax-highlighted code viewer ───────────────────────────────────────────
+// Syntax-highlighted, read-only code view (dark, like a code editor).
 function CodeViewer({ code }) {
   const [copied, setCopied] = useState(false)
   const handleCopy = () => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000) }
@@ -152,246 +153,51 @@ function CodeViewer({ code }) {
   }
   const lines = code.split('\n')
   return (
-    <div style={{ display:'flex', flexDirection:'column', height:'100%', background:'#08080f' }}>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 16px', background:'#0c0c18', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0 }}>
-        <div style={{ display:'flex', gap:'6px' }}>
-          {['#FF5F56','#FFBD2E','#27C93F'].map((c,i) => <div key={i} style={{ width:'11px', height:'11px', borderRadius:'50%', background:c }} />)}
-        </div>
-        <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.2)', fontFamily:'monospace' }}>generated-website.html · {lines.length} lines</span>
-        <button onClick={handleCopy} style={{ padding:'4px 12px', borderRadius:'6px', border:'1px solid rgba(255,255,255,0.09)', background: copied ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.04)', color: copied ? '#4ade80' : 'rgba(255,255,255,0.45)', fontSize:'11px', fontWeight:600, cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s' }}>{copied ? '✓ Copied' : '⎘ Copy'}</button>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#0f1020' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', background: '#15172b', flexShrink: 0 }}>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontFamily: 'ui-monospace,monospace' }}>index.html · {lines.length} lines</span>
+        <button onClick={handleCopy} style={{ padding: '5px 12px', borderRadius: 7, border: '1px solid rgba(255,255,255,0.15)', background: copied ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.06)', color: copied ? '#4ade80' : 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: FONT }}>{copied ? '✓ Copied' : 'Copy'}</button>
       </div>
-      <div style={{ flex:1, display:'flex', overflow:'auto' }}>
-        <div style={{ padding:'14px 0', background:'#0a0a15', borderRight:'1px solid rgba(255,255,255,0.04)', userSelect:'none', flexShrink:0, minWidth:'46px', textAlign:'right' }}>
-          {lines.map((_,i) => <div key={i} style={{ padding:'0 12px', fontSize:'11.5px', lineHeight:'20px', color:'rgba(255,255,255,0.1)', fontFamily:"'Fira Code','Courier New',monospace" }}>{i+1}</div>)}
+      <div style={{ flex: 1, display: 'flex', overflow: 'auto' }}>
+        <div style={{ padding: '14px 0', userSelect: 'none', flexShrink: 0, minWidth: 46, textAlign: 'right', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+          {lines.map((_, i) => <div key={i} style={{ padding: '0 12px', fontSize: 11.5, lineHeight: '20px', color: 'rgba(255,255,255,0.22)', fontFamily: "'Fira Code',ui-monospace,monospace" }}>{i + 1}</div>)}
         </div>
-        <div style={{ flex:1, padding:'14px 18px', fontFamily:"'Fira Code','Courier New',monospace", fontSize:'12.5px', lineHeight:'20px', color:'#c9d1d9', whiteSpace:'pre', overflowX:'auto' }}>
-          {lines.map((line,i) => (
-            <div key={i} dangerouslySetInnerHTML={{ __html: highlight(line) || '&nbsp;' }}
-              style={{ minHeight:'20px', borderRadius:'2px', transition:'background 0.1s' }}
-              onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.025)'}
-              onMouseLeave={e => e.currentTarget.style.background='transparent'}
-            />
-          ))}
+        <div style={{ flex: 1, padding: '14px 18px', fontFamily: "'Fira Code',ui-monospace,monospace", fontSize: 12.5, lineHeight: '20px', color: '#d6dbe4', whiteSpace: 'pre' }}>
+          {lines.map((line, i) => <div key={i} dangerouslySetInnerHTML={{ __html: highlight(line) || '&nbsp;' }} style={{ minHeight: 20 }} />)}
         </div>
       </div>
     </div>
   )
 }
 
-// ─── Full-page preview overlay ─────────────────────────────────────────────────
 function FullPreviewOverlay({ doc, onClose }) {
   return (
-    <motion.div
-      initial={{ opacity:0, scale:0.98 }} animate={{ opacity:1, scale:1 }} exit={{ opacity:0, scale:0.98 }}
-      transition={{ duration:0.22, ease:[0.22,1,0.36,1] }}
-      style={{ position:'fixed', inset:0, zIndex:9999, background:'#000', display:'flex', flexDirection:'column' }}
-    >
-      <div style={{ height:'44px', flexShrink:0, background:'rgba(8,8,14,0.97)', backdropFilter:'blur(12px)', borderBottom:'1px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 16px' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-          <div style={{ display:'flex', gap:'5px' }}>
-            {['#FF5F56','#FFBD2E','#27C93F'].map((c,i) => <div key={i} style={{ width:'10px', height:'10px', borderRadius:'50%', background:c }} />)}
-          </div>
-          <div style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'6px', padding:'4px 14px', fontSize:'11.5px', color:'rgba(255,255,255,0.28)', fontFamily:'monospace', minWidth:'260px', textAlign:'center' }}>generated-website.html</div>
-        </div>
-        <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-          <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.2)' }}>Press Esc to go back</span>
-          <button onClick={onClose}
-            style={{ width:'28px', height:'28px', borderRadius:'7px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.09)', color:'rgba(255,255,255,0.6)', fontSize:'17px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.18s' }}
-            onMouseEnter={e => { e.currentTarget.style.background='rgba(239,68,68,0.15)'; e.currentTarget.style.color='#f87171'; e.currentTarget.style.borderColor='rgba(239,68,68,0.3)' }}
-            onMouseLeave={e => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='rgba(255,255,255,0.6)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.09)' }}
-          >×</button>
+    <Motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.2 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 9999, background: C.bg, display: 'flex', flexDirection: 'column', fontFamily: FONT }}>
+      <div style={{ height: 50, flexShrink: 0, background: C.surface, borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px' }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: C.ink, display: 'flex', alignItems: 'center', gap: 8 }}><Monitor size={16} color={C.violet} /> Full-page preview</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 12.5, color: C.muted }}>Press Esc to go back</span>
+          <button aria-label="Close preview" onClick={onClose} style={{ ...btn.secondary, padding: 7 }}><X size={16} /></button>
         </div>
       </div>
-      <iframe srcDoc={doc} style={{ flex:1, width:'100%', border:'none', background:'white' }} title="Full Page Preview" sandbox={PREVIEW_SANDBOX} />
-    </motion.div>
+      <iframe srcDoc={doc} style={{ flex: 1, width: '100%', border: 'none', background: 'white' }} title="Full page preview" sandbox={PREVIEW_SANDBOX} />
+    </Motion.div>
   )
 }
 
-// ─── 3D Orbital Scene Background ──────────────────────────────────────────────
-function OrbitScene3D() {
-  return (
-    <>
-      <style>{`
-        @keyframes orb-spin-1  { from { transform: rotateX(72deg) rotateY(0deg);   } to { transform: rotateX(72deg) rotateY(360deg);  } }
-        @keyframes orb-spin-2  { from { transform: rotateX(52deg) rotateY(120deg); } to { transform: rotateX(52deg) rotateY(480deg);  } }
-        @keyframes orb-spin-3  { from { transform: rotateX(30deg) rotateY(240deg); } to { transform: rotateX(30deg) rotateY(600deg);  } }
-        @keyframes orb-spin-4  { from { transform: rotateX(88deg) rotateY(60deg);  } to { transform: rotateX(88deg) rotateY(420deg);  } }
-        @keyframes orb-spin-5  { from { transform: rotateX(15deg) rotateY(180deg); } to { transform: rotateX(15deg) rotateY(540deg);  } }
-
-        @keyframes dot-travel  { from { transform: rotateY(0deg)   translateX(var(--r)) rotateY(0deg);   }
-                                  to   { transform: rotateY(360deg) translateX(var(--r)) rotateY(-360deg); } }
-        @keyframes dot-travel-r{ from { transform: rotateY(0deg)   translateX(var(--r)) rotateY(0deg);   }
-                                  to   { transform: rotateY(-360deg) translateX(var(--r)) rotateY(360deg); } }
-
-        @keyframes core-pulse  { 0%,100% { transform: scale(1);     opacity: 0.85; }
-                                  50%     { transform: scale(1.18);  opacity: 1;    } }
-        @keyframes halo-pulse  { 0%,100% { transform: scale(1);     opacity: 0.18; }
-                                  50%     { transform: scale(1.3);   opacity: 0.32; } }
-        @keyframes halo-pulse2 { 0%,100% { transform: scale(1);     opacity: 0.08; }
-                                  50%     { transform: scale(1.5);   opacity: 0.15; } }
-
-        @keyframes float-1 { 0%,100%{transform:translate(0,0) scale(1)}   50%{transform:translate(12px,-18px) scale(1.08)} }
-        @keyframes float-2 { 0%,100%{transform:translate(0,0) scale(1)}   50%{transform:translate(-14px,10px) scale(0.94)} }
-        @keyframes float-3 { 0%,100%{transform:translate(0,0) scale(1)}   50%{transform:translate(8px,16px)  scale(1.05)} }
-        @keyframes float-4 { 0%,100%{transform:translate(0,0) scale(1)}   50%{transform:translate(-10px,-12px) scale(1.1)} }
-        @keyframes float-5 { 0%,100%{transform:translate(0,0) scale(1)}   50%{transform:translate(18px,8px)  scale(0.92)} }
-
-        @keyframes scanline  { 0%   { transform: translateY(-100%); opacity: 0; }
-                               10%  { opacity: 1; }
-                               90%  { opacity: 0.6; }
-                               100% { transform: translateY(220%); opacity: 0; } }
-
-        @keyframes grid-drift { from { background-position: 0 0; } to { background-position: 58px 58px; } }
-
-        @keyframes star-twinkle { 0%,100%{opacity:0.15} 50%{opacity:0.8} }
-        @keyframes atmo-spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-        @keyframes atmo-spin-r { from{transform:rotate(0deg)} to{transform:rotate(-360deg)} }
-      `}</style>
-
-      {/* Deep space background */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(14,8,38,1) 0%, rgba(4,3,18,1) 45%, rgba(2,2,10,1) 100%)',
-      }} />
-
-      {/* Animated grid */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        backgroundImage: 'linear-gradient(rgba(99,60,220,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,60,220,0.06) 1px, transparent 1px)',
-        backgroundSize: '58px 58px',
-        animation: 'grid-drift 8s linear infinite',
-        maskImage: 'radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 80%)',
-      }} />
-
-      {/* Atmospheric glow rings */}
-      <div style={{
-        position: 'absolute', top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 700, height: 700, borderRadius: '50%',
-        background: 'conic-gradient(from 0deg, rgba(99,60,220,0.06), rgba(56,189,248,0.06), rgba(99,60,220,0.06))',
-        animation: 'atmo-spin 30s linear infinite',
-      }} />
-      <div style={{
-        position: 'absolute', top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 500, height: 500, borderRadius: '50%',
-        background: 'conic-gradient(from 180deg, rgba(244,114,182,0.05), rgba(99,60,220,0.07), rgba(56,189,248,0.05))',
-        animation: 'atmo-spin-r 22s linear infinite',
-      }} />
-
-      {/* Nebula dust blobs */}
-      {[
-        { top:'28%', left:'18%', w:260, h:180, c:'rgba(99,60,220,0.09)',  anim:'float-1', dur:'9s'  },
-        { top:'55%', left:'65%', w:220, h:160, c:'rgba(56,189,248,0.07)', anim:'float-2', dur:'11s' },
-        { top:'70%', left:'25%', w:190, h:140, c:'rgba(244,114,182,0.06)',anim:'float-3', dur:'14s' },
-        { top:'20%', left:'60%', w:200, h:150, c:'rgba(52,211,153,0.06)', anim:'float-4', dur:'12s' },
-        { top:'42%', left:'42%', w:320, h:240, c:'rgba(99,60,220,0.06)',  anim:'float-5', dur:'16s' },
-      ].map((b, i) => (
-        <div key={i} style={{
-          position: 'absolute', top: b.top, left: b.left,
-          width: b.w, height: b.h, borderRadius: '50%',
-          background: `radial-gradient(ellipse, ${b.c} 0%, transparent 70%)`,
-          animation: `${b.anim} ${b.dur} ease-in-out infinite`,
-          filter: 'blur(2px)',
-        }} />
-      ))}
-
-      {/* Twinkling star field */}
-      {Array.from({ length: 60 }).map((_, i) => {
-        const left  = ((i * 37 + 11) % 97) + '%'
-        const top   = ((i * 53 + 17) % 93) + '%'
-        const size  = (i % 3 === 0) ? 2.5 : (i % 3 === 1) ? 1.5 : 1
-        const delay = (i * 0.18) % 4
-        const dur   = 2 + (i % 5) * 0.7
-        const color = i % 4 === 0 ? '#a78bfa' : i % 4 === 1 ? '#67e8f9' : i % 4 === 2 ? '#f9a8d4' : '#fff'
-        return (
-          <div key={i} style={{
-            position: 'absolute', left, top,
-            width: size, height: size, borderRadius: '50%',
-            background: color,
-            animation: `star-twinkle ${dur}s ease-in-out ${delay}s infinite`,
-            boxShadow: size > 2 ? `0 0 ${size * 3}px ${color}` : 'none',
-          }} />
-        )
-      })}
-
-      {/* 3D Orbital Scene */}
-      <div style={{
-        position: 'absolute', top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 420, height: 420,
-        perspective: '900px',
-      }}>
-        <div style={{ position: 'relative', width: '100%', height: '100%', transformStyle: 'preserve-3d' }}>
-
-          {/* Ring 1 — indigo */}
-          <div style={{ position:'absolute', inset:'15%', borderRadius:'50%', border:'1.5px solid rgba(99,60,220,0.45)', boxShadow:'0 0 18px rgba(99,60,220,0.2), inset 0 0 18px rgba(99,60,220,0.1)', animation:'orb-spin-1 12s linear infinite', transformStyle:'preserve-3d' }}>
-            <div style={{ position:'absolute', top:'50%', left:'50%', '--r':'50%', animation:'dot-travel 12s linear infinite', transformOrigin:'0 0' }}>
-              <div style={{ width:10, height:10, borderRadius:'50%', background:'radial-gradient(circle, #c4b5fd 0%, #818cf8 60%, transparent 100%)', boxShadow:'0 0 16px 4px rgba(129,140,248,0.9)', transform:'translate(-50%, -50%)' }} />
-            </div>
-          </div>
-
-          {/* Ring 2 — cyan */}
-          <div style={{ position:'absolute', inset:'5%', borderRadius:'50%', border:'1px solid rgba(56,189,248,0.32)', boxShadow:'0 0 14px rgba(56,189,248,0.15)', animation:'orb-spin-2 18s linear infinite', transformStyle:'preserve-3d' }}>
-            <div style={{ position:'absolute', top:'50%', left:'50%', '--r':'47%', animation:'dot-travel-r 18s linear infinite', transformOrigin:'0 0' }}>
-              <div style={{ width:8, height:8, borderRadius:'50%', background:'radial-gradient(circle, #bae6fd 0%, #38bdf8 60%, transparent 100%)', boxShadow:'0 0 14px 3px rgba(56,189,248,0.85)', transform:'translate(-50%, -50%)' }} />
-            </div>
-          </div>
-
-          {/* Ring 3 — rose */}
-          <div style={{ position:'absolute', inset:'25%', borderRadius:'50%', border:'1px solid rgba(244,114,182,0.3)', boxShadow:'0 0 12px rgba(244,114,182,0.12)', animation:'orb-spin-3 8s linear infinite', transformStyle:'preserve-3d' }}>
-            <div style={{ position:'absolute', top:'50%', left:'50%', '--r':'38%', animation:'dot-travel 8s linear infinite', transformOrigin:'0 0' }}>
-              <div style={{ width:7, height:7, borderRadius:'50%', background:'radial-gradient(circle, #fce7f3 0%, #f472b6 60%, transparent 100%)', boxShadow:'0 0 12px 3px rgba(244,114,182,0.85)', transform:'translate(-50%, -50%)' }} />
-            </div>
-          </div>
-
-          {/* Ring 4 — emerald */}
-          <div style={{ position:'absolute', inset:'-2%', borderRadius:'50%', border:'0.8px solid rgba(52,211,153,0.22)', animation:'orb-spin-4 28s linear infinite', transformStyle:'preserve-3d' }}>
-            <div style={{ position:'absolute', top:'50%', left:'50%', '--r':'52%', animation:'dot-travel-r 28s linear infinite', transformOrigin:'0 0' }}>
-              <div style={{ width:6, height:6, borderRadius:'50%', background:'radial-gradient(circle, #a7f3d0 0%, #34d399 60%, transparent 100%)', boxShadow:'0 0 10px 2px rgba(52,211,153,0.8)', transform:'translate(-50%, -50%)' }} />
-            </div>
-          </div>
-
-          {/* Ring 5 — amber */}
-          <div style={{ position:'absolute', inset:'32%', borderRadius:'50%', border:'0.8px solid rgba(251,191,36,0.25)', animation:'orb-spin-5 10s linear infinite', transformStyle:'preserve-3d' }}>
-            <div style={{ position:'absolute', top:'50%', left:'50%', '--r':'35%', animation:'dot-travel 10s linear infinite', transformOrigin:'0 0' }}>
-              <div style={{ width:5, height:5, borderRadius:'50%', background:'radial-gradient(circle, #fef9c3 0%, #fbbf24 60%, transparent 100%)', boxShadow:'0 0 10px 2px rgba(251,191,36,0.8)', transform:'translate(-50%, -50%)' }} />
-            </div>
-          </div>
-
-          {/* Central core */}
-          <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:130, height:130, borderRadius:'50%', background:'radial-gradient(circle, rgba(99,60,220,0.15) 0%, transparent 70%)', animation:'halo-pulse2 4s ease-in-out infinite' }} />
-          <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:90, height:90, borderRadius:'50%', background:'radial-gradient(circle, rgba(99,60,220,0.3) 0%, rgba(56,189,248,0.15) 50%, transparent 70%)', animation:'halo-pulse 3s ease-in-out infinite' }} />
-          <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:56, height:56, borderRadius:'50%', border:'1.5px solid rgba(167,139,250,0.6)', boxShadow:'0 0 24px rgba(129,140,248,0.5), inset 0 0 16px rgba(129,140,248,0.25)' }} />
-          <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:42, height:42, borderRadius:'50%', background:'radial-gradient(circle at 35% 35%, #c4b5fd 0%, #818cf8 40%, #4f46e5 80%)', boxShadow:'0 0 32px 8px rgba(129,140,248,0.7), 0 0 60px 16px rgba(99,60,220,0.35)', animation:'core-pulse 3s ease-in-out infinite' }} />
-          <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:14, height:14, borderRadius:'50%', background:'radial-gradient(circle, #fff 0%, rgba(196,181,253,0.9) 60%, transparent 100%)', boxShadow:'0 0 16px 4px rgba(255,255,255,0.6)', animation:'core-pulse 3s ease-in-out infinite 0.4s' }} />
-        </div>
-      </div>
-
-      {/* Scan-line shimmer */}
-      <div style={{ position:'absolute', left:0, right:0, height:'18%', background:'linear-gradient(to bottom, transparent, rgba(99,60,220,0.04), transparent)', animation:'scanline 7s ease-in-out infinite', pointerEvents:'none' }} />
-
-      {/* Left edge vignette */}
-      <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, rgba(7,7,10,0.6) 0%, transparent 22%)', pointerEvents:'none' }} />
-
-      {/* Bottom fade */}
-      <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(6,6,8,0.55) 0%, transparent 28%)', pointerEvents:'none' }} />
-    </>
-  )
-}
-
-// ─── Main Component ────────────────────────────────────────────────────────────
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Generate() {
   const { userData } = useSelector(s => s.user)
   const navigate     = useNavigate()
-  const dispatch = useDispatch()
+  const dispatch     = useDispatch()
   const [prompt,            setPrompt]            = useState('')
   const [isEnhanced,        setIsEnhanced]        = useState(false)
   const [enhancing,         setEnhancing]         = useState(false)
   const [selectedStyle,     setSelectedStyle]     = useState('auto')
   const [selectedSections,  setSelectedSections]  = useState([])   // optional: empty = the template chooses
-  const [charCount,         setCharCount]         = useState(0)
   const [activePalette,     setActivePalette]     = useState(null)
+  const [showMore,          setShowMore]          = useState(false)
 
   // "hybrid": tested templates + AI-written content (complete pages, few tokens).
   // "ai": the model writes the whole page (more freedom, may be cut off).
@@ -409,6 +215,8 @@ export default function Generate() {
   const [websiteId,      setWebsiteId]      = useState(null)
   const [previewDoc,     setPreviewDoc]     = useState(null)
   const [error,          setError]          = useState('')
+  const [redirecting,    setRedirecting]    = useState(false)
+  const [exporting,      setExporting]      = useState(false)
 
   const [activeTab,       setActiveTab]       = useState('preview')
   const [showFullPreview, setShowFullPreview] = useState(false)
@@ -423,26 +231,30 @@ export default function Generate() {
   const startTimeRef = useRef(null)
   const tipTimerRef  = useRef(null)
   const redirectTimer = useRef(null)
+  const mainRef      = useRef(null)
 
   useEffect(() => {
     const h = (e) => { if (e.key === 'Escape') setShowFullPreview(false) }
     window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h)
   }, [])
 
-  useEffect(() => { if (!userData) navigate('/login') }, [userData])
+  useEffect(() => { if (!userData) navigate('/login') }, [userData, navigate])
 
   useEffect(() => {
     const p = sessionStorage.getItem('pendingPrompt')
-    if (p) { setPrompt(p); sessionStorage.removeItem('pendingPrompt') }
+    if (p) { setPrompt(p.slice(0, PROMPT_CHAR_LIMIT)); sessionStorage.removeItem('pendingPrompt') }
   }, [])
 
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px'
-    }
-    setCharCount(prompt.length)
+    const el = textareaRef.current
+    if (el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 220) + 'px' }
   }, [prompt])
+
+  // On narrow screens the plan / progress / preview sit below the form: bring them into view.
+  const showingResult = !!plan || generating || generated
+  useEffect(() => {
+    if (showingResult && window.matchMedia('(max-width: 900px)').matches) mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [showingResult])
 
   useEffect(() => () => {
     clearInterval(countdownRef.current)
@@ -452,7 +264,7 @@ export default function Generate() {
   }, [])
 
   const handleStyleSelect = (id) => { setSelectedStyle(id); setActivePalette(id === 'random' ? getRandomPalette() : null) }
-  const rerollPalette = (e) => { e.stopPropagation(); setActivePalette(getRandomPalette()) }
+  const rerollPalette = () => setActivePalette(getRandomPalette())
   const toggleSection = (id) => setSelectedSections(p => p.includes(id) ? p.filter(s => s !== id) : [...p, id])
 
   const startTimers = useCallback((totalMs) => {
@@ -461,9 +273,9 @@ export default function Generate() {
     countdownRef.current = setInterval(() => setElapsedMs(Date.now() - startTimeRef.current), 150)
     stepTimeouts.current.forEach(clearTimeout); stepTimeouts.current = []
     let cum = 0
-    STEP_WEIGHTS.slice(0,-1).forEach((w,i) => { cum += w*totalMs; stepTimeouts.current.push(setTimeout(() => setGeneratingStep(i+1), cum)) })
+    STEP_WEIGHTS.slice(0, -1).forEach((w, i) => { cum += w * totalMs; stepTimeouts.current.push(setTimeout(() => setGeneratingStep(i + 1), cum)) })
     clearInterval(tipTimerRef.current)
-    tipTimerRef.current = setInterval(() => setTipIndex(p => (p+1) % TIPS.length), 6000)
+    tipTimerRef.current = setInterval(() => setTipIndex(p => (p + 1) % TIPS.length), 6000)
   }, [])
 
   const stopTimers = useCallback(() => {
@@ -505,7 +317,7 @@ export default function Generate() {
       if (!response.ok || !data.success) throw new Error(data.message || 'Planning failed')
       setPlan(data.plan)
     } catch (err) {
-      setError(err.message || 'Could not plan this site. Try again, or generate directly.')
+      setError(err.message || 'Could not plan this site. Try again, or build directly.')
     } finally {
       setPlanning(false)
     }
@@ -527,7 +339,7 @@ export default function Generate() {
       setIsEnhanced(true)
       setPlan(null)
     } catch (err) {
-      setError(err.message || 'Failed to enhance prompt. Try again.')
+      setError(err.message || 'Failed to improve the description. Try again.')
     } finally {
       setEnhancing(false)
     }
@@ -535,6 +347,7 @@ export default function Generate() {
 
   const handleGenerate = async () => {
     if (!prompt.trim() || generating) return
+    clearTimeout(redirectTimer.current); setRedirecting(false)
     setGenerating(true); setGenerated(false); setError(''); setGeneratingStep(0); setElapsedMs(0)
     setTipIndex(Math.floor(Math.random() * TIPS.length)); setShowFullPreview(false)
     setPreviewDoc(null)
@@ -558,11 +371,12 @@ export default function Generate() {
       try {
         const result = await axios.get(`${serverUrl}/api/user/current`, { withCredentials: true })
         if (result.data.user) dispatch(setUserData(result.data.user))
-      } catch {}
+      } catch { /* credits refresh is best-effort */ }
 
       if (data.websiteId) {
         setWebsiteId(data.websiteId)
-        redirectTimer.current = setTimeout(() => navigate(`/editor?id=${data.websiteId}`), 2000)
+        setRedirecting(true)
+        redirectTimer.current = setTimeout(() => navigate(`/editor?id=${data.websiteId}`), 4000)
       }
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.')
@@ -572,363 +386,340 @@ export default function Generate() {
     }
   }
 
+  const stayHere = () => { clearTimeout(redirectTimer.current); setRedirecting(false) }
+  const openEditor = () => { clearTimeout(redirectTimer.current); navigate(websiteId ? `/editor?id=${websiteId}` : '/dashboard') }
+
   const handleKeyDown = (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleGenerate() }
 
-  const handleDownload = () => {
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(new Blob([generatedCode], { type: 'text/html' }))
-    a.download = 'genweb-site.html'; a.click()
+  // Whole site (every page) as a ZIP from the server; plain HTML if unsaved.
+  const handleDownload = async () => {
+    stayHere()
+    if (!websiteId) {
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(new Blob([generatedCode], { type: 'text/html' }))
+      a.download = 'index.html'; a.click()
+      return
+    }
+    setExporting(true)
+    try {
+      const res = await axios.get(`${serverUrl}/api/website/${websiteId}/export`, { withCredentials: true, responseType: 'blob' })
+      const name = /filename="([^"]+)"/.exec(res.headers['content-disposition'] || '')?.[1] || 'website.zip'
+      const url = URL.createObjectURL(res.data)
+      const a = document.createElement('a')
+      a.href = url; a.download = name; a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 10000)
+    } catch {
+      setError('Download failed. You can also export from the editor.')
+    } finally {
+      setExporting(false)
+    }
   }
 
+  const credits       = userData?.credits ?? 0
   const realPct       = Math.min(99, Math.round((elapsedMs / estimatedMs) * 100))
   const remainingSecs = Math.max(0, (estimatedMs - elapsedMs) / 1000)
-  const canGenerate   = prompt.trim().length > 0 && !generating && !enhancing && !planning && (!plan || plan.sections.length > 0)
-  const canPlan       = prompt.trim().length > 0 && !generating && !enhancing && !planning
-
-  const LBL = {
-    fontSize: '10.5px', fontWeight: 700, color: 'rgba(255,255,255,0.35)',
-    letterSpacing: '0.12em', textTransform: 'uppercase', display: 'block', marginBottom: '10px',
-  }
+  const busy          = generating || enhancing || planning
+  const canGenerate   = prompt.trim().length > 0 && !busy && (!plan || plan.sections.length > 0)
+  const canPlan       = prompt.trim().length > 0 && !busy
+  const lowCredits    = credits < GENERATION_COST
 
   return (
-    <div style={{ minHeight:'100vh', background:'#060608', color:'#f0f0f0', fontFamily:"'Inter',sans-serif", display:'flex', flexDirection:'column' }}>
+    <div style={{ minHeight: '100vh', ...pageBackground, color: C.text, fontFamily: FONT, display: 'flex', flexDirection: 'column' }}>
+      <style>{GLOBAL_CSS + `
+        @keyframes gw-spin{to{transform:rotate(360deg)}}
+        .gw-gen{display:grid;grid-template-columns:minmax(340px,420px) minmax(0,1fr);height:calc(100vh - 66px)}
+        .gw-gen-side{overflow-y:auto}
+        @media (max-width:900px){.gw-gen{grid-template-columns:1fr;height:auto}.gw-gen-side{overflow:visible;border-right:none !important}.gw-gen-main{min-height:620px}}
+        @media (max-width:900px){.gw-gen-actions{position:static !important;margin:0 !important;padding:0 !important;background:none !important}}
+        .gw-ex:hover{border-color:${C.violet} !important;color:${C.violet} !important}
+      `}</style>
 
       <AnimatePresence>
-        {showFullPreview && previewDoc && (
-          <FullPreviewOverlay doc={previewDoc} onClose={() => setShowFullPreview(false)} />
-        )}
+        {showFullPreview && previewDoc && <FullPreviewOverlay doc={previewDoc} onClose={() => setShowFullPreview(false)} />}
       </AnimatePresence>
 
-      {/* NAV */}
-      <motion.nav initial={{ y:-16, opacity:0 }} animate={{ y:0, opacity:1 }}
-        style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, height:'56px', background:'rgba(6,6,8,0.94)', backdropFilter:'blur(20px)', borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 24px' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
-          <button onClick={() => navigate('/dashboard')}
-            style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', cursor:'pointer', color:'rgba(255,255,255,0.5)', fontSize:'16px', width:'32px', height:'32px', borderRadius:'8px', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.color='white'; e.currentTarget.style.borderColor='rgba(255,255,255,0.2)' }}
-            onMouseLeave={e => { e.currentTarget.style.color='rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.08)' }}
-          >←</button>
-          <span style={{ fontSize:'14px', fontWeight:600, color:'white' }}>New Website</span>
-        </div>
-        <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'6px', padding:'5px 12px', borderRadius:'20px', background:'rgba(59,130,246,0.08)', border:'1px solid rgba(59,130,246,0.18)' }}>
-            <span style={{ fontSize:'12px' }}>⚡</span>
-            <span style={{ fontSize:'12px', fontWeight:600, color:'#60a5fa' }}>{userData?.credits ?? 0} credits</span>
-          </div>
-          <AnimatePresence>
-            {generated && !generating && (
-              <motion.div initial={{ opacity:0, x:10 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:10 }} style={{ display:'flex', gap:'8px', alignItems:'center' }}>
-                <button onClick={handleDownload}
-                  style={{ padding:'6px 14px', borderRadius:'8px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.7)', fontWeight:600, fontSize:'12px', cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.color='white'}
-                  onMouseLeave={e => e.currentTarget.style.color='rgba(255,255,255,0.7)'}
-                >↓ Download</button>
-                <button onClick={() => { clearTimeout(redirectTimer.current); navigate(websiteId ? `/editor?id=${websiteId}` : '/dashboard') }}
-                  style={{ padding:'6px 16px', borderRadius:'8px', background:'linear-gradient(135deg,#1d4ed8,#3b82f6)', border:'none', color:'white', fontWeight:600, fontSize:'12px', cursor:'pointer', fontFamily:'inherit', boxShadow:'0 0 20px rgba(59,130,246,0.25)' }}
-                >Open in Editor →</button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </motion.nav>
+      <AppHeader maxWidth={1600} />
 
-      {/* BODY */}
-      <div style={{ display:'flex', height:'100vh', paddingTop:'56px', position:'relative', zIndex:10, overflow:'hidden' }}>
-
-        {/* SIDEBAR */}
-        <aside style={{ width:'368px', minWidth:'368px', height:'100%', overflowY:'auto', overflowX:'hidden', borderRight:'1px solid rgba(255,255,255,0.06)', background:'rgba(7,7,10,0.93)', display:'flex', flexDirection:'column', flexShrink:0, scrollbarWidth:'none' }}>
-          <style>{`aside::-webkit-scrollbar{display:none}`}</style>
-          <div style={{ padding:'20px 18px', display:'flex', flexDirection:'column', gap:'20px', flex:1 }}>
+      <div className="gw-gen">
+        {/* ── Left: describe + options ── */}
+        <aside className="gw-gen-side" style={{ background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(10px)', borderRight: `1px solid ${C.border}` }}>
+          <div style={{ padding: 'clamp(18px,3vw,26px)', display: 'flex', flexDirection: 'column', gap: 22 }}>
+            <div>
+              <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: C.ink, letterSpacing: '-0.02em' }}>Create a new website</h1>
+              <p style={{ margin: 0, fontSize: 14, color: C.muted }}>Tell us about your business — we'll plan and build the site.</p>
+            </div>
 
             <AnimatePresence>
               {error && (
-                <motion.div initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
-                  style={{ background:'rgba(239,68,68,0.07)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:'10px', padding:'11px 13px', fontSize:'12.5px', color:'#f87171', display:'flex', gap:'8px' }}>
-                  <span>⚠️</span>
-                  <div>
-                    <p style={{ margin:0, fontWeight:600 }}>Error</p>
-                    <p style={{ margin:'3px 0 0', opacity:0.75, fontSize:'12px' }}>{error}</p>
-                  </div>
-                </motion.div>
+                <Motion.div role="alert" initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }}
+                  style={{ display: 'flex', gap: 10, padding: '12px 14px', borderRadius: 12, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: 13.5 }}>
+                  <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span style={{ flex: 1 }}>{error}</span>
+                  <button aria-label="Dismiss" onClick={() => setError('')} style={{ ...btn.ghost, padding: 2, color: '#991b1b' }}><X size={15} /></button>
+                </Motion.div>
               )}
             </AnimatePresence>
 
-            {/* PROMPT */}
+            {/* Prompt */}
             <div>
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'9px' }}>
-                <label style={LBL}>Describe your website</label>
-                <span style={{ fontSize:'11px', color: charCount > (PROMPT_CHAR_LIMIT - 100) ? '#f87171' : 'rgba(255,255,255,0.2)' }}>
-                  {charCount}/{PROMPT_CHAR_LIMIT}
-                </span>
+              <label htmlFor="gen-prompt" style={{ ...LBL, justifyContent: 'space-between' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><Sparkles size={15} color={C.violet} /> Describe your business</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: prompt.length > PROMPT_CHAR_LIMIT - 100 ? C.red : C.faint }}>{prompt.length}/{PROMPT_CHAR_LIMIT}</span>
+              </label>
+              <div style={{ borderRadius: 14, border: `1.5px solid ${prompt ? C.violet : C.borderStrong}`, background: C.surface, boxShadow: prompt ? '0 0 0 4px rgba(124,58,237,0.08)' : shadow.sm, transition: 'border-color .2s, box-shadow .2s' }}>
+                <textarea id="gen-prompt" ref={textareaRef} value={prompt} onChange={e => updatePromptDraft(e.target.value)} onKeyDown={handleKeyDown}
+                  placeholder="e.g. A unisex salon in Noida called Glow Studio with haircuts, facials, bridal makeup, prices and online appointments"
+                  style={{ display: 'block', width: '100%', minHeight: 110, maxHeight: 220, padding: '14px 14px 6px', border: 'none', outline: 'none', resize: 'none', background: 'transparent', color: C.ink, fontSize: 14.5, lineHeight: 1.6, fontFamily: FONT }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px 8px 12px' }}>
+                  {isEnhanced
+                    ? <span style={{ fontSize: 12, color: C.green, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}><Check size={14} /> Improved by AI — edit freely</span>
+                    : <span style={{ fontSize: 12, color: C.faint }}>Ctrl + Enter to build</span>}
+                  <button onClick={handleEnhancePrompt} disabled={!prompt.trim() || busy} title="Let AI add useful details to your description (optional)"
+                    style={{ ...btn.ghost, marginLeft: 'auto', padding: '6px 10px', fontSize: 13, color: prompt.trim() && !busy ? C.violet : C.faint, background: 'rgba(124,58,237,0.06)', cursor: prompt.trim() && !busy ? 'pointer' : 'not-allowed' }}>
+                    {enhancing ? <><Spin size={14} /> Improving…</> : <><Wand2 size={14} /> Improve with AI</>}
+                  </button>
+                </div>
               </div>
-
-              <AnimatePresence>
-                {isEnhanced && (
-                  <motion.div initial={{ opacity:0, y:-4 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
-                    style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'8px', padding:'5px 10px', borderRadius:'8px', background:'rgba(52,211,153,0.08)', border:'1px solid rgba(52,211,153,0.25)' }}>
-                    <span style={{ fontSize:'11px' }}>✨</span>
-                    <span style={{ fontSize:'11px', color:'#34d399', fontWeight:600 }}>Prompt enhanced by AI</span>
-                    <button onClick={() => setIsEnhanced(false)} style={{ marginLeft:'auto', fontSize:'10px', color:'rgba(52,211,153,0.6)', background:'none', border:'none', cursor:'pointer', padding:'0 2px' }}>reset</button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div style={{ background:'rgba(255,255,255,0.02)', border:`1px solid ${prompt ? 'rgba(59,130,246,0.4)' : 'rgba(255,255,255,0.07)'}`, borderRadius:'12px', padding:'12px', transition:'border-color 0.2s, box-shadow 0.2s', boxShadow: prompt ? '0 0 0 3px rgba(59,130,246,0.06)' : 'none' }}>
-                <textarea
-                  ref={textareaRef}
-                  value={prompt}
-                  onChange={e => updatePromptDraft(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="e.g. A dark SaaS landing page with animated hero, glassmorphism cards, FAQ accordion, and 3-tier pricing…"
-                  style={{ width:'100%', background:'transparent', border:'none', outline:'none', color:'white', fontSize:'13px', lineHeight:1.65, resize:'none', minHeight:'88px', maxHeight:'180px', fontFamily:'inherit', boxSizing:'border-box' }}
-                />
-                <div style={{ borderTop:'1px solid rgba(255,255,255,0.05)', paddingTop:'8px', marginTop:'7px' }}>
-                  <p style={{ fontSize:'10px', color:'rgba(255,255,255,0.2)', margin:'0 0 5px', fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase' }}>Try an example</p>
-                  {EXAMPLES.slice(0,3).map((ex,i) => (
-                    <button key={i} onClick={() => updatePromptDraft(ex)}
-                      style={{ display:'block', width:'100%', background:'none', border:'none', textAlign:'left', cursor:'pointer', color:'rgba(255,255,255,0.28)', fontSize:'11.5px', lineHeight:1.5, padding:'3px 5px', borderRadius:'5px', fontFamily:'inherit', transition:'all 0.15s', marginBottom:'2px' }}
-                      onMouseEnter={e => { e.currentTarget.style.color='#60a5fa'; e.currentTarget.style.background='rgba(59,130,246,0.06)' }}
-                      onMouseLeave={e => { e.currentTarget.style.color='rgba(255,255,255,0.28)'; e.currentTarget.style.background='none' }}
-                    >→ {ex.length > 58 ? ex.slice(0,58)+'…' : ex}</button>
+              <div style={{ marginTop: 12 }}>
+                <p style={{ margin: '0 0 7px', fontSize: 12, color: C.muted, fontWeight: 600 }}>Or start from an example</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {EXAMPLES.map(([icon, label, text]) => (
+                    <button key={label} className="gw-ex" onClick={() => updatePromptDraft(text)} title={text}
+                      style={{ padding: '6px 11px', borderRadius: 99, border: `1px solid ${prompt === text ? C.violet : C.border}`, background: prompt === text ? 'rgba(124,58,237,0.07)' : C.surface, color: prompt === text ? C.violet : C.text, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: FONT }}>
+                      {icon} {label}
+                    </button>
                   ))}
                 </div>
               </div>
-
-              <motion.button
-                onClick={handleEnhancePrompt}
-                disabled={!prompt.trim() || enhancing || generating}
-                whileHover={prompt.trim() && !enhancing && !generating ? { scale:1.02 } : {}}
-                whileTap={prompt.trim() && !enhancing && !generating ? { scale:0.97 } : {}}
-                style={{ width:'100%', marginTop:'10px', padding:'11px', borderRadius:'10px', border:'1px solid rgba(139,92,246,0.35)', background: prompt.trim() && !enhancing && !generating ? 'rgba(139,92,246,0.1)' : 'rgba(255,255,255,0.03)', color: prompt.trim() && !enhancing && !generating ? '#a78bfa' : 'rgba(255,255,255,0.2)', fontWeight:600, fontSize:'13px', fontFamily:'inherit', cursor: prompt.trim() && !enhancing && !generating ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', transition:'all 0.2s' }}>
-                {enhancing ? (
-                  <><motion.span animate={{ rotate:360 }} transition={{ duration:1, repeat:Infinity, ease:'linear' }} style={{ display:'inline-block' }}>⟳</motion.span> Enhancing your prompt…</>
-                ) : (
-                  <>✨ Enhance Prompt with AI <span style={{ fontSize:'10px', opacity:0.5, marginLeft:2 }}>(optional)</span></>
-                )}
-              </motion.button>
             </div>
 
-            {/* STYLE */}
+            {/* How to build */}
             <div>
-              <label style={LBL}>Visual Style</label>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px' }}>
-                {STYLE_PRESETS.map(s => (
-                  <motion.button key={s.id} onClick={() => handleStyleSelect(s.id)} whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}
-                    style={{ padding:'9px 11px', borderRadius:'9px', cursor:'pointer', textAlign:'left', fontFamily:'inherit', transition:'all 0.15s', border:`1px solid ${selectedStyle===s.id ? 'rgba(59,130,246,0.5)' : 'rgba(255,255,255,0.06)'}`, background: selectedStyle===s.id ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.015)' }}>
-                    <div style={{ fontSize:'14px', marginBottom:'3px', color: selectedStyle===s.id ? '#60a5fa' : 'rgba(255,255,255,0.35)' }}>{s.icon}</div>
-                    <div style={{ fontSize:'11.5px', fontWeight:600, color: selectedStyle===s.id ? 'white' : 'rgba(255,255,255,0.5)', marginBottom:'1px' }}>{s.label}</div>
-                    <div style={{ fontSize:'10.5px', color:'rgba(255,255,255,0.2)' }}>{s.id==='random' && activePalette ? activePalette.name : s.desc}</div>
-                  </motion.button>
-                ))}
-              </div>
-              <AnimatePresence>
-                {selectedStyle === 'random' && activePalette && (
-                  <motion.div initial={{ opacity:0, height:0 }} animate={{ opacity:1, height:'auto' }} exit={{ opacity:0, height:0 }} style={{ overflow:'hidden', marginTop:'7px' }}>
-                    <div style={{ borderRadius:'9px', border:'1px solid rgba(255,255,255,0.06)', background:'rgba(255,255,255,0.015)', padding:'9px 11px', display:'flex', alignItems:'center', gap:'9px' }}>
-                      <div style={{ display:'flex', gap:'4px', flexShrink:0 }}>
-                        {[activePalette.primary, activePalette.accent, activePalette.bg].map((c,i) => <div key={i} style={{ width:'15px', height:'15px', borderRadius:'50%', background:c, border:'1px solid rgba(255,255,255,0.1)' }} />)}
-                      </div>
-                      <div style={{ flex:1 }}>
-                        <div style={{ fontSize:'11.5px', fontWeight:600, color:'white' }}>{activePalette.name}</div>
-                        <div style={{ fontSize:'10.5px', color:'rgba(255,255,255,0.25)' }}>{activePalette.desc}</div>
-                      </div>
-                      <button onClick={rerollPalette} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'5px', padding:'3px 7px', color:'rgba(255,255,255,0.4)', fontSize:'12px', cursor:'pointer' }}>🔀</button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* SECTIONS */}
-            <div>
-              <label style={LBL}>Include Sections <span style={{ textTransform:'none', letterSpacing:0, fontWeight:500, opacity:0.7 }}>(optional — picked for you if empty)</span></label>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:'5px' }}>
-                {SECTIONS.map(s => (
-                  <motion.button key={s.id} onClick={() => toggleSection(s.id)} whileTap={{ scale:0.95 }}
-                    style={{ padding:'5px 11px', borderRadius:'20px', cursor:'pointer', fontFamily:'inherit', transition:'all 0.15s', fontSize:'11.5px', fontWeight:500, border:`1px solid ${selectedSections.includes(s.id) ? 'rgba(59,130,246,0.4)' : 'rgba(255,255,255,0.07)'}`, background: selectedSections.includes(s.id) ? 'rgba(59,130,246,0.09)' : 'transparent', color: selectedSections.includes(s.id) ? '#60a5fa' : 'rgba(255,255,255,0.35)' }}
-                  >{selectedSections.includes(s.id) ? '✓ ' : ''}{s.label}</motion.button>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ flex:1 }} />
-
-            {/* GENERATE BUTTON */}
-            <div>
-              <div role="radiogroup" aria-label="Generation engine" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px', marginBottom:'10px' }}>
+              <p style={LBL}><LayoutTemplate size={15} color={C.violet} /> How to build</p>
+              <div role="radiogroup" aria-label="Generation engine" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {[
-                  { id:'hybrid', label:'⚡ Templates', hint:'Recommended · always a complete site' },
-                  { id:'ai',     label:'🎨 Free-form AI', hint:'More freedom · may be cut short' },
+                  { id: 'hybrid', label: 'Templates', badge: 'Recommended', hint: 'Always a complete, tested site' },
+                  { id: 'ai',     label: 'Free-form AI', hint: 'More freedom · may be cut short' },
                 ].map(o => (
-                  <button key={o.id} role="radio" aria-checked={engine === o.id} onClick={() => setEngine(o.id)} disabled={generating} title={o.hint}
-                    style={{ padding:'8px 6px', borderRadius:'9px', cursor:'pointer', fontFamily:'inherit', textAlign:'center', border:`1px solid ${engine === o.id ? 'rgba(59,130,246,0.45)' : 'rgba(255,255,255,0.08)'}`, background: engine === o.id ? 'rgba(59,130,246,0.1)' : 'transparent', color: engine === o.id ? '#93c5fd' : 'rgba(255,255,255,0.4)' }}>
-                    <div style={{ fontSize:'12px', fontWeight:700 }}>{o.label}</div>
-                    <div style={{ fontSize:'9.5px', opacity:0.75, marginTop:'2px' }}>{o.hint}</div>
+                  <button key={o.id} role="radio" aria-checked={engine === o.id} onClick={() => setEngine(o.id)} disabled={generating} style={choice(engine === o.id)}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 700, color: C.ink }}>{o.label}</span>
+                      {o.badge && <span style={{ fontSize: 10, fontWeight: 700, color: C.green, background: '#ecfdf5', borderRadius: 99, padding: '1px 7px' }}>{o.badge}</span>}
+                    </div>
+                    <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>{o.hint}</div>
                   </button>
                 ))}
               </div>
               {engine === 'hybrid' && (
-                <div role="radiogroup" aria-label="Pages" style={{ display:'flex', gap:'6px', marginBottom:'10px' }}>
-                  {[{ id:'single', label:'📄 Single page' }, { id:'multi', label:'🗂 Multi-page' }].map(o => (
-                    <button key={o.id} role="radio" aria-checked={pageMode === o.id} onClick={() => setPageMode(o.id)} disabled={generating}
-                      title={o.id === 'multi' ? 'Home page plus separate pages for menu, gallery, contact…' : 'Everything on one scrolling page'}
-                      style={{ flex:1, padding:'7px 6px', borderRadius:'9px', cursor:'pointer', fontFamily:'inherit', fontSize:'11.5px', fontWeight:600, border:`1px solid ${pageMode === o.id ? 'rgba(56,189,248,0.45)' : 'rgba(255,255,255,0.08)'}`, background: pageMode === o.id ? 'rgba(56,189,248,0.1)' : 'transparent', color: pageMode === o.id ? '#7dd3fc' : 'rgba(255,255,255,0.4)' }}>
-                      {o.label}
+                <div role="radiogroup" aria-label="Pages" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
+                  {[
+                    { id: 'single', label: 'Single page', icon: FileText, hint: 'Everything on one page' },
+                    { id: 'multi',  label: 'Multi-page',  icon: Files,    hint: 'Home + Menu, Gallery, Contact…' },
+                  ].map(o => (
+                    <button key={o.id} role="radio" aria-checked={pageMode === o.id} onClick={() => setPageMode(o.id)} disabled={generating} style={choice(pageMode === o.id)}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 700, color: C.ink }}>{React.createElement(o.icon, { size: 15, color: pageMode === o.id ? C.violet : C.muted })}{o.label}</span>
+                      <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>{o.hint}</div>
                     </button>
                   ))}
                 </div>
               )}
-              {!plan && (
-                <button onClick={handlePlan} disabled={!canPlan}
-                  title="See which sections and features the AI will build, edit them, then generate"
-                  style={{ width:'100%', padding:'10px', marginBottom:'8px', borderRadius:'11px', border:'1px solid rgba(167,139,250,0.3)', background: canPlan ? 'rgba(167,139,250,0.08)' : 'rgba(255,255,255,0.02)', color: canPlan ? '#c4b5fd' : 'rgba(255,255,255,0.2)', fontWeight:600, fontSize:'13px', fontFamily:'inherit', cursor: canPlan ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', gap:'7px' }}>
-                  {planning
-                    ? <><motion.span animate={{ rotate:360 }} transition={{ duration:1.2, repeat:Infinity, ease:'linear' }} style={{ display:'inline-block' }}>⟳</motion.span> Planning your site…</>
-                    : <>📋 Review plan first <span style={{ fontSize:'10.5px', opacity:0.7 }}>(no credits)</span></>}
-                </button>
-              )}
-              <div style={{ fontSize:'10.5px', color:'rgba(255,255,255,0.18)', textAlign:'center', marginBottom:'9px' }}>
-                50 credits per generation · {userData?.credits ?? 0} remaining
-              </div>
-              <motion.button
-                onClick={handleGenerate}
-                disabled={!canGenerate}
-                whileHover={canGenerate ? { scale:1.02 } : {}}
-                whileTap={canGenerate ? { scale:0.97 } : {}}
-                style={{ width:'100%', padding:'13px', borderRadius:'11px', border:'none', background: canGenerate ? 'linear-gradient(135deg,#1d4ed8,#3b82f6)' : 'rgba(255,255,255,0.04)', color: canGenerate ? 'white' : 'rgba(255,255,255,0.18)', fontWeight:700, fontSize:'14px', fontFamily:'inherit', cursor: canGenerate ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', transition:'all 0.2s', boxShadow: canGenerate ? '0 4px 22px rgba(59,130,246,0.28)' : 'none' }}>
-                {generating
-                  ? <><motion.span animate={{ rotate:360 }} transition={{ duration:1.2, repeat:Infinity, ease:'linear' }} style={{ display:'inline-block' }}>⟳</motion.span> {GEN_STEPS[Math.min(generatingStep, GEN_STEPS.length-1)]}</>
-                  : <>🚀 {plan ? 'Generate from plan' : 'Generate Website'}</>
-                }
-              </motion.button>
-              {!prompt.trim() && (
-                <p style={{ fontSize:'11px', color:'rgba(255,255,255,0.15)', textAlign:'center', marginTop:'6px' }}>
-                  Describe your website above to get started
-                </p>
-              )}
             </div>
 
+            {/* Optional style + sections */}
+            <div>
+              <button onClick={() => setShowMore(s => !s)} aria-expanded={showMore}
+                style={{ ...btn.ghost, width: '100%', justifyContent: 'space-between', padding: '10px 12px', border: `1px solid ${C.border}`, background: C.surface, borderRadius: 12 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 7, color: C.ink }}><Palette size={15} color={C.violet} /> Style & sections <span style={{ fontWeight: 500, color: C.muted }}>(optional)</span></span>
+                <span style={{ fontSize: 12.5, color: C.muted, fontWeight: 500 }}>
+                  {[selectedStyle !== 'auto' && STYLE_PRESETS.find(s => s.id === selectedStyle)?.label, selectedSections.length && `${selectedSections.length} sections`].filter(Boolean).join(' · ') || 'Auto'} {showMore ? '▲' : '▼'}
+                </span>
+              </button>
+              <AnimatePresence initial={false}>
+                {showMore && (
+                  <Motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
+                    <div style={{ paddingTop: 14, display: 'grid', gap: 16 }}>
+                      <div>
+                        <p style={{ ...LBL, fontWeight: 600, color: C.text }}>Visual style</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 6 }}>
+                          {STYLE_PRESETS.map(s => (
+                            <button key={s.id} onClick={() => handleStyleSelect(s.id)} aria-pressed={selectedStyle === s.id} style={{ ...choice(selectedStyle === s.id), padding: '8px 10px' }}>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}><span style={{ color: selectedStyle === s.id ? C.violet : C.faint, marginRight: 6 }}>{s.icon}</span>{s.label}</div>
+                              <div style={{ fontSize: 11.5, color: C.muted, marginTop: 2 }}>{s.id === 'random' && activePalette ? activePalette.name : s.desc}</div>
+                            </button>
+                          ))}
+                        </div>
+                        {selectedStyle === 'random' && activePalette && (
+                          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 12, border: `1px solid ${C.border}`, background: C.surface }}>
+                            <div style={{ display: 'flex', gap: 4 }}>{[activePalette.primary, activePalette.accent, activePalette.bg].map(c => <span key={c} style={{ width: 16, height: 16, borderRadius: 99, background: c, border: `1px solid ${C.border}` }} />)}</div>
+                            <span style={{ flex: 1, fontSize: 13, color: C.text }}>{activePalette.name}</span>
+                            <button onClick={rerollPalette} aria-label="Another palette" style={{ ...btn.secondary, padding: 6 }}><Shuffle size={14} /></button>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p style={{ ...LBL, fontWeight: 600, color: C.text }}>Must-have sections <span style={{ fontWeight: 500, color: C.muted }}>— picked for you if empty</span></p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                          {SECTIONS.map(s => {
+                            const on = selectedSections.includes(s.id)
+                            return (
+                              <button key={s.id} onClick={() => toggleSection(s.id)} aria-pressed={on}
+                                style={{ padding: '6px 12px', borderRadius: 99, cursor: 'pointer', fontFamily: FONT, fontSize: 12.5, fontWeight: 600, border: `1px solid ${on ? C.violet : C.border}`, background: on ? 'rgba(124,58,237,0.07)' : C.surface, color: on ? C.violet : C.text }}>
+                                {on ? '✓ ' : ''}{s.label}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </Motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Actions */}
+            <div className="gw-gen-actions" style={{ display: 'grid', gap: 10, position: 'sticky', bottom: 0, margin: '0 -26px -26px', padding: '14px 26px 18px', background: 'linear-gradient(to top, #fff 82%, rgba(255,255,255,0))' }}>
+              {lowCredits && (
+                <div style={{ fontSize: 13, color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, padding: '10px 12px' }}>
+                  Building needs {GENERATION_COST} credits and you have {credits}. Reviewing the plan is still free. <button onClick={() => navigate('/pricing')} style={{ ...btn.ghost, display: 'inline', padding: 0, color: C.amber, textDecoration: 'underline', fontSize: 13 }}>Get credits</button>
+                </div>
+              )}
+              {!plan && (
+                <button onClick={handlePlan} disabled={!canPlan} title="See the sections and features first, change them, then build"
+                  style={{ ...btn.secondary, width: '100%', opacity: canPlan ? 1 : 0.55, cursor: canPlan ? 'pointer' : 'not-allowed' }}>
+                  {planning ? <><Spin /> Planning your site…</> : <><ClipboardList size={17} color={C.violet} /> Review the plan first <span style={{ fontSize: 12, color: C.green, fontWeight: 700 }}>FREE</span></>}
+                </button>
+              )}
+              <button onClick={handleGenerate} disabled={!canGenerate}
+                style={{ ...btn.primary, width: '100%', padding: '14px 22px', opacity: canGenerate ? 1 : 0.5, cursor: canGenerate ? 'pointer' : 'not-allowed', boxShadow: canGenerate ? shadow.brand : 'none' }}>
+                {generating ? <><Spin /> {GEN_STEPS[Math.min(generatingStep, GEN_STEPS.length - 1)]}</> : <><Rocket size={17} /> {plan ? 'Build from plan' : 'Build my website'}</>}
+              </button>
+              <p style={{ margin: 0, fontSize: 12.5, color: C.muted, textAlign: 'center' }}>
+                {GENERATION_COST} credits per website · <b style={{ color: C.amber }}>{credits}</b> left
+              </p>
+            </div>
           </div>
         </aside>
 
-        {/* RIGHT PANEL */}
-        <div style={{ flex:1, height:'100%', display:'flex', flexDirection:'column', overflow:'hidden', minWidth:0, position:'relative' }}>
-
-          {/* ── ORBIT SCENE BACKGROUND ── */}
-          <div style={{ position:'absolute', inset:0, zIndex:0, overflow:'hidden', background:'#02020e' }}>
-            <OrbitScene3D />
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg, rgba(7,7,10,0.55) 0%, transparent 18%)' }} />
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(6,6,8,0.5) 0%, transparent 30%)' }} />
-          </div>
-
-          {/* Tab bar */}
+        {/* ── Right: plan / progress / preview ── */}
+        <main ref={mainRef} className="gw-gen-main" style={{ position: 'relative', display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
           {generated && !generating && (
-            <div style={{ position:'relative', zIndex:2, height:'46px', flexShrink:0, borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', padding:'0 14px', gap:'4px', background:'rgba(8,8,12,0.88)', backdropFilter:'blur(12px)' }}>
-              {['preview','code'].map(tab => (
-                <button key={tab} onClick={() => setActiveTab(tab)}
-                  style={{ padding:'5px 13px', borderRadius:'7px', border:'none', cursor:'pointer', background: activeTab===tab ? 'rgba(59,130,246,0.12)' : 'transparent', color: activeTab===tab ? '#60a5fa' : 'rgba(255,255,255,0.35)', fontSize:'12.5px', fontWeight:500, fontFamily:'inherit', transition:'all 0.15s' }}>
-                  {tab==='preview' ? '🖥 Preview' : '‹/› Code'}
-                </button>
-              ))}
-              {activeTab === 'preview' && (
-                <button onClick={() => setShowFullPreview(true)}
-                  style={{ marginLeft:'6px', padding:'5px 12px', borderRadius:'7px', border:'1px solid rgba(59,130,246,0.25)', background:'rgba(59,130,246,0.07)', color:'#60a5fa', fontSize:'12px', fontWeight:600, cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s', display:'flex', alignItems:'center', gap:'5px' }}
-                  onMouseEnter={e => { e.currentTarget.style.background='rgba(59,130,246,0.14)'; e.currentTarget.style.borderColor='rgba(59,130,246,0.45)' }}
-                  onMouseLeave={e => { e.currentTarget.style.background='rgba(59,130,246,0.07)'; e.currentTarget.style.borderColor='rgba(59,130,246,0.25)' }}
-                >⛶ Full Page</button>
-              )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '10px 16px', background: C.surface, borderBottom: `1px solid ${C.border}` }}>
+              <div role="tablist" aria-label="View" style={{ display: 'flex', gap: 4, padding: 3, borderRadius: 10, background: C.soft }}>
+                {[['preview', 'Preview', Monitor], ['code', 'Code', Code2]].map(([id, label, Icon]) => (
+                  <button key={id} role="tab" aria-selected={activeTab === id} onClick={() => setActiveTab(id)}
+                    style={{ ...btn.ghost, padding: '6px 12px', fontSize: 13, background: activeTab === id ? C.surface : 'transparent', color: activeTab === id ? C.violet : C.muted, boxShadow: activeTab === id ? shadow.sm : 'none' }}>
+                    {React.createElement(Icon, { size: 15 })}{label}
+                  </button>
+                ))}
+              </div>
+              {activeTab === 'preview' && <button onClick={() => setShowFullPreview(true)} style={{ ...btn.ghost, fontSize: 13 }}><Maximize2 size={15} /> Full page</button>}
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+                <button onClick={handleDownload} disabled={exporting} style={{ ...btn.secondary, padding: '8px 14px', fontSize: 13.5 }}><Download size={15} /> {exporting ? 'Preparing…' : 'Download'}</button>
+                <button onClick={openEditor} style={{ ...btn.primary, padding: '8px 16px', fontSize: 13.5, boxShadow: 'none' }}>Open in editor <ArrowRight size={15} /></button>
+              </div>
             </div>
           )}
 
-          {/* Content area */}
-          <div style={{ flex:1, position:'relative', zIndex:1, display:'flex', alignItems: !generating && !generated ? 'center' : 'stretch', justifyContent: !generating && !generated ? 'center' : 'stretch', overflow:'hidden' }}>
-
-            {/* PLAN REVIEW state */}
+          <div style={{ flex: 1, position: 'relative', display: 'flex', overflow: 'auto', alignItems: generated && !generating ? 'stretch' : 'center', justifyContent: 'center' }}>
+            {/* Plan review */}
             {!generating && !generated && plan && (
-              <PlanReview plan={plan} onChange={setPlan} onGenerate={handleGenerate} onDiscard={() => setPlan(null)}
-                credits={userData?.credits} generating={generating} />
+              <div style={{ width: '100%', alignSelf: 'flex-start' }}>
+                <PlanReview plan={plan} onChange={setPlan} onGenerate={handleGenerate} onDiscard={() => setPlan(null)} credits={credits} cost={GENERATION_COST} generating={generating} />
+              </div>
             )}
 
-            {/* IDLE state */}
+            {/* Idle */}
             {!generating && !generated && !plan && (
-              <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} style={{ textAlign:'center', maxWidth:'420px', padding:'24px' }}>
-                <div style={{ width:'88px', height:'88px', borderRadius:'28px', background:'linear-gradient(135deg,rgba(99,60,220,0.18),rgba(59,130,246,0.12))', border:'1px solid rgba(139,92,246,0.3)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 28px', fontSize:'36px', boxShadow:'0 0 80px rgba(99,60,220,0.2), 0 0 40px rgba(59,130,246,0.1)' }}>✨</div>
-                <h2 style={{ fontSize:'24px', fontWeight:800, color:'white', margin:'0 0 12px', letterSpacing:'-0.03em', textShadow:'0 0 40px rgba(139,92,246,0.4)' }}>Your website will appear here</h2>
-                <p style={{ fontSize:'13px', color:'rgba(255,255,255,0.38)', lineHeight:1.75, margin:'0 0 28px' }}>
-                  Describe your idea in the sidebar and hit <strong style={{ color:'#60a5fa' }}>Generate</strong>.<br/>
-                  Use <strong style={{ color:'#a78bfa' }}>Enhance</strong> first for better results — it's optional.
-                </p>
-                <div style={{ display:'flex', flexWrap:'wrap', gap:'7px', justifyContent:'center' }}>
-                  {['✨ AI Prompt Enhancer','⚡ Top-tier AI models','📱 Mobile responsive','🎨 Premium design','💾 Export ready'].map((f,i) => (
-                    <div key={i} style={{ padding:'6px 14px', borderRadius:'20px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', fontSize:'11.5px', color:'rgba(255,255,255,0.38)', backdropFilter:'blur(8px)' }}>{f}</div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {/* GENERATING state */}
-            {generating && (
-              <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} style={{ textAlign:'center', maxWidth:'400px', width:'100%', margin:'auto', padding:'24px' }}>
-                <div style={{ position:'relative', width:'176px', margin:'0 auto 26px', userSelect:'none' }}>
-                  <CircularProgress pct={realPct} size={176} stroke={8} />
-                  <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'3px' }}>
-                    <span style={{ fontSize:'36px', fontWeight:800, color:'white', letterSpacing:'-0.04em', lineHeight:1, fontVariantNumeric:'tabular-nums' }}>{realPct}%</span>
-                    <span style={{ fontSize:'11px', fontWeight:500, color: remainingSecs < 5 ? '#4ade80' : '#60a5fa', transition:'color 1s' }}>
-                      {remainingSecs > 1 ? `~${formatTime(remainingSecs)} left` : 'almost done…'}
-                    </span>
-                  </div>
-                </div>
-                <h3 style={{ fontSize:'17px', fontWeight:700, color:'white', margin:'0 0 4px', letterSpacing:'-0.02em' }}>Building your website</h3>
-                <p style={{ fontSize:'12.5px', color:'rgba(255,255,255,0.38)', margin:'0 0 20px' }}>{GEN_STEPS[Math.min(generatingStep, GEN_STEPS.length-1)]}</p>
-                <div style={{ display:'flex', flexDirection:'column', gap:'5px', marginBottom:'18px' }}>
-                  {GEN_STEPS.map((step,i) => {
-                    const done=i<generatingStep, active=i===generatingStep
-                    return (
-                      <div key={i} style={{ display:'flex', alignItems:'center', gap:'9px', padding:'7px 11px', borderRadius:'8px', background: done ? 'rgba(59,130,246,0.07)' : active ? 'rgba(59,130,246,0.04)' : 'rgba(255,255,255,0.015)', border:`1px solid ${done ? 'rgba(59,130,246,0.18)' : active ? 'rgba(59,130,246,0.1)' : 'rgba(255,255,255,0.04)'}`, opacity: done ? 1 : active ? 0.9 : 0.22, transition:'all 0.4s' }}>
-                        <div style={{ width:'18px', height:'18px', borderRadius:'50%', flexShrink:0, background: done ? 'linear-gradient(135deg,#1d4ed8,#3b82f6)' : 'rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'9px', color:'white', transition:'all 0.4s' }}>
-                          {done ? '✓' : active ? <motion.span animate={{ opacity:[1,0.2,1] }} transition={{ duration:1, repeat:Infinity }}>·</motion.span> : <span style={{ color:'rgba(255,255,255,0.3)' }}>{i+1}</span>}
-                        </div>
-                        <span style={{ fontSize:'12px', flex:1, textAlign:'left', color: done ? 'rgba(255,255,255,0.6)' : active ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)', transition:'color 0.4s' }}>{step}</span>
-                        {done && <span style={{ fontSize:'10px', color:'#3b82f6' }}>✓</span>}
-                      </div>
-                    )
-                  })}
-                </div>
-                <AnimatePresence mode="wait">
-                  <motion.div key={tipIndex} initial={{ opacity:0, y:5 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-5 }} transition={{ duration:0.35 }}
-                    style={{ padding:'11px 14px', borderRadius:'9px', background:'rgba(59,130,246,0.05)', border:'1px solid rgba(59,130,246,0.1)', fontSize:'11.5px', color:'rgba(255,255,255,0.35)', lineHeight:1.6, textAlign:'left' }}>
-                    {TIPS[tipIndex]}
-                  </motion.div>
-                </AnimatePresence>
-              </motion.div>
-            )}
-
-            {/* GENERATED state */}
-            {generated && !generating && (
-              <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column' }}>
-                {activeTab === 'preview' ? (
-                  <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
-                    <iframe srcDoc={previewDoc} style={{ width:'100%', height:'100%', border:'none', background:'white' }} title="Generated Website Preview" sandbox={PREVIEW_SANDBOX} />
-                    <div onClick={() => setShowFullPreview(true)}
-                      style={{ position:'absolute', inset:0, display:'flex', alignItems:'flex-end', justifyContent:'center', paddingBottom:'22px', background:'linear-gradient(to top, rgba(5,5,10,0.55) 0%, transparent 35%)', cursor:'pointer', zIndex:2, opacity:0, transition:'opacity 0.2s' }}
-                      onMouseEnter={e => e.currentTarget.style.opacity='1'}
-                      onMouseLeave={e => e.currentTarget.style.opacity='0'}
-                    >
-                      <div style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 18px', borderRadius:'99px', background:'rgba(8,8,16,0.92)', border:'1px solid rgba(59,130,246,0.4)', backdropFilter:'blur(14px)', color:'#60a5fa', fontSize:'12.5px', fontWeight:600, boxShadow:'0 4px 20px rgba(59,130,246,0.2)' }}>
-                        ⛶ Click to open full-page preview
+              <Motion.div initial={{ y: 16 }} animate={{ y: 0 }} style={{ textAlign: 'center', maxWidth: 520, padding: 28 }}>
+                <div style={{ position: 'relative', width: 'min(100%, 380px)', margin: '0 auto 28px' }}>
+                  <div aria-hidden="true" style={{ borderRadius: 18, background: C.surface, border: `1px solid ${C.border}`, boxShadow: shadow.lg, overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', gap: 5, padding: '9px 12px', background: C.soft, borderBottom: `1px solid ${C.border}` }}>
+                      {['#ff5f56', '#ffbd2e', '#27c93f'].map(c => <span key={c} style={{ width: 9, height: 9, borderRadius: 99, background: c }} />)}
+                    </div>
+                    <div style={{ padding: 20, display: 'grid', gap: 10 }}>
+                      <div style={{ height: 12, width: '45%', borderRadius: 6, background: C.brand, opacity: 0.85 }} />
+                      <div style={{ height: 22, width: '80%', borderRadius: 8, background: '#ece9fb' }} />
+                      <div style={{ height: 10, width: '65%', borderRadius: 6, background: '#f1effb' }} />
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginTop: 6 }}>
+                        {[0, 1, 2].map(i => <div key={i} style={{ height: 48, borderRadius: 10, background: '#f5f3ff', border: `1px solid ${C.border}` }} />)}
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div style={{ flex:1, overflow:'hidden' }}>
-                    <CodeViewer code={generatedCode} />
-                  </div>
-                )}
-              </motion.div>
+                  <span style={{ position: 'absolute', right: -14, top: -14, width: 46, height: 46, borderRadius: 14, display: 'grid', placeItems: 'center', background: C.brand, color: '#fff', boxShadow: shadow.brand }}><Sparkles size={22} /></span>
+                </div>
+                <h2 style={{ fontSize: 24, fontWeight: 800, color: C.ink, margin: '0 0 10px', letterSpacing: '-0.02em' }}>Your website will appear here</h2>
+                <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.7, margin: '0 0 22px' }}>
+                  Describe your business, then <b style={{ color: C.text }}>review the plan</b> to check sections for free, or <b style={{ color: C.text }}>build</b> right away.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+                  {['Complete pages every time', 'Booking & contact forms', 'Works on phones', 'Edit without AI'].map(f => (
+                    <span key={f} style={{ ...pill(C.violet), fontWeight: 600, letterSpacing: 0, fontSize: 12.5 }}><Check size={13} /> {f}</span>
+                  ))}
+                </div>
+              </Motion.div>
             )}
 
+            {/* Generating */}
+            {generating && (
+              <Motion.div initial={{ y: 12 }} animate={{ y: 0 }} aria-live="polite" style={{ textAlign: 'center', maxWidth: 420, width: '100%', padding: 28 }}>
+                <div style={{ position: 'relative', width: 168, margin: '0 auto 22px' }}>
+                  <CircularProgress pct={realPct} />
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 34, fontWeight: 800, color: C.ink, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{realPct}%</span>
+                    <span style={{ fontSize: 12.5, color: C.muted }}>{remainingSecs > 1 ? `~${formatTime(remainingSecs)} left` : 'almost done…'}</span>
+                  </div>
+                </div>
+                <h3 style={{ fontSize: 19, fontWeight: 800, color: C.ink, margin: '0 0 16px' }}>Building your website</h3>
+                <ol style={{ listStyle: 'none', padding: 0, margin: '0 0 18px', display: 'grid', gap: 6, textAlign: 'left' }}>
+                  {GEN_STEPS.map((step, i) => {
+                    const done = i < generatingStep, active = i === generatingStep
+                    return (
+                      <li key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 10, background: active ? C.surface : 'transparent', border: `1px solid ${active ? C.border : 'transparent'}`, boxShadow: active ? shadow.sm : 'none', opacity: done || active ? 1 : 0.45 }}>
+                        <span style={{ width: 22, height: 22, borderRadius: 99, display: 'grid', placeItems: 'center', flexShrink: 0, background: done ? C.green : active ? 'rgba(124,58,237,0.1)' : C.soft, color: done ? '#fff' : C.violet, fontSize: 11, fontWeight: 700 }}>
+                          {done ? <Check size={13} /> : active ? <Spin size={13} /> : i + 1}
+                        </span>
+                        <span style={{ fontSize: 13.5, color: done ? C.text : active ? C.ink : C.muted, fontWeight: active ? 700 : 500 }}>{step}</span>
+                      </li>
+                    )
+                  })}
+                </ol>
+                <AnimatePresence mode="wait">
+                  <Motion.div key={tipIndex} initial={{ y: 5, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -5, opacity: 0 }} transition={{ duration: 0.3 }}
+                    style={{ padding: '12px 14px', borderRadius: 12, background: C.surface, border: `1px solid ${C.border}`, fontSize: 13.5, color: C.text, lineHeight: 1.6, textAlign: 'left' }}>
+                    {TIPS[tipIndex]}
+                  </Motion.div>
+                </AnimatePresence>
+              </Motion.div>
+            )}
+
+            {/* Generated */}
+            {generated && !generating && (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: activeTab === 'preview' ? 'clamp(10px,2vw,20px)' : 0, minHeight: 0 }}>
+                {activeTab === 'preview' ? (
+                  <div style={{ flex: 1, minHeight: 480, borderRadius: 14, overflow: 'hidden', border: `1px solid ${C.border}`, boxShadow: shadow.lg, background: '#fff', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '8px 12px', background: C.soft, borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+                      {['#ff5f56', '#ffbd2e', '#27c93f'].map(c => <span key={c} style={{ width: 9, height: 9, borderRadius: 99, background: c }} />)}
+                    </div>
+                    <iframe srcDoc={previewDoc} style={{ flex: 1, width: '100%', border: 'none', background: 'white' }} title="Generated website preview" sandbox={PREVIEW_SANDBOX} />
+                  </div>
+                ) : (
+                  <div style={{ flex: 1, minHeight: 480, overflow: 'hidden' }}><CodeViewer code={generatedCode} /></div>
+                )}
+              </div>
+            )}
+
+            {/* Success toast with redirect */}
+            <AnimatePresence>
+              {generated && redirecting && (
+                <Motion.div role="status" initial={{ x: '-50%', y: 20, opacity: 0 }} animate={{ x: '-50%', y: 0, opacity: 1 }} exit={{ x: '-50%', y: 20, opacity: 0 }}
+                  style={{ position: 'absolute', bottom: 22, left: '50%', zIndex: 5, display: 'flex', alignItems: 'center', gap: 12, padding: '10px 10px 10px 16px', borderRadius: 14, background: C.ink, color: '#fff', boxShadow: shadow.lg, fontSize: 14, whiteSpace: 'nowrap' }}>
+                  <Check size={17} color="#4ade80" /> Website saved — opening the editor…
+                  <button onClick={stayHere} style={{ ...btn.ghost, padding: '6px 10px', color: '#fff', background: 'rgba(255,255,255,0.12)', fontSize: 13 }}>Stay here</button>
+                </Motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   )

@@ -4,7 +4,8 @@ import { getAiConfig } from "../ai/config.js"
 import { startRequest, finishRequest } from "../ai/usage.js"
 import { AiRequest } from "../models/ai.models.js"
 import { reserve as reserveQuota, release as releaseQuota, userCounterId } from "../ai/quota.js"
-import { generateSite, editSite, enhanceIdea } from "../ai/pipeline.js"
+import { generateSite, editSite, enhanceIdea, planSite } from "../ai/pipeline.js"
+import { normalizePlan, checkPlan } from "../ai/plan.js"
 import { insertAt } from "../ai/htmlPatch.js"
 import { allowedOrigins } from "../config/origins.js"
 import Website from "../models/website.model.js"
@@ -170,6 +171,34 @@ export const enhancePrompt = async (req, res) => {
   }
 }
 
+// POST /api/website/plan  body: { prompt } → { plan }. Uses a daily request
+// slot like enhance; no credits (credits are charged when generating).
+export const planWebsite = async (req, res) => {
+  const requestId = newRequestId()
+  const started = Date.now()
+  let slot = null
+  try {
+    const { prompt } = req.body
+    if (typeof prompt !== "string" || !prompt.trim()) return res.status(400).json({ success: false, message: "Prompt required" })
+    slot = await reserveDailySlot(req.user._id)
+    if (!slot) return quotaResponse(res)
+
+    await startRequest({ requestId, userId: req.user._id, task: "plan" })
+    const r = await planSite(prompt.trim().slice(0, 4000), { ctx: { requestId, userId: req.user._id } })
+    if (!r.plan) {
+      await releaseQuota(slot); slot = null
+      await finishRequest(requestId, { outcome: "failed", failureReason: r.reason, durationMs: Date.now() - started })
+      return r.exhausted ? capacityResponse(res, r.retryAfterMs) : res.status(503).json({ success: false, message: "Could not plan this site — try again, or generate directly." })
+    }
+    await finishRequest(requestId, { outcome: "success", modelUsed: r.model?.id || "cache", durationMs: Date.now() - started })
+    return res.json({ success: true, plan: r.plan })
+  } catch (e) {
+    if (slot) await releaseQuota(slot)
+    await finishRequest(requestId, { outcome: "failed", failureReason: "error" })
+    return serverError(res, "planWebsite", e)
+  }
+}
+
 export const generateWebsite = async (req, res) => {
   const cost = CREDITS_CONFIG.COST_PER_GENERATION
   const requestId = newRequestId()
@@ -178,6 +207,13 @@ export const generateWebsite = async (req, res) => {
   try {
     const { prompt } = req.body
     if (typeof prompt !== "string" || !prompt.trim()) return res.status(400).json({ success: false, message: "Prompt required" })
+    // Optional reviewed plan (possibly edited by the user): re-validated here,
+    // never trusted as sent.
+    let plan = null
+    if (req.body.plan !== undefined && req.body.plan !== null) {
+      plan = normalizePlan(req.body.plan)
+      if (!plan) return res.status(400).json({ success: false, message: "The plan needs at least one section." })
+    }
     const user = req.user
 
     slot = await reserveDailySlot(user._id)
@@ -186,7 +222,7 @@ export const generateWebsite = async (req, res) => {
     if (!reservation) { await releaseQuota(slot); slot = null; return res.status(403).json({ success: false, message: `Need ${cost} credits` }) }
 
     await startRequest({ requestId, userId: user._id, task: "generate" })
-    const result = await generateSite(prompt.trim(), { deadline: Date.now() + REQUEST_BUDGET_MS, ctx: { requestId, userId: user._id } })
+    const result = await generateSite(prompt.trim(), { deadline: Date.now() + REQUEST_BUDGET_MS, ctx: { requestId, userId: user._id }, plan })
 
     if (!result.parsed) {
       await refundCredits(user._id, reservation, "generation failed"); reservation = null
@@ -212,6 +248,7 @@ export const generateWebsite = async (req, res) => {
       thumbnailBg,
       thumbnailAccent,
       thumbnailTitle,
+      plan,
       conversation: [
         { role: "user", content: prompt.trim() },
         { role: "ai",   content: parsed.message || "Website generated." },
@@ -236,6 +273,7 @@ export const generateWebsite = async (req, res) => {
       websiteId: website._id,
       website:   { id: website._id, title: website.title, slug: website.slug },
       credits:   { used: cost, remaining: reservation.balance },
+      checklist: checkPlan(parsed.code, plan),
     })
   } catch (e) {
     if (reservation) await refundCredits(req.user._id, reservation, "generation error")
@@ -258,7 +296,8 @@ export const getWebsite = async (req, res) => {
   try {
     const w = await findOwnWebsite(req)
     if (!w) return notFound(res)
-    return res.json({ success: true, website: w })
+    // Checklist is recomputed from the current code, so it reflects later edits.
+    return res.json({ success: true, website: w, checklist: checkPlan(w.latestCode, w.plan) })
   } catch (e) { return serverError(res, "getWebsite", e) }
 }
 
@@ -322,6 +361,7 @@ export const updateWebsite = async (req, res) => {
       mode:     r.mode,
       usage:    totals ? { inputTokens: totals.inputTokens, outputTokens: totals.outputTokens, aiCalls: totals.attempts } : null,
       credits:  { used: cost, remaining: reservation.balance },
+      checklist: checkPlan(r.parsed.code, website.plan),
     })
   } catch (e) {
     if (reservation) await refundCredits(req.user._id, reservation, "edit error")

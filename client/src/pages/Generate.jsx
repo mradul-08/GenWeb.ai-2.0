@@ -6,6 +6,7 @@ import { setUserData } from '../redux/userSlice'
 import { serverUrl } from '../config'
 import axios from 'axios'
 import { buildPreviewDoc, PREVIEW_SANDBOX } from '../utils/previewDoc'
+import PlanReview from '../components/PlanReview'
 
 // ─── Palettes ─────────────────────────────────────────────────────────────────
 const RANDOM_PALETTES = [
@@ -390,6 +391,10 @@ export default function Generate() {
   const [charCount,         setCharCount]         = useState(0)
   const [activePalette,     setActivePalette]     = useState(null)
 
+  // Plan mode: an editable plan reviewed before generating (null = direct mode).
+  const [plan,           setPlan]           = useState(null)
+  const [planning,       setPlanning]       = useState(false)
+
   const [generating,     setGenerating]     = useState(false)
   const [generatingStep, setGeneratingStep] = useState(0)
   const [generated,      setGenerated]      = useState(false)
@@ -462,6 +467,36 @@ export default function Generate() {
   const updatePromptDraft = (value) => {
     setPrompt(value.slice(0, PROMPT_CHAR_LIMIT))
     setIsEnhanced(false)
+    setPlan(null)   // a plan describes the prompt it was made from
+  }
+
+  // The prompt as sent to the server: the user's idea plus the sidebar choices.
+  const buildEnrichedPrompt = () => {
+    let styleNote = selectedStyle, paletteNote = ''
+    if (selectedStyle === 'random' && activePalette) {
+      styleNote   = 'colorful with custom palette'
+      paletteNote = ` Use this exact palette — primary: ${activePalette.primary}, accent: ${activePalette.accent}, background: ${activePalette.bg}. Name: "${activePalette.name}".`
+    }
+    return `${prompt.trim()}. Visual style: ${styleNote}.${paletteNote} Include sections: ${selectedSections.join(', ')}.`
+  }
+
+  const handlePlan = async () => {
+    if (!prompt.trim() || planning || generating) return
+    setPlanning(true); setError(''); setPlan(null)
+    try {
+      const { response, data } = await fetchJsonWithTimeout(`${serverUrl}/api/website/plan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ prompt: buildEnrichedPrompt() }),
+      }, 75000)
+      if (!response.ok || !data.success) throw new Error(data.message || 'Planning failed')
+      setPlan(data.plan)
+    } catch (err) {
+      setError(err.message || 'Could not plan this site. Try again, or generate directly.')
+    } finally {
+      setPlanning(false)
+    }
   }
 
   const handleEnhancePrompt = async () => {
@@ -478,6 +513,7 @@ export default function Generate() {
       if (!response.ok || !data.success) throw new Error(data.message || 'Enhancement failed')
       setPrompt(data.enhancedPrompt.slice(0, PROMPT_CHAR_LIMIT))
       setIsEnhanced(true)
+      setPlan(null)
     } catch (err) {
       setError(err.message || 'Failed to enhance prompt. Try again.')
     } finally {
@@ -492,20 +528,16 @@ export default function Generate() {
     setPreviewDoc(null)
     startTimers(getStoredAvg())
     try {
-      let styleNote = selectedStyle, paletteNote = ''
-      if (selectedStyle === 'random' && activePalette) {
-        styleNote   = 'colorful with custom palette'
-        paletteNote = ` Use this exact palette — primary: ${activePalette.primary}, accent: ${activePalette.accent}, background: ${activePalette.bg}. Name: "${activePalette.name}".`
-      }
-      const enrichedPrompt = `${prompt.trim()}. Visual style: ${styleNote}.${paletteNote} Include sections: ${selectedSections.join(', ')}.`
+      const body = { prompt: buildEnrichedPrompt(), ...(plan ? { plan } : {}) }
       const { response: res, data } = await fetchJsonWithTimeout(`${serverUrl}/api/website/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ prompt: enrichedPrompt }),
+        body: JSON.stringify(body),
       }, 240000)
       if (!res.ok || !data.success) throw new Error(data.message || 'Generation failed')
       setGeneratedCode(data.code)
+      setPlan(null)
       setGeneratingStep(GEN_STEPS.length)
       setPreviewDoc(buildPreviewDoc(data.code))
       setGenerated(true)
@@ -538,7 +570,8 @@ export default function Generate() {
 
   const realPct       = Math.min(99, Math.round((elapsedMs / estimatedMs) * 100))
   const remainingSecs = Math.max(0, (estimatedMs - elapsedMs) / 1000)
-  const canGenerate   = prompt.trim().length > 0 && !generating && !enhancing
+  const canGenerate   = prompt.trim().length > 0 && !generating && !enhancing && !planning && (!plan || plan.sections.length > 0)
+  const canPlan       = prompt.trim().length > 0 && !generating && !enhancing && !planning
 
   const LBL = {
     fontSize: '10.5px', fontWeight: 700, color: 'rgba(255,255,255,0.35)',
@@ -710,6 +743,15 @@ export default function Generate() {
 
             {/* GENERATE BUTTON */}
             <div>
+              {!plan && (
+                <button onClick={handlePlan} disabled={!canPlan}
+                  title="See which sections and features the AI will build, edit them, then generate"
+                  style={{ width:'100%', padding:'10px', marginBottom:'8px', borderRadius:'11px', border:'1px solid rgba(167,139,250,0.3)', background: canPlan ? 'rgba(167,139,250,0.08)' : 'rgba(255,255,255,0.02)', color: canPlan ? '#c4b5fd' : 'rgba(255,255,255,0.2)', fontWeight:600, fontSize:'13px', fontFamily:'inherit', cursor: canPlan ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', gap:'7px' }}>
+                  {planning
+                    ? <><motion.span animate={{ rotate:360 }} transition={{ duration:1.2, repeat:Infinity, ease:'linear' }} style={{ display:'inline-block' }}>⟳</motion.span> Planning your site…</>
+                    : <>📋 Review plan first <span style={{ fontSize:'10.5px', opacity:0.7 }}>(no credits)</span></>}
+                </button>
+              )}
               <div style={{ fontSize:'10.5px', color:'rgba(255,255,255,0.18)', textAlign:'center', marginBottom:'9px' }}>
                 50 credits per generation · {userData?.credits ?? 0} remaining
               </div>
@@ -721,7 +763,7 @@ export default function Generate() {
                 style={{ width:'100%', padding:'13px', borderRadius:'11px', border:'none', background: canGenerate ? 'linear-gradient(135deg,#1d4ed8,#3b82f6)' : 'rgba(255,255,255,0.04)', color: canGenerate ? 'white' : 'rgba(255,255,255,0.18)', fontWeight:700, fontSize:'14px', fontFamily:'inherit', cursor: canGenerate ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', transition:'all 0.2s', boxShadow: canGenerate ? '0 4px 22px rgba(59,130,246,0.28)' : 'none' }}>
                 {generating
                   ? <><motion.span animate={{ rotate:360 }} transition={{ duration:1.2, repeat:Infinity, ease:'linear' }} style={{ display:'inline-block' }}>⟳</motion.span> {GEN_STEPS[Math.min(generatingStep, GEN_STEPS.length-1)]}</>
-                  : <>🚀 Generate Website</>
+                  : <>🚀 {plan ? 'Generate from plan' : 'Generate Website'}</>
                 }
               </motion.button>
               {!prompt.trim() && (
@@ -766,8 +808,14 @@ export default function Generate() {
           {/* Content area */}
           <div style={{ flex:1, position:'relative', zIndex:1, display:'flex', alignItems: !generating && !generated ? 'center' : 'stretch', justifyContent: !generating && !generated ? 'center' : 'stretch', overflow:'hidden' }}>
 
+            {/* PLAN REVIEW state */}
+            {!generating && !generated && plan && (
+              <PlanReview plan={plan} onChange={setPlan} onGenerate={handleGenerate} onDiscard={() => setPlan(null)}
+                credits={userData?.credits} generating={generating} />
+            )}
+
             {/* IDLE state */}
-            {!generating && !generated && (
+            {!generating && !generated && !plan && (
               <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} style={{ textAlign:'center', maxWidth:'420px', padding:'24px' }}>
                 <div style={{ width:'88px', height:'88px', borderRadius:'28px', background:'linear-gradient(135deg,rgba(99,60,220,0.18),rgba(59,130,246,0.12))', border:'1px solid rgba(139,92,246,0.3)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 28px', fontSize:'36px', boxShadow:'0 0 80px rgba(99,60,220,0.2), 0 0 40px rgba(59,130,246,0.1)' }}>✨</div>
                 <h2 style={{ fontSize:'24px', fontWeight:800, color:'white', margin:'0 0 12px', letterSpacing:'-0.03em', textShadow:'0 0 40px rgba(139,92,246,0.4)' }}>Your website will appear here</h2>

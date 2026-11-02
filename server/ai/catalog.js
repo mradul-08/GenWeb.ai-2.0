@@ -19,7 +19,7 @@
 const keysFromEnv = (prefix) =>
   [1, 2, 3, 4, 5].map(i => process.env[`${prefix}_${i}`]).filter(Boolean).map(key => ({ key }))
 
-export const TASKS = ["generate", "edit", "design_brief", "enhance"]
+export const TASKS = ["generate", "edit", "design_brief", "enhance", "plan"]
 
 export const PROVIDERS = {
   groq: {
@@ -64,7 +64,7 @@ export const PROVIDERS = {
 }
 
 const LONG  = ["generate", "edit"]
-const SHORT = ["design_brief", "enhance"]
+const SHORT = ["design_brief", "enhance", "plan"]
 
 // lockedReason: the model is unusable with the current accounts. Locked models
 // stay disabled regardless of admin overrides; unlocking requires editing this
@@ -86,4 +86,8 @@ export const DEFAULT_MODELS = [
   { id: "sambanova/llama-3.3-70b",  provider: "sambanova",  model: "Meta-Llama-3.3-70B-Instruct", tasks: [...LONG], priority: { generate: 10, edit: 10 }, enabled: false, lockedReason: "All keys rejected as invalid (401) — 2026-11-01" },
   // OpenRouter: every key returns "User not found"; IDs are current :free models.
   { id: "openrouter/gemma-4-31b-free", provider: "openrouter", model: "google/gemma-4-31b-it:free", tasks: [...LONG, ...SHORT], priority: { generate: 30, edit: 30, design_brief: 30, enhance: 30 }, enabled: false, lockedReason: "All keys return \"User not found\" (accounts deleted) — 2026-11-01" },
-].map(m => ({ ...m, tier: "free" }))
+].map(m => ({
+  ...m, tier: "free",
+  // Planning is a short structured task like the design brief: same model preference.
+  priority: m.tasks.includes("plan") ? { plan: m.priority.design_brief ?? m.priority.enhance, ...m.priority } : m.priority,
+}))

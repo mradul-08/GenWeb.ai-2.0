@@ -9,8 +9,9 @@ import { getCached, setCached } from "./cache.js"
 import { chooseStrategy } from "./strategy.js"
 import { getAiConfig } from "./config.js"
 import { replaceExternalImages } from "./sanitize.js"
+import { normalizePlan, renderPlan } from "./plan.js"
 import {
-  buildDesignBriefPrompt, parseDesignBrief, buildGenerationPrompt, buildFullEditPrompt,
+  buildDesignBriefPrompt, parseDesignBrief, buildGenerationPrompt, buildFullEditPrompt, buildPlanPrompt,
   buildSectionEditPrompt, buildStyleEditPrompt, buildTextEditPrompt, buildScriptRepairPrompt, buildEnhancePrompt,
 } from "./prompts.js"
 
@@ -103,13 +104,29 @@ async function designBrief(prompt, { deadline, ctx }) {
   return { brief, status: brief ? "ok" : "failed" }
 }
 
-export async function generateSite(prompt, { deadline, ctx, strategy }) {
+// plan: a normalized plan (ai/plan.js) the user reviewed; it replaces the
+// design brief, which would only repeat the planning step.
+export async function generateSite(prompt, { deadline, ctx, strategy, plan = null }) {
   const config = await getAiConfig()
-  const chosen = strategy || chooseStrategy(prompt, config.designStrategy)
+  const chosen = plan ? "plan" : (strategy || chooseStrategy(prompt, config.designStrategy))
   let brief = null, briefStatus = "skipped"
   if (chosen === "brief") ({ brief, status: briefStatus } = await designBrief(prompt, { deadline, ctx }))
-  const result = await runDocumentTask("generate", buildGenerationPrompt(prompt, brief), { deadline, ctx, allowedSource: prompt })
+  const genPrompt = buildGenerationPrompt(prompt, brief, plan ? renderPlan(plan) : "")
+  const result = await runDocumentTask("generate", genPrompt, { deadline, ctx, allowedSource: prompt })
   return { ...result, strategy: chosen, briefStatus }
+}
+
+// Turns a request into a reviewable plan (one short call, cached 30 min).
+export async function planSite(prompt, { ctx }) {
+  const cached = await getCached("plan", prompt)
+  const cachedPlan = cached && normalizePlan(cached)
+  if (cachedPlan) return { plan: cachedPlan, cached: true }
+  const r = await runTask({ task: "plan", prompt: buildPlanPrompt(prompt), maxTokens: 1200, ctx, minChars: 50 })
+  if (!r.content) return { plan: null, exhausted: r.exhausted, retryAfterMs: r.retryAfterMs, reason: r.exhausted ? "free_capacity_exhausted" : "no_model_available" }
+  const plan = normalizePlan(r.content)
+  if (!plan) return { plan: null, reason: "unparseable_plan", model: r.model }
+  await setCached("plan", prompt, JSON.stringify(plan))
+  return { plan, model: r.model }
 }
 
 // Smallest edit that satisfies the request; falls back to a full rewrite when a

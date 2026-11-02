@@ -4,7 +4,7 @@
 import crypto from "crypto"
 import { AiCache } from "../models/ai.models.js"
 
-const TTL_MS = { design_brief: 30 * 60 * 1000, enhance: 24 * 60 * 60 * 1000 }
+const TTL_MS = { design_brief: 30 * 60 * 1000, enhance: 24 * 60 * 60 * 1000, plan: 30 * 60 * 1000 }
 
 const keyFor = (task, input) =>
   `${task}:${crypto.createHash("sha256").update(input.trim().toLowerCase().replace(/\s+/g, " ")).digest("hex")}`

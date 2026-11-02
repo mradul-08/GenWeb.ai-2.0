@@ -2,6 +2,7 @@ import express from "express"
 import {
   generateWebsite,
   enhancePrompt,
+  planWebsite,
   getApiStatus,
   getUserWebsites,
   getWebsite,
@@ -30,6 +31,7 @@ websiteRouter.get("/status", getApiStatus)
 // Protected
 websiteRouter.post("/generate",        isAuth, aiLimit, generateWebsite)
 websiteRouter.post("/enhance-prompt",  isAuth, enhanceLimit, enhancePrompt)
+websiteRouter.post("/plan",            isAuth, enhanceLimit, planWebsite)
 websiteRouter.get("/",                 isAuth, getUserWebsites)
 websiteRouter.get("/:id",              isAuth, getWebsite)
 websiteRouter.put("/:id",              isAuth, aiLimit, updateWebsite)

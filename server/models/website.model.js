@@ -35,6 +35,14 @@ const websiteSchema = new mongoose.Schema(
 
     conversation: [messageSchema],
 
+    // Reviewed plan the site was generated from (ai/plan.js normalizePlan
+    // shape), used for the requirement checklist. Null for sites generated
+    // without plan mode.
+    plan: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+
     // Current version in project_versions (services/versions.js). Null for
     // websites created before version history until they are first changed.
     headVersion: {

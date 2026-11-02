@@ -80,11 +80,25 @@ function renderBrief(b) {
 }
 
 // brief = null → single-call strategy (the model plans the design itself).
-export function buildGenerationPrompt(userRequest, brief) {
+// planText (ai/plan.js renderPlan): the reviewed plan; it may contain user
+// edits, so it is passed as data like the request itself.
+const PLAN_RULE = "Follow the PLAN below exactly: build every listed section with its id, in order, and make every listed feature work. Add nothing the plan leaves out except a nav and footer if missing."
+
+export function buildGenerationPrompt(userRequest, brief, planText = "") {
+  const plan = planText ? `${PLAN_RULE}\n\n${asData("PLAN", planText)}\n` : ""
   return `You are an expert frontend engineer and web designer. Build a complete, production-quality single-page website.
 ${OUTPUT_CONTRACT}
 ${RULES}
 ${brief ? renderBrief(brief) : SINGLE_CALL_DESIGN}
+${plan}
+${asData("REQUEST", userRequest)}`
+}
+
+// ── Plan mode ─────────────────────────────────────────────────────────────────
+export function buildPlanPrompt(userRequest) {
+  return `Plan a single-page website for the request below before it is built. Keep the user's business, choices and language; do not invent a different business. Pick only the sections this site needs (usually 5–8, always a nav first and a footer last). Return ONLY JSON:
+{"title":"site name","summary":"one sentence","sections":[{"id":"kebab-case-id","name":"Short name","purpose":"what it shows, max 20 words"}],"features":[{"kind":"contact_form|newsletter|mobile_menu|theme_toggle|carousel|accordion|tabs|modal|counter|filter_search|other","text":"what must work, max 15 words"}],"style":{"mood":"few words","colors":["#rrggbb", "up to 5"],"headingFont":"Google Font","bodyFont":"Google Font"}}
+Features = interactive behaviour the request asks for or clearly needs (always include mobile_menu). Max 10 sections, 8 features.
 
 ${asData("REQUEST", userRequest)}`
 }

@@ -7,6 +7,7 @@ import { serverUrl } from '../config'
 import axios from 'axios'
 import { buildPreviewDoc, PREVIEW_SANDBOX } from '../utils/previewDoc'
 import VersionHistory from '../components/VersionHistory'
+import PlanChecklist from '../components/PlanChecklist'
 
 const EDIT_STEPS = ['Reading request…','Analyzing code…','Planning changes…','Applying edits…','Polishing…','Done ✓']
 
@@ -270,6 +271,8 @@ export default function Editor() {
   // Bumped after every server-side save so the History tab reloads.
   const [historyKey,      setHistoryKey]      = useState(0)
   const bumpHistory = useCallback(() => setHistoryKey(k => k + 1), [])
+  // Plan checklist from the server (null for sites made without plan mode).
+  const [checklist,       setChecklist]       = useState(null)
   const [showFullPreview, setShowFullPreview] = useState(false)
   const [device,          setDevice]          = useState('desktop')
   const [editStep,        setEditStep]        = useState(0)
@@ -322,6 +325,7 @@ export default function Editor() {
         const { data } = await axios.get(`${serverUrl}/api/website/${websiteId}`, { withCredentials:true })
         if (data.success && data.website) {
           setWebsite(data.website)
+          setChecklist(data.checklist || null)
           setCurrentCode(data.website.latestCode)
           versionHistory.reset(data.website.latestCode)
           if (data.website.deployUrl) setDeployUrl(data.website.deployUrl)
@@ -338,6 +342,18 @@ export default function Editor() {
     }
     load()
   }, [websiteId, userId])
+
+  // Manual saves, undo/redo and restores change the code too: refresh the
+  // server-computed checklist after each of them (plan-mode sites only).
+  const hasPlan = !!website?.plan
+  useEffect(() => {
+    if (!hasPlan || !websiteId || historyKey === 0) return
+    let cancelled = false
+    axios.get(`${serverUrl}/api/website/${websiteId}`, { withCredentials:true })
+      .then(({ data }) => { if (!cancelled && data.checklist) setChecklist(data.checklist) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [historyKey, hasPlan, websiteId])
 
   const updatePreview = useCallback((code) => {
     setPreviewDoc(buildPreviewDoc(code))
@@ -419,6 +435,7 @@ export default function Editor() {
       versionHistory.push(data.code)
       updatePreview(data.code)
       bumpHistory()
+      if (data.checklist) setChecklist(data.checklist)
       setActiveTab('preview')
       setMessages(prev => [...prev, {
         role:    'assistant',
@@ -697,10 +714,10 @@ export default function Editor() {
           )}
 
           <div style={{ height:46, flexShrink:0, borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', padding:'0 14px', gap:4, background:'rgba(8,8,12,0.9)', backdropFilter:'blur(16px)', zIndex:2, position:'relative' }}>
-            {['preview','code','history'].map(tab => (
+            {['preview','code','history', ...(checklist ? ['plan'] : [])].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 style={{ padding:'5px 13px', borderRadius:7, border:'none', cursor:'pointer', background: activeTab === tab ? 'rgba(168,85,247,0.12)' : 'transparent', color: activeTab === tab ? '#a855f7' : 'rgba(255,255,255,0.35)', fontSize:12.5, fontWeight:500, fontFamily:'inherit', transition:'all 0.15s' }}>
-                {{ preview:'🖥 Preview', code:'‹/› Code', history:'🕘 History' }[tab]}
+                {{ preview:'🖥 Preview', code:'‹/› Code', history:'🕘 History', plan:`✅ Plan ${checklist?.summary.found}/${checklist?.summary.checked}` }[tab]}
               </button>
             ))}
 
@@ -800,6 +817,12 @@ export default function Editor() {
             {/* HISTORY TAB */}
             {activeTab === 'history' && websiteId && (
               <VersionHistory websiteId={websiteId} refreshKey={historyKey} disabled={isEditing} onRestored={handleRestored} />
+            )}
+
+            {/* PLAN TAB — "Fix with AI" only fills the chat box; the user decides to send (50 credits). */}
+            {activeTab === 'plan' && checklist && (
+              <PlanChecklist checklist={checklist} disabled={isEditing}
+                onFix={(text) => { setInput(text); setTimeout(() => inputRef.current?.focus(), 0) }} />
             )}
           </div>
         </div>

@@ -15,6 +15,7 @@ import {
   getWebsiteVersion,
   restoreWebsiteVersion,
 } from "../controllers/website.controller.js"
+import { getLibrary, getDesign, applyDesign } from "../controllers/design.controller.js"
 import isAuth from "../middlewares/isAuth.js"
 import { rateLimit } from "../middlewares/rateLimit.js"
 
@@ -33,6 +34,8 @@ websiteRouter.post("/generate",        isAuth, aiLimit, generateWebsite)
 websiteRouter.post("/enhance-prompt",  isAuth, enhanceLimit, enhancePrompt)
 websiteRouter.post("/plan",            isAuth, enhanceLimit, planWebsite)
 websiteRouter.get("/",                 isAuth, getUserWebsites)
+// Before "/:id" so "library" is not read as a website id.
+websiteRouter.get("/library",          isAuth, getLibrary)
 websiteRouter.get("/:id",              isAuth, getWebsite)
 websiteRouter.put("/:id",              isAuth, aiLimit, updateWebsite)
 websiteRouter.patch("/:id/code",       isAuth, saveLimit, saveWebsiteCode)
@@ -42,5 +45,8 @@ websiteRouter.post("/:id/undeploy",    isAuth, undeployWebsite)
 websiteRouter.get("/:id/versions",                       isAuth, getWebsiteVersions)
 websiteRouter.get("/:id/versions/:versionId",            isAuth, getWebsiteVersion)
 websiteRouter.post("/:id/versions/:versionId/restore",   isAuth, saveLimit, restoreWebsiteVersion)
+// No-AI design editor (theme, layout, sections, text) — no credits.
+websiteRouter.get("/:id/design",       isAuth, getDesign)
+websiteRouter.put("/:id/design",       isAuth, saveLimit, applyDesign)
 
 export default websiteRouter

@@ -16,7 +16,7 @@ blobSchema.index({ project: 1 })
 
 // An immutable snapshot of a project: which content each file had. Versions
 // are only ever inserted; restoring an old one inserts a new version.
-export const VERSION_SOURCES = ["migration", "generate", "ai_edit", "manual_save", "deploy", "restore"]
+export const VERSION_SOURCES = ["migration", "generate", "ai_edit", "manual_save", "deploy", "restore", "design"]
 
 const versionSchema = new mongoose.Schema({
   project: { type: ObjectId, ref: "Website", required: true },
@@ -26,6 +26,9 @@ const versionSchema = new mongoose.Schema({
   source:  { type: String, enum: VERSION_SOURCES, required: true },
   label:   { type: String, default: "" },         // short human description shown in the history
   createdBy: { type: ObjectId, ref: "User", default: null },
+  // Template-built versions only: the build source (ai/hybrid.js makeBuild)
+  // so restoring this version also restores its design-editor state.
+  build: { type: mongoose.Schema.Types.Mixed, default: undefined },
 }, { timestamps: { createdAt: true, updatedAt: false }, versionKey: false })
 // Unique: two concurrent writers cannot both create version N.
 versionSchema.index({ project: 1, seq: -1 }, { unique: true })

@@ -36,7 +36,7 @@ const serverError = (res, label, e) => {
 // ══════════════════════════════════════════════════════════════════════════════
 // THUMBNAIL EXTRACTOR
 // ══════════════════════════════════════════════════════════════════════════════
-function extractThumbnailMeta(html, fallbackTitle = "") {
+export function extractThumbnailMeta(html, fallbackTitle = "") {
   let bg     = "#0a0a0f"
   let accent = "#818cf8"
   let title  = fallbackTitle
@@ -293,7 +293,7 @@ export const generateWebsite = async (req, res) => {
     // History is secondary to the generated site: a failure here is logged,
     // never charged back (the next change creates the missing first version).
     try {
-      await commitFiles(website._id, files, { source: "generate", label: prompt.trim(), userId: user._id })
+      await commitFiles(website._id, files, { source: "generate", label: prompt.trim(), userId: user._id, build: result.build || null })
     } catch (e) { console.error("[versions] generate", e) }
 
     await finishRequest(requestId, {
@@ -515,11 +515,15 @@ export const restoreWebsiteVersion = async (req, res) => {
     if (!found) return
     const { website, version, code, files } = found
     // Every page of the version comes back together.
+    // A template-built version also brings back its design-editor state; the
+    // site becomes multi-page or single-page as that version was.
     const head = await commitFiles(website._id, files, {
       source: "restore", label: `Restored version ${version.seq}`, userId: req.user._id,
       set: extractThumbnailMeta(code, website.title),
+      build: version.build || null,
+      kind: files.length > 1 ? "static" : version.build ? (version.build.multiPage ? "static" : "single_html") : null,
     })
-    return res.json({ success: true, message: `Restored version ${version.seq}`, code, files: filesFor(website, files), version: head })
+    return res.json({ success: true, message: `Restored version ${version.seq}`, code, files: files.length > 1 ? files : undefined, version: head })
   } catch (e) { return serverError(res, "restoreWebsiteVersion", e) }
 }
 

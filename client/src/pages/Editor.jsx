@@ -8,6 +8,7 @@ import axios from 'axios'
 import { buildPreviewDoc, PREVIEW_SANDBOX, isPageNavMessage } from '../utils/previewDoc'
 import VersionHistory from '../components/VersionHistory'
 import PlanChecklist from '../components/PlanChecklist'
+import DesignPanel from '../components/DesignPanel'
 
 const EDIT_STEPS = ['Reading request…','Analyzing code…','Planning changes…','Applying edits…','Polishing…','Done ✓']
 
@@ -428,19 +429,39 @@ export default function Editor() {
 
   // The server already saved the restored code as a new version. Multi-page
   // restores bring back every page; stay on the open page if it still exists.
-  const handleRestored = useCallback((code, seq, restoredFiles) => {
+  // Takes a complete server state (all pages, or one page) after a restore or
+  // a design change; stays on the open page if it still exists.
+  const showServerFiles = useCallback((code, serverFiles) => {
     let shown = code
-    if (restoredFiles?.length > 1) {
-      setFiles(restoredFiles)
-      const page = restoredFiles.find(f => f.path === pathRef.current) || restoredFiles[0]
+    if (serverFiles?.length > 1) {
+      setFiles(serverFiles)
+      const page = serverFiles.find(f => f.path === pathRef.current) || serverFiles[0]
       setCurrentPath(page.path)
       shown = page.content
+    } else {
+      setFiles(null)
+      setCurrentPath('index.html')
     }
+    return shown
+  }, [setFiles, setCurrentPath])
+
+  const handleRestored = useCallback((code, seq, restoredFiles) => {
+    const shown = showServerFiles(code, restoredFiles)
     versionHistory.push(shown)
     updatePreview(shown)
     bumpHistory()
     setMessages(prev => [...prev, { role:'assistant', content:`↺ Restored version ${seq}. It is now the current version — your previous one is still in History.` }])
-  }, [versionHistory.push, updatePreview, bumpHistory, setFiles, setCurrentPath])
+  }, [versionHistory.push, updatePreview, bumpHistory, showServerFiles])
+
+  // The design editor rebuilt the site (no AI, no credits).
+  const handleDesignApplied = useCallback((data) => {
+    const shown = showServerFiles(data.code, data.kind === 'static' ? data.files : null)
+    versionHistory.reset(shown)
+    updatePreview(shown)
+    if (data.checklist) setChecklist(data.checklist)
+    setWebsite(w => (w ? { ...w, kind: data.kind } : w))
+    bumpHistory()
+  }, [showServerFiles, versionHistory.reset, updatePreview, bumpHistory])
 
   const handleUndo = useCallback(() => {
     const code = versionHistory.undo()
@@ -761,10 +782,10 @@ export default function Editor() {
           )}
 
           <div style={{ height:46, flexShrink:0, borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', padding:'0 14px', gap:4, background:'rgba(8,8,12,0.9)', backdropFilter:'blur(16px)', zIndex:2, position:'relative' }}>
-            {['preview','code','history', ...(checklist ? ['plan'] : [])].map(tab => (
+            {['preview','design','code','history', ...(checklist ? ['plan'] : [])].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 style={{ padding:'5px 13px', borderRadius:7, border:'none', cursor:'pointer', background: activeTab === tab ? 'rgba(168,85,247,0.12)' : 'transparent', color: activeTab === tab ? '#a855f7' : 'rgba(255,255,255,0.35)', fontSize:12.5, fontWeight:500, fontFamily:'inherit', transition:'all 0.15s' }}>
-                {{ preview:'🖥 Preview', code:'‹/› Code', history:'🕘 History', plan:`✅ Plan ${checklist?.summary.found}/${checklist?.summary.checked}` }[tab]}
+                {{ preview:'🖥 Preview', design:'🎨 Design', code:'‹/› Code', history:'🕘 History', plan:`✅ Plan ${checklist?.summary.found}/${checklist?.summary.checked}` }[tab]}
               </button>
             ))}
 
@@ -874,6 +895,11 @@ export default function Editor() {
                   : <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:'rgba(255,255,255,0.3)', fontSize:14 }}>No code loaded</div>
                 }
               </div>
+            )}
+
+            {/* DESIGN TAB — no AI, no credits */}
+            {activeTab === 'design' && websiteId && (
+              <DesignPanel websiteId={websiteId} refreshKey={historyKey} disabled={isEditing} onApplied={handleDesignApplied} />
             )}
 
             {/* HISTORY TAB */}

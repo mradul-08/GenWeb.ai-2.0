@@ -56,6 +56,15 @@ const websiteSchema = new mongoose.Schema(
       default: null,
     },
 
+    // Template-built sites: the build source (template, sections, content)
+    // plus filesHash, the hash of the files it produced. When the current
+    // files still match that hash the design editor can rebuild freely;
+    // otherwise later AI/code edits exist and a rebuild must be confirmed.
+    build: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
+
     // Current version in project_versions (services/versions.js). Null for
     // websites created before version history until they are first changed.
     headVersion: {

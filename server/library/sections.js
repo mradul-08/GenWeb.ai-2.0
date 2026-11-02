@@ -304,6 +304,32 @@ export const LIST_KEY = {
 // Kinds that are meaningful from the plan alone (structure, not claims).
 export const ALWAYS_RENDER = new Set(["nav", "hero", "footer", "contact"])
 
+// Editable fields per kind, for the no-AI design editor. Mirrors each kind's
+// normalize(); the server still normalizes and escapes whatever is sent.
+// type: text | textarea | emoji | number | bool | strings (list of text) | list (of objects)
+const t = (key, label, max = 120) => ({ key, label, type: "text", max })
+const ta = (key, label, max = 600) => ({ key, label, type: "textarea", max })
+const em = (key, label = "Emoji") => ({ key, label, type: "emoji", max: 8 })
+const items = (key, label, maxItems, item) => ({ key, label, type: "list", maxItems, item })
+export const KIND_UI = {
+  nav:          { label: "Navigation", fields: [t("brand", "Brand name", 40), t("cta", "Button text (optional)", 24)] },
+  hero:         { label: "Hero", fields: [t("eyebrow", "Small label", 50), t("heading", "Headline", 90), ta("subheading", "Sub-heading", 260), t("primaryCta", "Main button", 28), t("secondaryCta", "Second button (optional)", 28), em("emoji")] },
+  features:     { label: "Features / services", fields: [t("heading", "Heading", 90), ta("intro", "Intro", 260), items("items", "Items", 6, [em("icon", "Icon"), t("title", "Title", 60), ta("text", "Text", 240)])] },
+  about:        { label: "About", fields: [t("heading", "Heading", 90), { key: "paragraphs", label: "Paragraphs", type: "strings", maxItems: 3, max: 600 }, items("highlights", "Highlights", 3, [t("value", "Value", 12), t("label", "Label", 40)]), em("emoji")] },
+  menu:         { label: "Menu / products", fields: [t("heading", "Heading", 90), ta("intro", "Intro", 260), items("items", "Items", 12, [t("name", "Name", 60), t("description", "Description", 160), t("price", "Price", 20), t("tag", "Tag", 20)]), t("note", "Small print", 160)] },
+  pricing:      { label: "Pricing", fields: [t("heading", "Heading", 90), ta("intro", "Intro", 260), items("plans", "Plans", 4, [t("name", "Name", 40), t("price", "Price", 20), t("period", "Period", 20), { key: "features", label: "Features", type: "strings", maxItems: 8, max: 90 }, t("cta", "Button", 24), { key: "highlighted", label: "Highlight", type: "bool" }])] },
+  testimonials: { label: "Testimonials", fields: [t("heading", "Heading", 90), items("items", "Reviews", 6, [ta("quote", "Quote", 280), t("name", "Name", 40), t("role", "Role", 50)])] },
+  gallery:      { label: "Gallery", fields: [t("heading", "Heading", 90), ta("intro", "Intro", 260), items("items", "Tiles", 9, [em("emoji"), t("caption", "Caption", 60)])] },
+  team:         { label: "Team", fields: [t("heading", "Heading", 90), ta("intro", "Intro", 260), items("members", "Members", 8, [t("name", "Name", 40), t("role", "Role", 50), ta("bio", "Bio", 200), em("emoji")])] },
+  stats:        { label: "Stats", fields: [t("heading", "Heading (optional)", 90), items("items", "Numbers", 4, [{ key: "value", label: "Value", type: "number" }, t("suffix", "Suffix", 4), t("label", "Label", 40)])] },
+  faq:          { label: "FAQ", fields: [t("heading", "Heading", 90), items("items", "Questions", 8, [t("q", "Question", 160), ta("a", "Answer", 500)])] },
+  events:       { label: "Schedule / timeline", fields: [t("heading", "Heading", 90), ta("intro", "Intro", 260), items("items", "Entries", 8, [t("date", "Date / time", 30), t("title", "Title", 70), ta("text", "Text", 220)])] },
+  contact:      { label: "Contact / booking", fields: [t("heading", "Heading", 90), ta("intro", "Intro", 260), t("address", "Address", 160), t("phone", "Phone", 40), t("email", "Email", 80), t("hours", "Hours", 120), t("formTitle", "Form title", 60), t("submitLabel", "Button", 28)] },
+  cta:          { label: "Call to action", fields: [t("heading", "Heading", 90), ta("text", "Text", 220), t("button", "Button", 28), { key: "newsletter", label: "Email sign-up form", type: "bool" }] },
+  footer:       { label: "Footer", fields: [t("tagline", "Tagline", 140), t("address", "Address", 160), t("hours", "Hours", 120), t("copyright", "Copyright", 80)] },
+  content:      { label: "Text section", fields: [t("heading", "Heading", 90), ta("intro", "Intro", 260), { key: "paragraphs", label: "Paragraphs", type: "strings", maxItems: 2, max: 600 }, items("items", "Cards", 6, [t("title", "Title", 60), ta("text", "Text", 240)])] },
+}
+
 function navRender(c, ctx, cls) {
   const cta = c.cta && ctx.contactId ? `<a class="gw-btn gw-btn-sm" href="${esc(ctx.link(ctx.contactId))}">${esc(c.cta)}</a>` : ""
   // The button already leads to the contact section; don't list it twice.

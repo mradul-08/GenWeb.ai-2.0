@@ -6,7 +6,7 @@ import { runTask } from "./router.js"
 import { validateDocument } from "./validate.js"
 import { normalizePlan } from "./plan.js"
 import { KINDS } from "../library/sections.js"
-import { buildBlueprint, assembleSite } from "../library/assemble.js"
+import { buildBlueprint, assembleSite, serializeBlueprint } from "../library/assemble.js"
 
 const CONTENT_MAX_TOKENS = 3500
 const MAX_CONTENT_ATTEMPTS = 2
@@ -98,5 +98,19 @@ export async function generateHybrid(request, { deadline, ctx, plan = null, rand
     // are left out rather than filled with invented text; the checklist shows them).
     hybrid: { template: blueprint.template, templateScore: blueprint.templateScore, preset: blueprint.preset.id, sections: site.sections.map(s => ({ id: s.id, kind: s.kind, variant: s.variant })), dropped: site.dropped, pages: site.pages },
     plan: plan || derivePlan(blueprint, site),
+    // Everything needed to rebuild the site without AI (design editor).
+    build: makeBuild({ blueprint, content, multiPage, request, plan }),
+  }
+}
+
+export const BUILD_VERSION = 1
+export function makeBuild({ blueprint, content, multiPage, request = "", plan = null }) {
+  return {
+    v: BUILD_VERSION,
+    blueprint: serializeBlueprint(blueprint),
+    content,
+    multiPage: !!multiPage,
+    requestText: String(request).slice(0, 4000),
+    plan: plan ? { title: plan.title || "", summary: plan.summary || "", style: plan.style || {} } : null,
   }
 }

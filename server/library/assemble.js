@@ -6,6 +6,7 @@ import { KINDS, LIST_KEY, ALWAYS_RENDER, esc } from "./sections.js"
 import { buildScript } from "./interactions.js"
 import { TEMPLATES, mapKind, rankTemplates, choosePreset, variantsOf } from "./templates.js"
 import { contrastRatio } from "../ai/prompts.js"
+import { PRESETS, presetById } from "./presets.js"
 
 const DEFAULT_LABELS = {
   nav: "Navigation", hero: "Home", features: "Services", about: "About", menu: "Menu", pricing: "Pricing",
@@ -153,6 +154,41 @@ function themeCss(colors) {
   return `html[data-theme="${scheme}"]{--bg:${other.bg};--surface:${other.surface};--text:${other.text};--muted:${other.muted}}`
 }
 
+// Everything a theme contributes to a page. pure: the user picked this preset
+// explicitly — use it as designed, without the request's colours or fonts.
+export function themeParts(preset, { plan = null, requestText = "", pure = false } = {}) {
+  const colors = pure ? resolveColors(preset) : resolveColors(preset, { planColors: plan?.style?.colors || [], requestText })
+  const headingFont = !pure && FONT_OK.test(plan?.style?.headingFont || "") ? plan.style.headingFont : preset.fonts.heading
+  const bodyFont = !pure && FONT_OK.test(plan?.style?.bodyFont || "") ? plan.style.bodyFont : preset.fonts.body
+  const fontsUrl = `https://fonts.googleapis.com/css2?${[...new Set([headingFont, bodyFont])].map(f => `family=${encodeURIComponent(f).replace(/%20/g, "+")}:wght@400;600;700;800`).join("&")}&display=swap`
+  const tokens = `:root{--primary:${colors.primary};--secondary:${colors.secondary};--accent:${colors.accent};--bg:${colors.bg};--surface:${colors.surface};--text:${colors.text};--muted:${colors.muted};--on-primary:${colors.onPrimary};--footer-bg:${colors.footerBg};--footer-text:${colors.footerText};--radius:${preset.radius};--shadow:${preset.shadow};--font-heading:"${headingFont}";--font-body:"${bodyFont}";color-scheme:${colors.dark ? "dark" : "light"}}`
+  return { colors, tokens, fontsUrl, headingFont, bodyFont, toggleCss: themeCss(colors) }
+}
+
+// Swaps the theme of an already-built page in place: design tokens, font
+// stylesheet, colour scheme and the dark-mode toggle rule. Everything else
+// (including later AI or code edits) is untouched. Returns null when the
+// page no longer has the generated token rule (e.g. rewritten by hand).
+const TOKENS_RE = /:root\{--primary:[^}]*\}/
+export function applyTheme(html, preset) {
+  if (!TOKENS_RE.test(html)) return null
+  const p = themeParts(preset, { pure: true })
+  return html
+    .replace(TOKENS_RE, () => p.tokens)
+    .replace(/(<link href=")https:\/\/fonts\.googleapis\.com\/css2\?[^"]*(" rel="stylesheet">)/, (m, a, b) => a + esc(p.fontsUrl) + b)
+    .replace(/(<html\b[^>]*\bdata-theme=")(dark|light)(")/, (m, a, s, b) => a + (p.colors.dark ? "dark" : "light") + b)
+    .replace(/html\[data-theme="(dark|light)"\]\{[^}]*\}/, () => p.toggleCss)
+}
+
+// ── Build source (stored with the site so design changes need no AI) ─────────
+// A blueprint with its preset as an id, safe to store in MongoDB.
+export const serializeBlueprint = (b) => ({
+  template: b.template, preset: b.preset.id, pureTheme: !!b.pureTheme,
+  sections: b.sections.map(s => ({ id: s.id, name: s.name, purpose: s.purpose || "", kind: s.kind, variant: s.variant })),
+  features: [...b.features], booking: !!b.booking, filter: !!b.filter,
+})
+export const hydrateBlueprint = (s) => ({ ...s, templateScore: 1, preset: presetById(s.preset) || PRESETS[0], sections: s.sections.map(x => ({ ...x })) })
+
 // content: { title, brand, tagline, sections: { [id]: rawContent } } from the
 // model (untrusted). Missing or invalid parts fall back to plan-based text.
 // multiPage: split into index.html + one self-contained page per major
@@ -186,11 +222,8 @@ export function assembleSite(blueprint, content = {}, { plan = null, requestText
   const contactId = kept.find(k => k.s.kind === "contact")?.s.id || null
   const firstContentId = kept.find(k => !["nav", "hero"].includes(k.s.kind))?.s.id || null
 
-  const colors = resolveColors(blueprint.preset, { planColors: plan?.style?.colors || [], requestText })
-  const headingFont = FONT_OK.test(plan?.style?.headingFont || "") ? plan.style.headingFont : blueprint.preset.fonts.heading
-  const bodyFont = FONT_OK.test(plan?.style?.bodyFont || "") ? plan.style.bodyFont : blueprint.preset.fonts.body
-  const fontsUrl = `https://fonts.googleapis.com/css2?${[...new Set([headingFont, bodyFont])].map(f => `family=${encodeURIComponent(f).replace(/%20/g, "+")}:wght@400;600;700;800`).join("&")}&display=swap`
-  const tokens = `:root{--primary:${colors.primary};--secondary:${colors.secondary};--accent:${colors.accent};--bg:${colors.bg};--surface:${colors.surface};--text:${colors.text};--muted:${colors.muted};--on-primary:${colors.onPrimary};--footer-bg:${colors.footerBg};--footer-text:${colors.footerText};--radius:${blueprint.preset.radius};--shadow:${blueprint.preset.shadow};--font-heading:"${headingFont}";--font-body:"${bodyFont}";color-scheme:${colors.dark ? "dark" : "light"}}`
+  const theme = themeParts(blueprint.preset, { plan, requestText, pure: !!blueprint.pureTheme })
+  const { colors, tokens, fontsUrl, headingFont, bodyFont } = theme
   const description = site.tagline || `${site.brand} — official website`
 
   const renderPage = (page) => {
@@ -216,7 +249,7 @@ export function assembleSite(blueprint, content = {}, { plan = null, requestText
       // Inner pages get a page header with the page's h1 right after the nav.
       return s.kind === "nav" && !isHome ? { ...out, html: out.html + pageHeader(page, site) } : out
     })
-    const css = [tokens, BASE_CSS, isHome ? "" : PAGE_HEAD_CSS, ...new Set(rendered.map(r => r.css).filter(Boolean)), blueprint.features.includes("theme_toggle") ? themeCss(colors) : ""].filter(Boolean).join("\n")
+    const css = [tokens, BASE_CSS, isHome ? "" : PAGE_HEAD_CSS, ...new Set(rendered.map(r => r.css).filter(Boolean)), blueprint.features.includes("theme_toggle") ? theme.toggleCss : ""].filter(Boolean).join("\n")
     const script = buildScript(rendered.flatMap(r => r.scripts || []).concat(blueprint.filter && page.items.some(k => k.s.kind === "menu") ? ["filter"] : []))
     const title = isHome ? site.title : `${page.title} — ${site.brand}`
     return `<!DOCTYPE html>

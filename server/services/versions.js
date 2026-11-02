@@ -48,7 +48,10 @@ export const currentFiles = (website) =>
 const sameManifest = (a, b) =>
   a.length === b.length && a.every((f, i) => f.path === b[i].path && f.blob === b[i].blob)
 
-async function insertVersion({ projectId, head, files, source, label, userId, session }) {
+// Fingerprint of a complete file set (paths, order and content).
+export const hashFiles = (files) => sha256(Buffer.from(JSON.stringify(files.map(f => [f.path, f.content])), "utf8"))
+
+async function insertVersion({ projectId, head, files, source, label, userId, session, build }) {
   // File order is kept as given (it is the site's page order).
   const manifest = []
   for (const f of files) {
@@ -64,6 +67,7 @@ async function insertVersion({ projectId, head, files, source, label, userId, se
     source,
     label: cleanLabel(label),
     createdBy: userId ?? null,
+    ...(build ? { build } : {}),
   }], { session })
   return { version, created: true }
 }
@@ -73,7 +77,10 @@ async function insertVersion({ projectId, head, files, source, label, userId, se
 // nothing changed), and the website itself (files, latestCode = index.html,
 // headVersion and any extra set/push fields). Websites created before
 // version history first get their previous state as a "migration" version.
-async function commit(websiteId, nextFiles, { source, label = "", userId = null, set = {}, push = null }) {
+// build: the template build source when these files were produced by the
+// assembler (stored on the version and on the site, with the files' hash).
+// kind: switch the site between "single_html" and "static" (multi-page).
+async function commit(websiteId, nextFiles, { source, label = "", userId = null, set = {}, push = null, build = null, kind = null, buildInSync = true }) {
   // Two writers racing for the same seq hit the unique index; the loser
   // re-reads the new head and tries again (rare, so a few attempts suffice).
   for (let attempt = 1; ; attempt++) {
@@ -89,12 +96,17 @@ async function commit(websiteId, nextFiles, { source, label = "", userId = null,
         if (!head && website.latestCode && !unchanged) {
           ;({ version: head } = await insertVersion({ projectId: websiteId, head: null, files: before, source: "migration", label: "Before version history", userId, session }))
         }
-        const { version, created } = await insertVersion({ projectId: websiteId, head, files, source, label, userId, session })
+        const { version, created } = await insertVersion({ projectId: websiteId, head, files, source, label, userId, session, build })
 
         const index = files.find(f => f.path === MAIN_FILE) ?? files[0]
+        const kindAfter = kind ?? website.kind ?? "single_html"
         const fields = { ...set, latestCode: index.content, headVersion: version._id }
-        if (website.kind === "static") fields.files = files
+        if (kind) fields.kind = kind
+        // buildInSync=false: the files also contain edits the build cannot reproduce.
+        if (build) fields.build = { ...build, filesHash: buildInSync ? hashFiles(files) : null }
         const update = { $set: fields }
+        if (kindAfter === "static") fields.files = files
+        else if (website.files) update.$unset = { files: "" }
         if (push) update.$push = push
         await Website.updateOne({ _id: websiteId }, update, { session })
         return { id: version._id, seq: version.seq, created }

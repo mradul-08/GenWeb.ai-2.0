@@ -26,6 +26,8 @@ const getRandomPalette = () => RANDOM_PALETTES[Math.floor(Math.random() * RANDOM
 const STEP_WEIGHTS = [0.10, 0.15, 0.20, 0.25, 0.20, 0.10]
 
 const STYLE_PRESETS = [
+  // Auto: no style is forced; the template and the business decide the look.
+  { id: 'auto',          label: 'Auto',       icon: '✦', desc: 'Best fit for your business' },
   { id: 'minimal',       label: 'Minimal',   icon: '◻', desc: 'Clean, lots of whitespace' },
   { id: 'bold',          label: 'Bold',       icon: '◼', desc: 'Strong colors, big typography' },
   { id: 'glassmorphism', label: 'Glass',      icon: '◈', desc: 'Frosted glass effects' },
@@ -386,8 +388,8 @@ export default function Generate() {
   const [prompt,            setPrompt]            = useState('')
   const [isEnhanced,        setIsEnhanced]        = useState(false)
   const [enhancing,         setEnhancing]         = useState(false)
-  const [selectedStyle,     setSelectedStyle]     = useState('dark')
-  const [selectedSections,  setSelectedSections]  = useState(['hero', 'features', 'pricing', 'faq', 'footer'])
+  const [selectedStyle,     setSelectedStyle]     = useState('auto')
+  const [selectedSections,  setSelectedSections]  = useState([])   // optional: empty = the template chooses
   const [charCount,         setCharCount]         = useState(0)
   const [activePalette,     setActivePalette]     = useState(null)
 
@@ -482,7 +484,12 @@ export default function Generate() {
       styleNote   = 'colorful with custom palette'
       paletteNote = ` Use this exact palette — primary: ${activePalette.primary}, accent: ${activePalette.accent}, background: ${activePalette.bg}. Name: "${activePalette.name}".`
     }
-    return `${prompt.trim()}. Visual style: ${styleNote}.${paletteNote} Include sections: ${selectedSections.join(', ')}.`
+    // Only choices the user actually made are added; defaults would override
+    // what the template and the request imply (e.g. every site turning dark).
+    const style = selectedStyle === 'auto' ? '' : ` Visual style: ${styleNote}.${paletteNote}`
+    const sections = selectedSections.length ? ` Include sections: ${selectedSections.join(', ')}.` : ''
+    // One full stop after the idea, whether or not the user typed one.
+    return `${prompt.trim().replace(/[.\s]+$/, '')}.${style}${sections}`
   }
 
   const handlePlan = async () => {
@@ -734,7 +741,7 @@ export default function Generate() {
 
             {/* SECTIONS */}
             <div>
-              <label style={LBL}>Include Sections</label>
+              <label style={LBL}>Include Sections <span style={{ textTransform:'none', letterSpacing:0, fontWeight:500, opacity:0.7 }}>(optional — picked for you if empty)</span></label>
               <div style={{ display:'flex', flexWrap:'wrap', gap:'5px' }}>
                 {SECTIONS.map(s => (
                   <motion.button key={s.id} onClick={() => toggleSection(s.id)} whileTap={{ scale:0.95 }}

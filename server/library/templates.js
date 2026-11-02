@@ -130,7 +130,8 @@ export function rankTemplates(text, planKinds = []) {
     const category = Math.min(1, countTags(t, tpl.tags) / 2)
     const kinds = new Set(tpl.sections.map(([k]) => k))
     const coverage = planKinds.length ? planKinds.filter(k => kinds.has(k)).length / planKinds.length : 0
-    const score = planKinds.length ? 0.6 * category + 0.4 * coverage : category
+    // The kind of business matters most; coverage of the planned sections breaks ties.
+    const score = planKinds.length ? 0.75 * category + 0.25 * coverage : category
     return { template: tpl, score: Math.round(score * 100) / 100 }
   }).sort((a, b) => b.score - a.score)
 }

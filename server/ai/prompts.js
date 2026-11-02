@@ -96,8 +96,8 @@ ${asData("REQUEST", userRequest)}`
 
 // ── Plan mode ─────────────────────────────────────────────────────────────────
 export function buildPlanPrompt(userRequest) {
-  return `Plan a single-page website for the request below before it is built. Keep the user's business, choices and language; do not invent a different business. Pick only the sections this site needs (usually 5–8, always a nav first and a footer last). Return ONLY JSON:
-{"title":"site name","summary":"one sentence","sections":[{"id":"kebab-case-id","name":"Short name","purpose":"what it shows, max 20 words"}],"features":[{"kind":"contact_form|newsletter|mobile_menu|theme_toggle|carousel|accordion|tabs|modal|counter|filter_search|other","text":"what must work, max 15 words"}],"style":{"mood":"few words","colors":["#rrggbb", "up to 5"],"headingFont":"Google Font","bodyFont":"Google Font"}}
+  return `Plan a single-page website for the request below before it is built. Keep the user's business, choices and language; do not invent a different business. Pick the sections this kind of business needs (usually 6–9, always a nav first and a footer last): e.g. a salon or clinic needs services with prices, team, reviews, opening hours and booking; a restaurant needs a menu, gallery, hours and table booking. If the request mentions booking, appointments, orders or contact, include a contact/booking section on the page. Use on-page sections rather than popups. Return ONLY JSON:
+{"title":"site name","summary":"one sentence","sections":[{"id":"kebab-case-id","name":"Short name","purpose":"what it shows, max 20 words"}],"features":[{"kind":"contact_form|newsletter|mobile_menu|theme_toggle|carousel|accordion|counter|filter_search|other","text":"what must work, max 15 words"}],"style":{"mood":"few words","colors":["#rrggbb", "up to 5"],"headingFont":"Google Font","bodyFont":"Google Font"}}
 Features = interactive behaviour the request asks for or clearly needs (always include mobile_menu). Max 10 sections, 8 features.
 
 ${asData("REQUEST", userRequest)}`

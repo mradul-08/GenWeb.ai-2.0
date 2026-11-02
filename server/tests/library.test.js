@@ -45,6 +45,12 @@ test("requests are matched to the right starter template", () => {
   for (const [text, id] of cases) assert.equal(rankTemplates(text)[0].template.id, id, text)
 })
 
+test("a reviewed plan with generic sections still gets its business's template (live case)", () => {
+  // The first live salon plan only had generic sections; it was built with the business template.
+  const text = "Glow Studio – unisex salon in Sector 18 Noida, haircut, hair colour, facials and bridal makeup with prices, online appointment booking. Glow Studio Unisex salon offering haircuts, colour, facials, bridal makeup."
+  assert.equal(rankTemplates(text, ["hero", "features", "pricing", "faq", "footer"])[0].template.id, "salon")
+})
+
 test("new section names map to the new kinds", () => {
   const cases = [
     [{ id: "hours", name: "Opening hours" }, "hours"], [{ id: "timings", name: "Timings" }, "hours"],

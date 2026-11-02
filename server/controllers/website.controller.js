@@ -9,6 +9,7 @@ import { insertAt } from "../ai/htmlPatch.js"
 import { allowedOrigins } from "../config/origins.js"
 import Website from "../models/website.model.js"
 import { reserveCredits, refundCredits } from "../services/credits.js"
+import { commitCode, ensureVersioned, listVersions, getVersionCode, deleteHistory } from "../services/versions.js"
 
 const CREDITS_CONFIG = {
   COST_PER_GENERATION: 50,
@@ -81,9 +82,13 @@ function extractThumbnailMeta(html, fallbackTitle = "") {
 // ══════════════════════════════════════════════════════════════════════════════
 // SHARED HELPERS
 // ══════════════════════════════════════════════════════════════════════════════
-const generateSlug = (title) =>
-  title.toLowerCase().trim().replace(/[^a-z0-9s-]/g, "").replace(/s+/g, "-").slice(0, 40)
-  + "-" + Math.random().toString(36).slice(2, 6)
+// Readable slug + random suffix: "Business Solutions" → "business-solutions-k3f9".
+// Only new slugs use this; existing slugs are never changed (shared links).
+export const generateSlug = (title) => {
+  const base = String(title || "").toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]/g, "").replace(/[\s-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/, "")
+  return (base || "site") + "-" + Math.random().toString(36).slice(2, 6).padEnd(4, "0")
+}
 
 const humanTime = (ms) => {
   if (!ms || ms <= 0) return "a few minutes"
@@ -213,6 +218,12 @@ export const generateWebsite = async (req, res) => {
       ],
     })
 
+    // History is secondary to the generated site: a failure here is logged,
+    // never charged back (the next change creates the missing first version).
+    try {
+      await commitCode(website._id, parsed.code, { source: "generate", label: prompt.trim(), userId: user._id })
+    } catch (e) { console.error("[versions] generate", e) }
+
     await finishRequest(requestId, {
       outcome: "success", website: website._id, modelUsed: result.model.id, strategy: result.strategy,
       designBrief: result.briefStatus, validation: result.validation, durationMs: Date.now() - started,
@@ -284,12 +295,16 @@ export const updateWebsite = async (req, res) => {
       return res.status(503).json({ success: false, message: "Update failed — try again." })
     }
 
-    website.latestCode = r.parsed.code
-    website.conversation.push(
-      { role: "user", content: prompt.trim() },
-      { role: "ai",   content: `Done! Applied: ${prompt.trim().slice(0, 80)}` }
-    )
-    await website.save()
+    // Code, conversation and version are written together; if this throws,
+    // nothing was saved and the catch below refunds the credits.
+    await commitCode(website._id, r.parsed.code, {
+      source: "ai_edit", label: prompt.trim(), userId: user._id,
+      set: extractThumbnailMeta(r.parsed.code, website.title),
+      push: { conversation: { $each: [
+        { role: "user", content: prompt.trim() },
+        { role: "ai",   content: `Done! Applied: ${prompt.trim().slice(0, 80)}` },
+      ] } },
+    })
 
     await finishRequest(requestId, {
       outcome: "success", modelUsed: r.model?.id, editType: r.plan.editType, editMode: r.mode,
@@ -327,10 +342,11 @@ export const saveWebsiteCode = async (req, res) => {
     const website = await findOwnWebsite(req)
     if (!website) return notFound(res)
 
-    website.latestCode = code
-    Object.assign(website, extractThumbnailMeta(code, website.title))
-    await website.save()
-    return res.json({ success: true, message: "Saved" })
+    const version = await commitCode(website._id, code, {
+      source: "manual_save", label: "Manual edit", userId: req.user._id,
+      set: extractThumbnailMeta(code, website.title),
+    })
+    return res.json({ success: true, message: "Saved", version })
   } catch (e) {
     return serverError(res, "saveWebsiteCode", e)
   }
@@ -341,8 +357,68 @@ export const deleteWebsite = async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) return notFound(res)
     const w = await Website.findOneAndDelete({ _id: req.params.id, user: req.user._id })
     if (!w) return notFound(res)
+    await deleteHistory(w._id)
     return res.json({ success: true, message: "Deleted successfully" })
   } catch (e) { return serverError(res, "deleteWebsite", e) }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// VERSION HISTORY — see services/versions.js
+// ══════════════════════════════════════════════════════════════════════════════
+
+// GET /api/website/:id/versions → newest first, without content.
+export const getWebsiteVersions = async (req, res) => {
+  try {
+    const website = await findOwnWebsite(req)
+    if (!website) return notFound(res)
+    await ensureVersioned(website)
+    const [versions, head] = await Promise.all([
+      listVersions(website._id),
+      Website.findById(website._id).select("headVersion").lean(),
+    ])
+    return res.json({
+      success: true,
+      versions: versions.map(v => ({
+        id: v._id, seq: v.seq, source: v.source, label: v.label,
+        size: v.files.reduce((n, f) => n + f.size, 0), createdAt: v.createdAt,
+        current: String(v._id) === String(head.headVersion),
+      })),
+    })
+  } catch (e) { return serverError(res, "getWebsiteVersions", e) }
+}
+
+async function findOwnVersion(req, res) {
+  const website = await findOwnWebsite(req)
+  if (!website || !mongoose.isValidObjectId(req.params.versionId)) { notFound(res); return null }
+  const found = await getVersionCode(website._id, req.params.versionId)
+  if (!found) { notFound(res); return null }
+  return { website, ...found }
+}
+
+// GET /api/website/:id/versions/:versionId → { code } of that version.
+export const getWebsiteVersion = async (req, res) => {
+  try {
+    const found = await findOwnVersion(req, res)
+    if (!found) return
+    const { version, code } = found
+    return res.json({ success: true, version: { id: version._id, seq: version.seq, source: version.source, label: version.label, createdAt: version.createdAt }, code })
+  } catch (e) { return serverError(res, "getWebsiteVersion", e) }
+}
+
+// POST /api/website/:id/versions/:versionId/restore → makes that version's
+// code current by recording it as a NEW version (history is never rewritten).
+// Like a manual save, it also updates a deployed site.
+export const restoreWebsiteVersion = async (req, res) => {
+  try {
+    const found = await findOwnVersion(req, res)
+    if (!found) return
+    const { website, version, code } = found
+    const head = await commitCode(website._id, code, {
+      source: "restore", label: `Restored version ${version.seq}`, userId: req.user._id,
+      set: extractThumbnailMeta(code, website.title),
+    })
+    return res.json({ success: true, message: `Restored version ${version.seq}`, code, version: head })
+  } catch (e) { return serverError(res, "restoreWebsiteVersion", e) }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -359,8 +435,10 @@ export const deployWebsite = async (req, res) => {
     if (req.body?.code !== undefined) {
       const invalid = validateUserCode(req.body.code)
       if (invalid) return res.status(400).json({ success: false, message: invalid })
-      website.latestCode = req.body.code
-      Object.assign(website, extractThumbnailMeta(req.body.code, website.title))
+      await commitCode(website._id, req.body.code, {
+        source: "deploy", label: "Saved when deploying", userId: req.user._id,
+        set: extractThumbnailMeta(req.body.code, website.title),
+      })
     }
 
     if (!website.slug) {

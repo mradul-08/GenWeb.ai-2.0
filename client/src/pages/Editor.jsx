@@ -6,6 +6,7 @@ import { setUserData } from '../redux/userSlice'
 import { serverUrl } from '../config'
 import axios from 'axios'
 import { buildPreviewDoc, PREVIEW_SANDBOX } from '../utils/previewDoc'
+import VersionHistory from '../components/VersionHistory'
 
 const EDIT_STEPS = ['Reading request…','Analyzing code…','Planning changes…','Applying edits…','Polishing…','Done ✓']
 
@@ -266,6 +267,9 @@ export default function Editor() {
   const [deployCopied,     setDeployCopied]     = useState(false)
 
   const [activeTab,       setActiveTab]       = useState('preview')
+  // Bumped after every server-side save so the History tab reloads.
+  const [historyKey,      setHistoryKey]      = useState(0)
+  const bumpHistory = useCallback(() => setHistoryKey(k => k + 1), [])
   const [showFullPreview, setShowFullPreview] = useState(false)
   const [device,          setDevice]          = useState('desktop')
   const [editStep,        setEditStep]        = useState(0)
@@ -363,10 +367,19 @@ export default function Editor() {
         30000
       )
       if (!res.ok || !data.success) throw new Error(data.message || 'Save failed')
+      bumpHistory()
     } catch (err) {
       setError(`Couldn't save your change: ${err.message}`)
     }
-  }, [websiteId])
+  }, [websiteId, bumpHistory])
+
+  // The server already saved the restored code as a new version.
+  const handleRestored = useCallback((code, seq) => {
+    versionHistory.push(code)
+    updatePreview(code)
+    bumpHistory()
+    setMessages(prev => [...prev, { role:'assistant', content:`↺ Restored version ${seq}. It is now the current version — your previous one is still in History.` }])
+  }, [versionHistory.push, updatePreview, bumpHistory])
 
   const handleUndo = useCallback(() => {
     const code = versionHistory.undo()
@@ -405,6 +418,7 @@ export default function Editor() {
       stopTimers()
       versionHistory.push(data.code)
       updatePreview(data.code)
+      bumpHistory()
       setActiveTab('preview')
       setMessages(prev => [...prev, {
         role:    'assistant',
@@ -447,6 +461,7 @@ export default function Editor() {
         { withCredentials: true }
       )
       if (data.success && data.deployUrl) {
+        bumpHistory()
         setDeployUrl(data.deployUrl)
         setShowDeployModal(true)
         setMessages(prev => [...prev, {
@@ -682,10 +697,10 @@ export default function Editor() {
           )}
 
           <div style={{ height:46, flexShrink:0, borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', padding:'0 14px', gap:4, background:'rgba(8,8,12,0.9)', backdropFilter:'blur(16px)', zIndex:2, position:'relative' }}>
-            {['preview','code'].map(tab => (
+            {['preview','code','history'].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 style={{ padding:'5px 13px', borderRadius:7, border:'none', cursor:'pointer', background: activeTab === tab ? 'rgba(168,85,247,0.12)' : 'transparent', color: activeTab === tab ? '#a855f7' : 'rgba(255,255,255,0.35)', fontSize:12.5, fontWeight:500, fontFamily:'inherit', transition:'all 0.15s' }}>
-                {tab === 'preview' ? '🖥 Preview' : '‹/› Code'}
+                {{ preview:'🖥 Preview', code:'‹/› Code', history:'🕘 History' }[tab]}
               </button>
             ))}
 
@@ -780,6 +795,11 @@ export default function Editor() {
                   : <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', color:'rgba(255,255,255,0.3)', fontSize:14 }}>No code loaded</div>
                 }
               </div>
+            )}
+
+            {/* HISTORY TAB */}
+            {activeTab === 'history' && websiteId && (
+              <VersionHistory websiteId={websiteId} refreshKey={historyKey} disabled={isEditing} onRestored={handleRestored} />
             )}
           </div>
         </div>

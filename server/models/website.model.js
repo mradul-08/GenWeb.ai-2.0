@@ -35,6 +35,13 @@ const websiteSchema = new mongoose.Schema(
 
     conversation: [messageSchema],
 
+    // Current version in project_versions (services/versions.js). Null for
+    // websites created before version history until they are first changed.
+    headVersion: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+    },
+
     deployed: {
       type: Boolean,
       default: false,

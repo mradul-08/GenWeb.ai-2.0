@@ -10,6 +10,9 @@ import {
   deleteWebsite,
   deployWebsite,
   undeployWebsite,
+  getWebsiteVersions,
+  getWebsiteVersion,
+  restoreWebsiteVersion,
 } from "../controllers/website.controller.js"
 import isAuth from "../middlewares/isAuth.js"
 import { rateLimit } from "../middlewares/rateLimit.js"
@@ -34,5 +37,8 @@ websiteRouter.patch("/:id/code",       isAuth, saveLimit, saveWebsiteCode)
 websiteRouter.delete("/:id",           isAuth, deleteWebsite)
 websiteRouter.post("/:id/deploy",      isAuth, deployWebsite)
 websiteRouter.post("/:id/undeploy",    isAuth, undeployWebsite)
+websiteRouter.get("/:id/versions",                       isAuth, getWebsiteVersions)
+websiteRouter.get("/:id/versions/:versionId",            isAuth, getWebsiteVersion)
+websiteRouter.post("/:id/versions/:versionId/restore",   isAuth, saveLimit, restoreWebsiteVersion)
 
 export default websiteRouter

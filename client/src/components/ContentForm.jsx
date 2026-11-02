@@ -8,7 +8,7 @@ const input = { width:'100%', boxSizing:'border-box', padding:'7px 9px', borderR
 const small = { padding:'3px 8px', borderRadius:6, border:'1px solid rgba(255,255,255,0.1)', background:'transparent', color:'rgba(255,255,255,0.55)', fontSize:11, cursor:'pointer', fontFamily:'inherit' }
 const label = { display:'block', fontSize:11, fontWeight:600, color:'rgba(255,255,255,0.5)', margin:'0 0 4px' }
 
-function Field({ field, value, onChange }) {
+function Field({ field, value, onChange, iconList }) {
   const id = useId()
   switch (field.type) {
     case 'textarea':
@@ -20,9 +20,12 @@ function Field({ field, value, onChange }) {
     case 'strings':
       return <StringList field={field} value={Array.isArray(value) ? value : []} onChange={onChange} />
     case 'list':
-      return <ItemList field={field} value={Array.isArray(value) ? value : []} onChange={onChange} />
-    default: // text, emoji
-      return <><label htmlFor={id} style={label}>{field.label}</label><input id={id} type="text" maxLength={field.max} value={value ?? ''} onChange={e => onChange(e.target.value)} style={{ ...input, ...(field.type === 'emoji' ? { width:70 } : {}) }} /></>
+      return <ItemList field={field} value={Array.isArray(value) ? value : []} onChange={onChange} iconList={iconList} />
+    case 'emoji':
+      // Icon name from the library (suggested) or an emoji.
+      return <><label htmlFor={id} style={label}>{field.label} <span style={{ fontWeight:400, opacity:0.6 }}>(icon name or emoji)</span></label><input id={id} type="text" maxLength={16} list={iconList} placeholder="e.g. star" value={value ?? ''} onChange={e => onChange(e.target.value)} style={{ ...input, width:160 }} /></>
+    default: // text
+      return <><label htmlFor={id} style={label}>{field.label}</label><input id={id} type="text" maxLength={field.max} value={value ?? ''} onChange={e => onChange(e.target.value)} style={input} /></>
   }
 }
 
@@ -41,7 +44,7 @@ function StringList({ field, value, onChange }) {
   )
 }
 
-function ItemList({ field, value, onChange }) {
+function ItemList({ field, value, onChange, iconList }) {
   const set = (i, item) => onChange(value.map((x, j) => (j === i ? item : x)))
   const move = (i, d) => { const a = [...value]; const j = i + d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; onChange(a) }
   return (
@@ -57,7 +60,7 @@ function ItemList({ field, value, onChange }) {
               <button type="button" title="Remove" onClick={() => onChange(value.filter((_, j) => j !== i))} style={small}>✕</button>
             </div>
             <div style={{ display:'grid', gap:8 }}>
-              {field.item.map(sub => <div key={sub.key}><Field field={sub} value={obj[sub.key]} onChange={v => set(i, { ...obj, [sub.key]: v })} /></div>)}
+              {field.item.map(sub => <div key={sub.key}><Field field={sub} value={obj[sub.key]} iconList={iconList} onChange={v => set(i, { ...obj, [sub.key]: v })} /></div>)}
             </div>
           </div>
         )
@@ -68,11 +71,13 @@ function ItemList({ field, value, onChange }) {
   )
 }
 
-export default function ContentForm({ fields, value, onChange }) {
+export default function ContentForm({ fields, value, onChange, icons = [] }) {
   const v = value && typeof value === 'object' ? value : {}
+  const listId = useId()
   return (
     <div style={{ display:'grid', gap:10 }}>
-      {fields.map(f => <div key={f.key}><Field field={f} value={v[f.key]} onChange={x => onChange({ ...v, [f.key]: x })} /></div>)}
+      <datalist id={listId}>{icons.map(n => <option key={n} value={n} />)}</datalist>
+      {fields.map(f => <div key={f.key}><Field field={f} value={v[f.key]} iconList={listId} onChange={x => onChange({ ...v, [f.key]: x })} /></div>)}
     </div>
   )
 }

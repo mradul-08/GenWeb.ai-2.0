@@ -230,6 +230,8 @@ test("hybrid is the default engine: one small AI call, complete page, plan + che
   assert.ok(validateDocument(res.body.code).valid)
   assert.match(res.body.code, /Masala Chai/)
   assert.match(res.body.code, /₹40/)
+  // The owner is told which AI-written facts to check before publishing.
+  assert.match(res.body.message, /Before publishing, check the AI-written prices,[^.]*reviews/)
   assert.equal(res.body.checklist.summary.found, res.body.checklist.summary.checked)
 
   const site = await Website.findById(res.body.websiteId).lean()

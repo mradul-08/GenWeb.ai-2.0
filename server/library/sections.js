@@ -9,6 +9,8 @@
 // Original work (no third-party templates).
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+import { iconSvg, artSvg, ICON_NAMES } from "./icons.js"
+
 export const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")
 const str = (v, max, fallback = "") => {
   const s = typeof v === "string" ? v : typeof v === "number" ? String(v) : ""
@@ -23,6 +25,14 @@ const icon = (v, fallback) => {
   const s = str(v, 16)
   return s && !/[<>&"'A-Za-z0-9]/.test(s) && [...s].length <= 8 ? s : fallback
 }
+// Icon name from the library (rendered as SVG) or a valid emoji; else fallback (an icon name).
+const glyphValue = (v, fallback) => {
+  const name = typeof v === "string" ? v.trim().toLowerCase() : ""
+  return ICON_NAMES.includes(name) ? name : icon(v, fallback)
+}
+const glyph = (v) => iconSvg(v) || esc(v)
+// Theme-coloured art with a big icon in front (hero / about / highlight visuals).
+const artBlock = (value, style, cls) => `<div class="${cls} gw-art" aria-hidden="true">${artSvg(style)}<span class="gw-art-icon">${glyph(value)}</span></div>`
 const num = (v) => {
   const n = typeof v === "number" ? v : parseFloat(String(v ?? "").replace(/[^0-9.]/g, ""))
   return Number.isFinite(n) && n >= 0 && n < 1e9 ? n : null
@@ -48,10 +58,10 @@ export const KINDS = {
   },
 
   hero: {
-    schema: `{"eyebrow":"short label","heading":"headline, max 9 words","subheading":"1-2 sentences","primaryCta":"button text","secondaryCta":"button text or empty","emoji":"one emoji"}`,
+    schema: `{"eyebrow":"short label","heading":"headline, max 9 words","subheading":"1-2 sentences","primaryCta":"button text","secondaryCta":"button text or empty","icon":"icon name"}`,
     normalize: (c, ctx) => ({
       eyebrow: str(c?.eyebrow, 50), heading: str(c?.heading, 90, ctx.site.title), subheading: str(c?.subheading, 260, ctx.site.tagline || ctx.purpose),
-      primaryCta: str(c?.primaryCta, 28, "Get started"), secondaryCta: str(c?.secondaryCta, 28), emoji: icon(c?.emoji, "✨"),
+      primaryCta: str(c?.primaryCta, 28, "Get started"), secondaryCta: str(c?.secondaryCta, 28), emoji: glyphValue(c?.icon ?? c?.emoji, "sparkles"),
     }),
     variants: {
       centered: (c, ctx) => ({
@@ -59,44 +69,44 @@ export const KINDS = {
         css: `.gw-hero-centered{padding:110px 0 96px;text-align:center;background:radial-gradient(1200px 500px at 50% -10%,color-mix(in srgb,var(--primary) 18%,transparent),transparent),var(--bg)}.gw-hero-centered .gw-hero-actions{justify-content:center}.gw-hero-centered p{margin-inline:auto}`,
       }),
       split: (c, ctx) => ({
-        html: `<section id="${esc(ctx.id)}" class="gw-hero gw-hero-split"><div class="gw-wrap gw-hero-grid"><div>${heroText(c, ctx)}</div><div class="gw-hero-visual" aria-hidden="true"><span>${esc(c.emoji)}</span></div></div></section>`,
-        css: `.gw-hero-split{padding:90px 0}.gw-hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}.gw-hero-visual{aspect-ratio:1;border-radius:calc(var(--radius)*2);background:linear-gradient(135deg,var(--primary),var(--secondary));display:grid;place-items:center;box-shadow:var(--shadow)}.gw-hero-visual span{font-size:clamp(80px,14vw,160px);filter:drop-shadow(0 10px 20px rgba(0,0,0,.2))}@media(max-width:768px){.gw-hero-grid{grid-template-columns:1fr}.gw-hero-visual{max-width:280px;margin:0 auto}}`,
+        html: `<section id="${esc(ctx.id)}" class="gw-hero gw-hero-split"><div class="gw-wrap gw-hero-grid"><div>${heroText(c, ctx)}</div>${artBlock(c.emoji, ctx.site.brand.length, "gw-hero-visual")}</div></section>`,
+        css: `.gw-hero-split{padding:90px 0}.gw-hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}.gw-hero-visual{aspect-ratio:1;border-radius:calc(var(--radius)*2);background:var(--surface)}@media(max-width:768px){.gw-hero-grid{grid-template-columns:1fr}.gw-hero-visual{max-width:280px;margin:0 auto}}`,
       }),
       bold: (c, ctx) => ({
         html: `<section id="${esc(ctx.id)}" class="gw-hero gw-hero-bold"><div class="gw-wrap">${heroText(c, ctx)}</div></section>`,
-        css: `.gw-hero-bold{padding:120px 0 100px;background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 55%,var(--accent)));color:var(--on-primary)}.gw-hero-bold h1{font-size:clamp(2.6rem,7vw,5rem);max-width:14ch;color:var(--on-primary)}.gw-hero-bold .gw-eyebrow,.gw-hero-bold p{color:var(--on-primary);opacity:.9}.gw-hero-bold .gw-btn{background:var(--on-primary);color:var(--primary)}.gw-hero-bold .gw-btn-ghost{border-color:var(--on-primary);color:var(--on-primary);background:transparent}`,
+        css: `.gw-hero-bold{padding:120px 0 100px;background:radial-gradient(900px 420px at 85% 0%,color-mix(in srgb,var(--secondary) 35%,transparent),transparent),linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 72%,#000));color:var(--on-primary)}.gw-hero-bold h1{font-size:clamp(2.4rem,5.6vw,4.2rem);max-width:16ch;color:var(--on-primary)}.gw-hero-bold .gw-eyebrow,.gw-hero-bold p{color:var(--on-primary);opacity:.9}.gw-hero-bold .gw-btn{background:var(--on-primary);color:var(--primary)}.gw-hero-bold .gw-btn-ghost{border-color:var(--on-primary);color:var(--on-primary);background:transparent}`,
       }),
     },
   },
 
   features: {
-    schema: `{"heading":"…","intro":"one sentence","items":[{"icon":"emoji","title":"2-4 words","text":"1-2 sentences"}] (3-6 items)}`,
+    schema: `{"heading":"…","intro":"one sentence","items":[{"icon":"icon name","title":"2-4 words","text":"1-2 sentences"}] (exactly 3 or 6 items)}`,
     normalize: (c, ctx) => ({
       heading: heading(c, ctx), intro: intro(c, ctx),
-      items: fill(list(c?.items, 6).map(i => ({ icon: icon(i?.icon, "★"), title: str(i?.title, 60), text: str(i?.text, 240) })).filter(i => i.title), 3, (n) => ({ icon: "★", title: `${ctx.name} ${n}`, text: ctx.purpose })),
+      items: fill(list(c?.items, 6).map(i => ({ icon: glyphValue(i?.icon ?? i?.emoji, "star"), title: str(i?.title, 60), text: str(i?.text, 240) })).filter(i => i.title), 3, (n) => ({ icon: "★", title: `${ctx.name} ${n}`, text: ctx.purpose })),
     }),
     variants: {
       cards: (c, ctx) => ({
-        html: section(ctx, "gw-features", `${h2(c)}<div class="gw-grid">${c.items.map(i => `<article class="gw-card gw-reveal"><div class="gw-icon" aria-hidden="true">${esc(i.icon)}</div><h3>${esc(i.title)}</h3><p>${esc(i.text)}</p></article>`).join("")}</div>`),
+        html: section(ctx, "gw-features", `${h2(c)}<div class="gw-grid">${c.items.map(i => `<article class="gw-card gw-reveal"><div class="gw-icon" aria-hidden="true">${glyph(i.icon)}</div><h3>${esc(i.title)}</h3><p>${esc(i.text)}</p></article>`).join("")}</div>`),
         css: `.gw-icon{width:52px;height:52px;border-radius:var(--radius);display:grid;place-items:center;font-size:26px;background:color-mix(in srgb,var(--primary) 14%,var(--surface));margin-bottom:14px}`,
       }),
       list: (c, ctx) => ({
-        html: section(ctx, "gw-features gw-alt", `${h2(c)}<ul class="gw-feature-list">${c.items.map(i => `<li class="gw-reveal"><span class="gw-icon-sm" aria-hidden="true">${esc(i.icon)}</span><div><h3>${esc(i.title)}</h3><p>${esc(i.text)}</p></div></li>`).join("")}</ul>`),
+        html: section(ctx, "gw-features gw-alt", `${h2(c)}<ul class="gw-feature-list">${c.items.map(i => `<li class="gw-reveal"><span class="gw-icon-sm" aria-hidden="true">${glyph(i.icon)}</span><div><h3>${esc(i.title)}</h3><p>${esc(i.text)}</p></div></li>`).join("")}</ul>`),
         css: `.gw-feature-list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px 40px}.gw-feature-list li{display:flex;gap:16px;align-items:flex-start}.gw-icon-sm{flex-shrink:0;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:var(--surface)}.gw-feature-list h3{margin:4px 0 6px}`,
       }),
     },
   },
 
   about: {
-    schema: `{"heading":"…","paragraphs":["2-3 short paragraphs"],"highlights":[{"value":"e.g. 15+","label":"years"}] (0-3),"emoji":"one emoji"}`,
+    schema: `{"heading":"…","paragraphs":["2-3 short paragraphs"],"highlights":[{"value":"e.g. 15+","label":"years"}] (0-3),"icon":"icon name"}`,
     normalize: (c, ctx) => ({
-      heading: heading(c, ctx), paragraphs: paragraphs(c?.paragraphs, 3, ctx.purpose || `About ${ctx.site.brand}.`), emoji: icon(c?.emoji, "🌟"),
+      heading: heading(c, ctx), paragraphs: paragraphs(c?.paragraphs, 3, ctx.purpose || `About ${ctx.site.brand}.`), emoji: glyphValue(c?.icon ?? c?.emoji, "heart"),
       highlights: list(c?.highlights, 3).map(h => ({ value: str(h?.value, 12), label: str(h?.label, 40) })).filter(h => h.value && h.label),
     }),
     variants: {
       split: (c, ctx) => ({
-        html: section(ctx, "gw-about", `<div class="gw-about-grid"><div class="gw-about-art" aria-hidden="true">${esc(c.emoji)}</div><div><h2 class="gw-h2">${esc(c.heading)}</h2>${c.paragraphs.map(p => `<p>${esc(p)}</p>`).join("")}${highlights(c)}</div></div>`),
-        css: `.gw-about-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:56px;align-items:center}.gw-about-art{aspect-ratio:4/5;border-radius:calc(var(--radius)*2);background:linear-gradient(160deg,var(--surface),color-mix(in srgb,var(--secondary) 45%,var(--surface)));display:grid;place-items:center;font-size:clamp(70px,12vw,130px)}@media(max-width:768px){.gw-about-grid{grid-template-columns:1fr}.gw-about-art{aspect-ratio:16/9}}` + HIGHLIGHT_CSS,
+        html: section(ctx, "gw-about", `<div class="gw-about-grid">${artBlock(c.emoji, ctx.site.brand.length + 1, "gw-about-art")}<div><h2 class="gw-h2">${esc(c.heading)}</h2>${c.paragraphs.map(p => `<p>${esc(p)}</p>`).join("")}${highlights(c)}</div></div>`),
+        css: `.gw-about-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:56px;align-items:center}.gw-about-art{aspect-ratio:4/5;border-radius:calc(var(--radius)*2);background:var(--surface)}@media(max-width:768px){.gw-about-grid{grid-template-columns:1fr}.gw-about-art{aspect-ratio:16/9}}` + HIGHLIGHT_CSS,
       }),
       centered: (c, ctx) => ({
         html: section(ctx, "gw-about gw-alt", `<div class="gw-narrow"><h2 class="gw-h2">${esc(c.heading)}</h2>${c.paragraphs.map(p => `<p class="gw-lead">${esc(p)}</p>`).join("")}${highlights(c)}</div>`),
@@ -106,7 +116,7 @@ export const KINDS = {
   },
 
   menu: {
-    schema: `{"heading":"…","intro":"one sentence","items":[{"name":"…","description":"short","price":"with currency, e.g. ₹120","tag":"optional e.g. Bestseller"}] (4-12 items),"note":"optional small print"}`,
+    schema: `{"heading":"…","intro":"one sentence","items":[{"name":"…","description":"short","price":"with currency, e.g. ₹120","tag":"optional e.g. Bestseller"}] (6-8 items),"note":"optional small print"}`,
     normalize: (c, ctx) => ({
       heading: heading(c, ctx), intro: intro(c, ctx), note: str(c?.note, 160),
       items: fill(list(c?.items, 12).map(i => ({ name: str(i?.name, 60), description: str(i?.description, 160), price: str(i?.price, 20), tag: str(i?.tag, 20) })).filter(i => i.name), 3, (n) => ({ name: `Item ${n}`, description: ctx.purpose, price: "", tag: "" })),
@@ -139,7 +149,7 @@ export const KINDS = {
   },
 
   testimonials: {
-    schema: `{"heading":"…","items":[{"quote":"1-2 sentences","name":"person","role":"e.g. Regular customer"}] (3-5 items)}`,
+    schema: `{"heading":"…","items":[{"quote":"1-2 sentences","name":"person","role":"e.g. Regular customer"}] (exactly 3 items)}`,
     normalize: (c, ctx) => ({
       heading: heading(c, ctx),
       items: fill(list(c?.items, 6).map(i => ({ quote: str(i?.quote, 280), name: str(i?.name, 40), role: str(i?.role, 50) })).filter(i => i.quote && i.name), 2, (n) => ({ quote: `${ctx.site.brand} is wonderful.`, name: `Customer ${n}`, role: "" })),
@@ -158,28 +168,28 @@ export const KINDS = {
   },
 
   gallery: {
-    schema: `{"heading":"…","intro":"one sentence","items":[{"emoji":"one emoji","caption":"2-5 words"}] (4-9 items)}`,
+    schema: `{"heading":"…","intro":"one sentence","items":[{"icon":"icon name","caption":"2-5 words"}] (exactly 6 items)}`,
     normalize: (c, ctx) => ({
       heading: heading(c, ctx), intro: intro(c, ctx),
-      items: fill(list(c?.items, 9).map(i => ({ emoji: icon(i?.emoji, "📷"), caption: str(i?.caption, 60) })).filter(i => i.caption), 3, (n) => ({ emoji: "📷", caption: `${ctx.name} ${n}` })),
+      items: fill(list(c?.items, 9).map(i => ({ emoji: glyphValue(i?.icon ?? i?.emoji, "camera"), caption: str(i?.caption, 60) })).filter(i => i.caption), 3, (n) => ({ emoji: "📷", caption: `${ctx.name} ${n}` })),
     }),
     variants: {
       grid: (c, ctx) => ({
-        html: section(ctx, "gw-gallery", `${h2(c)}<div class="gw-gallery-grid">${c.items.map((i, n) => `<figure class="gw-tile gw-tile-${n % 4} gw-reveal"><span aria-hidden="true">${esc(i.emoji)}</span><figcaption>${esc(i.caption)}</figcaption></figure>`).join("")}</div>`),
-        css: `.gw-gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.gw-tile{margin:0;aspect-ratio:4/3;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:54px;color:var(--on-primary);box-shadow:var(--shadow);transition:transform .25s}.gw-tile:hover{transform:scale(1.03)}.gw-tile figcaption{font-size:.95rem;font-weight:600}.gw-tile-0{background:linear-gradient(135deg,var(--primary),var(--secondary))}.gw-tile-1{background:linear-gradient(135deg,var(--accent),var(--primary))}.gw-tile-2{background:linear-gradient(135deg,var(--secondary),var(--accent))}.gw-tile-3{background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 70%,#000),var(--primary))}`,
+        html: section(ctx, "gw-gallery", `${h2(c)}<div class="gw-gallery-grid">${c.items.map((i, n) => `<figure class="gw-tile gw-tile-${n % 4} gw-reveal"><span aria-hidden="true">${glyph(i.emoji)}</span><figcaption>${esc(i.caption)}</figcaption></figure>`).join("")}</div>`),
+        css: `.gw-gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:900px){.gw-gallery-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.gw-gallery-grid{grid-template-columns:1fr}}.gw-tile{margin:0;aspect-ratio:4/3;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:54px;color:var(--on-primary);box-shadow:var(--shadow);transition:transform .25s}.gw-tile:hover{transform:scale(1.03)}.gw-tile figcaption{font-size:.95rem;font-weight:600}.gw-tile-0{background:linear-gradient(135deg,var(--primary),var(--secondary))}.gw-tile-1{background:linear-gradient(135deg,var(--accent),var(--primary))}.gw-tile-2{background:linear-gradient(135deg,var(--secondary),var(--accent))}.gw-tile-3{background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 70%,#000),var(--primary))}`,
       }),
     },
   },
 
   team: {
-    schema: `{"heading":"…","intro":"one sentence","members":[{"name":"…","role":"…","bio":"one sentence","emoji":"one emoji"}] (2-6)}`,
+    schema: `{"heading":"…","intro":"one sentence","members":[{"name":"…","role":"…","bio":"one sentence","icon":"icon name"}] (3-4)}`,
     normalize: (c, ctx) => ({
       heading: heading(c, ctx), intro: intro(c, ctx),
-      members: fill(list(c?.members, 8).map(m => ({ name: str(m?.name, 40), role: str(m?.role, 50), bio: str(m?.bio, 200), emoji: icon(m?.emoji, "🙂") })).filter(m => m.name), 2, (n) => ({ name: `Team member ${n}`, role: "", bio: "", emoji: "🙂" })),
+      members: fill(list(c?.members, 8).map(m => ({ name: str(m?.name, 40), role: str(m?.role, 50), bio: str(m?.bio, 200), emoji: glyphValue(m?.icon ?? m?.emoji, "user") })).filter(m => m.name), 2, (n) => ({ name: `Team member ${n}`, role: "", bio: "", emoji: "🙂" })),
     }),
     variants: {
       grid: (c, ctx) => ({
-        html: section(ctx, "gw-team", `${h2(c)}<div class="gw-grid">${c.members.map(m => `<article class="gw-card gw-member gw-reveal"><div class="gw-avatar" aria-hidden="true">${esc(m.emoji)}</div><h3>${esc(m.name)}</h3>${m.role ? `<p class="gw-role">${esc(m.role)}</p>` : ""}${m.bio ? `<p>${esc(m.bio)}</p>` : ""}</article>`).join("")}</div>`),
+        html: section(ctx, "gw-team", `${h2(c)}<div class="gw-grid">${c.members.map(m => `<article class="gw-card gw-member gw-reveal"><div class="gw-avatar" aria-hidden="true">${glyph(m.emoji)}</div><h3>${esc(m.name)}</h3>${m.role ? `<p class="gw-role">${esc(m.role)}</p>` : ""}${m.bio ? `<p>${esc(m.bio)}</p>` : ""}</article>`).join("")}</div>`),
         css: `.gw-member{text-align:center}.gw-avatar{width:96px;height:96px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;font-size:44px;background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--secondary) 40%,var(--surface)))}.gw-role{color:var(--primary);font-weight:700;margin:-4px 0 8px}`,
       }),
     },
@@ -201,7 +211,7 @@ export const KINDS = {
   },
 
   faq: {
-    schema: `{"heading":"…","items":[{"q":"question","a":"1-3 sentence answer"}] (4-7 items)}`,
+    schema: `{"heading":"…","items":[{"q":"question","a":"1-3 sentence answer"}] (exactly 5 items)}`,
     normalize: (c, ctx) => ({
       heading: heading(c, ctx),
       items: fill(list(c?.items, 8).map(i => ({ q: str(i?.q ?? i?.question, 160), a: str(i?.a ?? i?.answer, 500) })).filter(i => i.q && i.a), 2, (n) => ({ q: `Question ${n}`, a: ctx.purpose || "Please contact us for details." })),
@@ -229,7 +239,7 @@ export const KINDS = {
   },
 
   contact: {
-    schema: `{"heading":"…","intro":"one sentence","address":"…","phone":"…","email":"…","hours":"…","formTitle":"…","submitLabel":"button text"}`,
+    schema: `{"heading":"…","intro":"one sentence","address":"only if in the request, else empty","phone":"only if in the request, else empty","email":"only if in the request, else empty","hours":"…","formTitle":"…","submitLabel":"button text"}`,
     normalize: (c, ctx) => ({
       heading: heading(c, ctx), intro: intro(c, ctx), address: str(c?.address, 160), phone: str(c?.phone, 40), email: str(c?.email, 80),
       hours: str(c?.hours, 120), formTitle: str(c?.formTitle, 60, ctx.booking ? "Book now" : "Send us a message"), submitLabel: str(c?.submitLabel, 28, ctx.booking ? "Book" : "Send"),
@@ -261,7 +271,7 @@ export const KINDS = {
   },
 
   footer: {
-    schema: `{"tagline":"one line","address":"optional","hours":"optional","copyright":"© year name"}`,
+    schema: `{"tagline":"one line","address":"only if in the request","hours":"optional","copyright":"© year name"}`,
     normalize: (c, ctx) => ({ brand: ctx.site.brand, tagline: str(c?.tagline, 140, ctx.site.tagline), address: str(c?.address, 160), hours: str(c?.hours, 120), copyright: str(c?.copyright, 80, `© ${new Date().getFullYear()} ${ctx.site.brand}`) }),
     variants: {
       simple: (c, ctx) => ({
@@ -356,7 +366,7 @@ const quoteCard = (i) => `<figure class="gw-quote gw-card"><blockquote>“${esc(
 const QUOTE_CSS = `.gw-quote{margin:0}.gw-quote blockquote{margin:0 0 16px;font-size:1.08rem;line-height:1.65}.gw-quote figcaption strong{display:block}.gw-quote figcaption span{color:var(--muted);font-size:.9rem}`
 
 function contactInfo(c) {
-  return [["📍", c.address], ["📞", c.phone], ["✉️", c.email], ["🕒", c.hours]].filter(([, v]) => v).map(([i, v]) => `<li><span aria-hidden="true">${i}</span>${esc(v)}</li>`).join("")
+  return [["pin", c.address], ["phone", c.phone], ["mail", c.email], ["clock", c.hours]].filter(([, v]) => v).map(([i, v]) => `<li>${iconSvg(i)}<span>${esc(v)}</span></li>`).join("")
 }
 function contactForm(c, ctx, cls = "") {
   // booking "table" (restaurants): date + guests; any other booking: date + time.
@@ -392,7 +402,7 @@ Object.assign(KINDS.hero.variants, {
     css: `.gw-hero-minimal{padding:128px 0 88px;border-bottom:1px solid color-mix(in srgb,var(--text) 10%,transparent)}.gw-hero-minimal h1{font-size:clamp(2.6rem,6.5vw,4.8rem);max-width:16ch}.gw-hero-minimal .gw-hero-sub{max-width:560px}`,
   }),
   panel: (c, ctx) => ({
-    html: `<section id="${esc(ctx.id)}" class="gw-hero gw-hero-panel"><div class="gw-wrap"><div class="gw-panel"><div class="gw-panel-emoji" aria-hidden="true">${esc(c.emoji)}</div>${heroText(c, ctx)}</div></div></section>`,
+    html: `<section id="${esc(ctx.id)}" class="gw-hero gw-hero-panel"><div class="gw-wrap"><div class="gw-panel"><div class="gw-panel-emoji" aria-hidden="true">${glyph(c.emoji)}</div>${heroText(c, ctx)}</div></div></section>`,
     css: `.gw-hero-panel{padding:96px 0;background:radial-gradient(color-mix(in srgb,var(--primary) 22%,transparent) 1.2px,transparent 1.3px) 0 0/22px 22px,var(--bg)}.gw-panel{max-width:780px;margin:0 auto;text-align:center;background:var(--bg);border:1px solid color-mix(in srgb,var(--text) 10%,transparent);border-radius:calc(var(--radius)*2);padding:56px 40px;box-shadow:var(--shadow)}.gw-panel-emoji{font-size:56px;margin-bottom:10px}.gw-hero-panel .gw-hero-actions{justify-content:center}.gw-hero-panel .gw-hero-sub{margin-inline:auto}@media(max-width:768px){.gw-panel{padding:40px 22px}}`,
   }),
 })
@@ -426,12 +436,12 @@ KINDS.testimonials.variants.spotlight = (c, ctx) => {
 }
 
 KINDS.gallery.variants.masonry = (c, ctx) => ({
-  html: section(ctx, "gw-gallery gw-alt", `${h2(c)}<div class="gw-masonry">${c.items.map((i, n) => `<figure class="gw-tile gw-tile-${n % 4} gw-h-${n % 3}"><span aria-hidden="true">${esc(i.emoji)}</span><figcaption>${esc(i.caption)}</figcaption></figure>`).join("")}</div>`),
+  html: section(ctx, "gw-gallery gw-alt", `${h2(c)}<div class="gw-masonry">${c.items.map((i, n) => `<figure class="gw-tile gw-tile-${n % 4} gw-h-${n % 3}"><span aria-hidden="true">${glyph(i.emoji)}</span><figcaption>${esc(i.caption)}</figcaption></figure>`).join("")}</div>`),
   css: TILE_CSS + `.gw-masonry{columns:3 220px;column-gap:16px}.gw-masonry .gw-tile{break-inside:avoid;margin:0 0 16px}.gw-h-0{height:200px}.gw-h-1{height:290px}.gw-h-2{height:240px}`,
 })
 
 KINDS.team.variants.list = (c, ctx) => ({
-  html: section(ctx, "gw-team gw-alt", `${h2(c)}<div class="gw-team-list">${c.members.map(m => `<article class="gw-member-row gw-reveal"><div class="gw-avatar-sm" aria-hidden="true">${esc(m.emoji)}</div><div><h3>${esc(m.name)}</h3>${m.role ? `<p class="gw-role">${esc(m.role)}</p>` : ""}${m.bio ? `<p>${esc(m.bio)}</p>` : ""}</div></article>`).join("")}</div>`),
+  html: section(ctx, "gw-team gw-alt", `${h2(c)}<div class="gw-team-list">${c.members.map(m => `<article class="gw-member-row gw-reveal"><div class="gw-avatar-sm" aria-hidden="true">${glyph(m.emoji)}</div><div><h3>${esc(m.name)}</h3>${m.role ? `<p class="gw-role">${esc(m.role)}</p>` : ""}${m.bio ? `<p>${esc(m.bio)}</p>` : ""}</div></article>`).join("")}</div>`),
   css: `.gw-team-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}.gw-member-row{display:flex;gap:16px;align-items:flex-start;padding:20px;border-radius:var(--radius);background:var(--bg)}.gw-avatar-sm{flex-shrink:0;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:30px;background:var(--surface)}.gw-member-row h3{margin:0 0 2px}.gw-member-row p{margin:0;color:var(--muted)}.gw-member-row .gw-role{color:var(--primary);font-weight:700;margin-bottom:6px}`,
 })
 
@@ -505,9 +515,9 @@ KINDS.steps = {
 }
 
 KINDS.highlight = {
-  schema: `{"heading":"…","text":"2-3 sentences","points":["3-4 short points"],"button":"button text or empty","emoji":"one emoji"}`,
+  schema: `{"heading":"…","text":"2-3 sentences","points":["3-4 short points"],"button":"button text or empty","icon":"icon name"}`,
   normalize: (c, ctx) => ({
-    heading: heading(c, ctx), text: str(c?.text, 500, ctx.purpose), emoji: icon(c?.emoji, "⭐"), button: str(c?.button, 28),
+    heading: heading(c, ctx), text: str(c?.text, 500, ctx.purpose), emoji: glyphValue(c?.icon ?? c?.emoji, "star"), button: str(c?.button, 28),
     points: (Array.isArray(c?.points) ? c.points : []).map(p => str(p, 120)).filter(Boolean).slice(0, 5),
   }),
   variants: {
@@ -517,8 +527,8 @@ KINDS.highlight = {
 }
 function highlightRender(c, ctx, flip) {
   return {
-    html: section(ctx, "gw-highlight", `<div class="gw-hl${flip ? " gw-hl-flip" : ""}"><div class="gw-hl-art" aria-hidden="true">${esc(c.emoji)}</div><div><h2 class="gw-h2">${esc(c.heading)}</h2>${c.text ? `<p class="gw-lead">${esc(c.text)}</p>` : ""}${c.points.length ? `<ul class="gw-hl-points">${c.points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}${c.button ? `<a class="gw-btn" href="${esc(ctx.link(ctx.contactId || "top"))}">${esc(c.button)}</a>` : ""}</div></div>`),
-    css: `.gw-hl{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center}.gw-hl-flip .gw-hl-art{order:2}.gw-hl-art{aspect-ratio:1;border-radius:calc(var(--radius)*2);display:grid;place-items:center;font-size:clamp(80px,13vw,150px);background:conic-gradient(from 210deg,var(--primary),var(--secondary),var(--accent),var(--primary));box-shadow:var(--shadow)}.gw-hl .gw-lead{margin-bottom:20px}.gw-hl-points{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:10px}.gw-hl-points li{padding-left:32px;position:relative}.gw-hl-points li::before{content:"✓";position:absolute;left:0;top:2px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:800;background:var(--primary);color:var(--on-primary)}@media(max-width:768px){.gw-hl{grid-template-columns:1fr}.gw-hl-flip .gw-hl-art{order:0}.gw-hl-art{max-width:260px;margin:0 auto}}`,
+    html: section(ctx, "gw-highlight", `<div class="gw-hl${flip ? " gw-hl-flip" : ""}">${artBlock(c.emoji, ctx.site.brand.length + 2, "gw-hl-art")}<div><h2 class="gw-h2">${esc(c.heading)}</h2>${c.text ? `<p class="gw-lead">${esc(c.text)}</p>` : ""}${c.points.length ? `<ul class="gw-hl-points">${c.points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}${c.button ? `<a class="gw-btn" href="${esc(ctx.link(ctx.contactId || "top"))}">${esc(c.button)}</a>` : ""}</div></div>`),
+    css: `.gw-hl{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center}.gw-hl-flip .gw-hl-art{order:2}.gw-hl-art{aspect-ratio:1;border-radius:calc(var(--radius)*2);background:var(--surface)}.gw-hl .gw-lead{margin-bottom:20px}.gw-hl-points{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:10px}.gw-hl-points li{padding-left:32px;position:relative}.gw-hl-points li::before{content:"✓";position:absolute;left:0;top:2px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:800;background:var(--primary);color:var(--on-primary)}@media(max-width:768px){.gw-hl{grid-template-columns:1fr}.gw-hl-flip .gw-hl-art{order:0}.gw-hl-art{max-width:260px;margin:0 auto}}`,
   }
 }
 

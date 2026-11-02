@@ -136,6 +136,33 @@ test("joined emoji are kept; text or markup in an emoji field is not", () => {
   for (const bad of ["<b>", "chef", "x\"y", "12"]) assert.ok(!html(bad).includes(`>${bad}<`), bad)
 })
 
+test("icon names render as theme-coloured SVG; older emoji content still works", () => {
+  const b = { template: "x", templateScore: 1, preset: PRESETS[0], features: [], booking: false, filter: false,
+    sections: [["hero", "split"], ["features", "cards"], ["team", "grid"], ["contact", "split"]].map(([kind, variant]) => ({ id: kind, name: kind, purpose: "", kind, variant })) }
+  const html = assembleSite(b, { sections: {
+    hero: { heading: "Hi", icon: "scissors" },
+    features: { items: [{ icon: "shield", title: "Safe", text: "x" }, { icon: "🙂", title: "Old emoji", text: "y" }, { icon: "not-an-icon", title: "Fallback", text: "z" }] },
+    team: { members: [{ name: "Ravi", emoji: "👨‍🍳" }] },
+    contact: { phone: "+91 98100 12345" },
+  } }).html
+  assert.match(html, /class="gw-hero-visual gw-art"[\s\S]*?<svg class="gw-svg"/, "hero art with an SVG icon")
+  assert.ok((html.match(/<svg class="gw-svg"/g) || []).length >= 4, "feature, hero, fallback star and contact icons")
+  assert.match(html, /🙂/)
+  assert.match(html, /👨‍🍳/)
+  assert.doesNotMatch(html, /not-an-icon/)
+  assert.doesNotMatch(html, /📞/, "contact info uses SVG icons")
+  assert.ok(validateDocument(html).valid)
+})
+
+test("the content prompt asks for icons by name, exact counts and no invented contact details", () => {
+  const b = buildBlueprint({ text: "salon in Noida", rand: seeded(2) })
+  const p = buildContentPrompt("salon in Noida", b, null)
+  assert.match(p, /use only these names — check, star/)
+  assert.match(p, /Never invent contact details/)
+  assert.match(p, /exactly 3 items/)
+  assert.doesNotMatch(p, /"emoji":"one emoji"/)
+})
+
 // Realistic content for any kind (what a good model answer looks like).
 function sample(kind) {
   const item = { name: "Masala Chai", description: "Spiced tea", price: "₹40", title: "Fresh daily", text: "Made every morning.", quote: "Lovely place.", role: "Regular",

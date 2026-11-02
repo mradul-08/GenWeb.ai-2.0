@@ -165,7 +165,7 @@ export default function DesignPanel({ websiteId, refreshKey, disabled, onApplied
                 </div>
                 {open === s.id && k && (
                   <div style={{ marginTop:10, padding:12, borderRadius:10, background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)' }}>
-                    <ContentForm fields={k.fields} value={draft.content.sections[s.id]} onChange={v => setSectionContent(s.id, v)} />
+                    <ContentForm fields={k.fields} icons={library.icons || []} value={draft.content.sections[s.id]} onChange={v => setSectionContent(s.id, v)} />
                   </div>
                 )}
               </div>

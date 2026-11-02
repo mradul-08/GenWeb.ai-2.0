@@ -71,6 +71,7 @@ test("the library lists every theme and section kind with variants and fields", 
   const r = await request(app).get("/api/website/library").set("Cookie", sessionCookie(user))
   assert.equal(r.status, 200)
   assert.equal(r.body.presets.length, PRESETS.length)
+  assert.ok(r.body.icons.includes("star") && r.body.icons.length >= 30, "icon names for the editor")
   for (const k of ["hero", "menu", "testimonials", "contact", "footer"]) {
     assert.ok(r.body.kinds[k].variants.length >= 1 && r.body.kinds[k].fields.length >= 1, k)
   }

@@ -4,6 +4,7 @@
 // their text. Costs no AI calls and no credits.
 import { PRESETS, presetById } from "../library/presets.js"
 import { KINDS, KIND_UI } from "../library/sections.js"
+import { ICON_NAMES } from "../library/icons.js"
 import { assembleSite, hydrateBlueprint, serializeBlueprint, applyTheme, resolveColors } from "../library/assemble.js"
 import { validateDocument } from "../ai/validate.js"
 import { hashFiles, currentFiles } from "./versions.js"
@@ -22,6 +23,7 @@ export function libraryInfo() {
       const c = resolveColors(p)
       return { id: p.id, dark: p.dark, fonts: p.fonts, colors: { primary: c.primary, secondary: c.secondary, accent: c.accent, bg: c.bg, text: c.text } }
     }),
+    icons: ICON_NAMES,
     kinds: Object.fromEntries(Object.keys(KINDS).map(k => [k, { label: KIND_UI[k].label, variants: Object.keys(KINDS[k].variants), fields: KIND_UI[k].fields }])),
   }
 }

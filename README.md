@@ -6,8 +6,11 @@ GenWeb.ai is an AI-powered website builder that turns a plain-language prompt in
 
 ## Live product
 
-- **Web app:** [genweb-ai-delta.vercel.app](https://genweb-ai-delta.vercel.app)
-- **Repository:** [github.com/mradul-08/Genweb.ai](https://github.com/mradul-08/Genweb.ai)
+- **Web app:** [genweb-v2-web.vercel.app](https://genweb-v2-web.vercel.app)
+- **Repository:** [github.com/mradul-08/GenWeb.ai-2.0](https://github.com/mradul-08/GenWeb.ai-2.0)
+
+The current frontend uses a warm, soft-light visual system: oat backgrounds, paper surfaces,
+charcoal text, muted sage actions, terracotta accents, and consistent Lucide icon tiles.
 
 ## Product presentation
 
@@ -35,6 +38,8 @@ Deploy a project to a shareable public URL served directly by the backend. The d
 - Natural-language website editing with targeted HTML patching
 - Full HTML source viewer and direct editing mode
 - Undo and redo history in the editor
+- Immutable version history with named and pinned checkpoints
+- Immutable published releases with rollback support
 - Responsive desktop, tablet, and mobile previews
 - Project dashboard with search, filtering, thumbnails, and deployment status
 - Public deployment URLs with a GenWeb.ai attribution ribbon
@@ -42,7 +47,8 @@ Deploy a project to a shareable public URL served directly by the backend. The d
 - Cookie-based JWT sessions
 - Credit-based usage model
 - Razorpay credit purchases with payment signature verification
-- Dark, animated product interface built with React and Framer Motion
+- Responsive editor workspace built with React and Framer Motion
+- Consistent soft icon system across landing, pricing, dashboard, generator, editor, and history
 
 ## Architecture
 
@@ -92,7 +98,7 @@ websiteBuilder/
 | Authentication | Firebase Google sign-in + Express JWT HTTP-only cookie sessions |
 | AI generation | Groq, Mistral, ZhipuAI, Cerebras, SambaNova, Cloudflare Workers AI, and OpenRouter with fallback routing |
 | Payments | Razorpay |
-| Hosting | Vercel/Firebase-compatible frontend and Node server deployment |
+| Hosting | Vercel frontend and Node server deployment |
 
 ## Run locally
 
@@ -123,6 +129,17 @@ npm run dev
 ```
 
 The client runs on `http://localhost:5173` by default.
+
+### Quality checks
+
+Run these before opening a pull request:
+
+```bash
+cd client
+npm run lint
+npm test
+npm run build
+```
 
 ## Environment configuration
 
@@ -164,6 +181,11 @@ Only values intentionally designed for browser exposure should use the `VITE_` p
 | `PUT` | `/api/website/:id` | Apply an AI edit |
 | `PATCH` | `/api/website/:id/code` | Save directly edited code (no credits) |
 | `POST` | `/api/website/:id/deploy` | Publish a project |
+| `GET` | `/api/website/:id/versions` | List immutable project versions |
+| `PATCH` | `/api/website/:id/versions/:versionId` | Name or pin a version checkpoint |
+| `POST` | `/api/website/:id/versions/:versionId/restore` | Restore a version as a new working version |
+| `GET` | `/api/website/:id/releases` | List immutable published releases |
+| `POST` | `/api/website/:id/releases/:releaseId/rollback` | Roll back the public site to a release |
 | `GET` | `/s/:slug` | Serve a deployed website publicly |
 | `POST` | `/api/payment/create-order` | Create a Razorpay order |
 | `POST` | `/api/payment/verify` | Verify payment and add credits |

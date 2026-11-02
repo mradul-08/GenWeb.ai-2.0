@@ -14,12 +14,12 @@ function useGetCurrentUser() {
           withCredentials: true
         })
         dispatch(setUserData(result.data.user))  // sets authChecked = true
-      } catch (error) {
+      } catch {
         dispatch(setAuthChecked())  // auth failed but checked = true, don't loop
       }
     }
     getCurrentUser()
-  }, [])
+  }, [dispatch])
 }
 
 export default useGetCurrentUser

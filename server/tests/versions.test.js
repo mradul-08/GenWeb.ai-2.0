@@ -29,6 +29,7 @@ const wrap = (html) => `{"title":"Crumb & Co","message":"Built a bakery site"}\n
 const as = (user) => ({
   list:    (site) => request(app).get(`/api/website/${site._id}/versions`).set("Cookie", sessionCookie(user)),
   get:     (site, v) => request(app).get(`/api/website/${site._id}/versions/${v}`).set("Cookie", sessionCookie(user)),
+  meta:    (site, v, body) => request(app).patch(`/api/website/${site._id}/versions/${v}`).set("Cookie", sessionCookie(user)).send(body),
   restore: (site, v) => request(app).post(`/api/website/${site._id}/versions/${v}/restore`).set("Cookie", sessionCookie(user)),
   save:    (site, code) => request(app).patch(`/api/website/${site._id}/code`).set("Cookie", sessionCookie(user)).send({ code }),
   edit:    (site, prompt) => request(app).put(`/api/website/${site._id}`).set("Cookie", sessionCookie(user)).send({ prompt }),
@@ -94,7 +95,7 @@ test("restore brings old code back as a NEW version; history is never rewritten"
   assert.equal(await ProjectVersion.countDocuments({ project: site._id }), 3)
 })
 
-test("restore also updates the deployed site (same as a manual save)", async () => {
+test("restore changes the working version but not the published release", async () => {
   const user = await legacyUser()
   const site = await legacySite(user)
   assert.equal((await as(user).deploy(site, { code: page("Live two") })).status, 200)
@@ -104,7 +105,26 @@ test("restore also updates the deployed site (same as a manual save)", async () 
   const { versions } = (await as(user).list(site)).body
   assert.deepEqual(versions.map(v => v.source), ["deploy", "migration"])
   await as(user).restore(site, versions[1].id)
-  assert.match((await request(app).get(`/s/${slug}`)).text, /Original/)
+  assert.match((await request(app).get(`/s/${slug}`)).text, /Live two/)
+})
+
+test("version checkpoints can be named and pinned with ownership validation", async () => {
+  const owner = await legacyUser()
+  const other = await legacyUser()
+  const site = await legacySite(owner)
+  await as(owner).save(site, page("Two"))
+  const version = (await as(owner).list(site)).body.versions[0]
+
+  const updated = await as(owner).meta(site, version.id, { label: "Launch candidate", pinned: true })
+  assert.equal(updated.status, 200, JSON.stringify(updated.body))
+  assert.equal(updated.body.version.label, "Launch candidate")
+  assert.equal(updated.body.version.pinned, true)
+
+  const listed = (await as(owner).list(site)).body.versions.find(v => v.id === version.id)
+  assert.equal(listed.label, "Launch candidate")
+  assert.equal(listed.pinned, true)
+  assert.equal((await as(owner).meta(site, version.id, { pinned: "yes" })).status, 400)
+  assert.equal((await as(other).meta(site, version.id, { pinned: false })).status, 404)
 })
 
 test("an AI edit of a legacy site keeps the pre-edit code as version 1, with its conversation", async () => {

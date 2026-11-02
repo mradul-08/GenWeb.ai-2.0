@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { motion as Motion } from 'framer-motion'
-import { ArrowRight, LayoutTemplate, ListChecks, Palette, History, Download, ShieldCheck, Sparkles, Check, LayoutDashboard, PenLine, ClipboardCheck, Rocket } from 'lucide-react'
+import { ArrowRight, LayoutTemplate, ListChecks, Palette, History, Download, ShieldCheck, Sparkles, Check, LayoutDashboard, PenLine, ClipboardCheck, Rocket, Scissors, Coffee, Dumbbell, GraduationCap, House, Stethoscope } from 'lucide-react'
 import { C, FONT, btn, card, pill, shadow } from '../theme'
+import IconTile from './IconTile'
 
 // Landing page sections (light theme). Everything described here exists in
 // the product; the example sites are real output of the template engine
@@ -15,13 +16,20 @@ const EXAMPLES = [
 ]
 
 const IDEAS = [
+  { icon: Scissors, label: 'Salon', text: 'A unisex salon in my city with services, prices and online appointments' },
+  { icon: Coffee, label: 'Café', text: 'A cosy café with a menu, opening hours, photos and table booking' },
+  { icon: Dumbbell, label: 'Gym', text: 'A gym with programs, trainers, memberships and a free trial form' },
+  { icon: GraduationCap, label: 'Coaching', text: 'A coaching institute with courses, batches, faculty and enquiries' },
+  { icon: House, label: 'Real estate', text: 'A real estate builder with listings, amenities and site-visit booking' },
+  { icon: Stethoscope, label: 'Clinic', text: 'A dental clinic with treatments, doctors, timings and appointments' },
+/*
   ['💇', 'Salon', 'A unisex salon in my city with services, prices and online appointments'],
   ['☕', 'Café', 'A cosy café with a menu, opening hours, photos and table booking'],
   ['🏋️', 'Gym', 'A gym with programs, trainers, memberships and a free trial form'],
   ['🎓', 'Coaching', 'A coaching institute with courses, batches, faculty and enquiries'],
   ['🏠', 'Real estate', 'A real estate builder with listings, amenities and site-visit booking'],
   ['🩺', 'Clinic', 'A dental clinic with treatments, doctors, timings and appointments'],
-]
+*/]
 
 const STEPS = [
   { icon: PenLine,        title: 'Describe your business',  text: 'One or two sentences in plain English — what you do, where, and what visitors should be able to do.' },
@@ -30,11 +38,11 @@ const STEPS = [
 ]
 
 const FEATURES = [
-  { icon: LayoutTemplate, color: '#7c3aed', title: 'Complete websites, every time',     text: 'Tested templates and sections for 12 kinds of business, filled with copy written for yours — single page or multi-page.' },
-  { icon: ListChecks,     color: '#2563eb', title: 'Plan first, checklist after',       text: 'Approve the sections and features up front; a checklist shows what made it into the site after every change.' },
-  { icon: Palette,        color: '#db2777', title: 'Design editor — no AI, no credits', text: '12 themes, 47 section designs, reorder or add sections and edit every text and price instantly.' },
-  { icon: History,        color: '#0891b2', title: 'Version history',                   text: 'Every change is saved. Preview any earlier version and restore it in one click.' },
-  { icon: Download,       color: '#059669', title: 'Publish or take it with you',       text: 'Publish on a GenWeb link, or export a ZIP of all pages to host free on Netlify, GitHub Pages or anywhere.' },
+  { icon: LayoutTemplate, color: '#687b68', title: 'Complete websites, every time',     text: 'Tested templates and sections for 12 kinds of business, filled with copy written for yours — single page or multi-page.' },
+  { icon: ListChecks,     color: '#c8795d', title: 'Plan first, checklist after',       text: 'Approve the sections and features up front; a checklist shows what made it into the site after every change.' },
+  { icon: Palette,        color: '#9a8066', title: 'Design editor — no AI, no credits', text: '12 themes, 47 section designs, reorder or add sections and edit every text and price instantly.' },
+  { icon: History,        color: '#5f8067', title: 'Version history',                   text: 'Every change is saved. Preview any earlier version and restore it in one click.' },
+  { icon: Download,       color: '#4e6251', title: 'Publish or take it with you',       text: 'Publish on a GenWeb link, or export a ZIP of all pages to host free on Netlify, GitHub Pages or anywhere.' },
   { icon: ShieldCheck,    color: '#b45309', title: 'Honest by design',                  text: 'No invented phone numbers or addresses, and a reminder to check prices, hours and reviews before you publish.' },
 ]
 
@@ -67,7 +75,7 @@ export function Hero({ userData, navigate }) {
           <span style={{ fontSize: 14, color: C.text }}>
             Welcome back, <b style={{ color: C.ink }}>{(userData.name || 'there').split(' ')[0]}</b>
             <span style={{ color: C.faint }}> · </span>
-            <span style={{ color: C.amber, fontWeight: 700 }}>⚡ {userData.credits ?? 0} credits</span>
+            <span style={{ color: C.terracotta, fontWeight: 700 }}>⚡ {userData.credits ?? 0} credits</span>
           </span>
           <button onClick={() => navigate('/dashboard')} style={{ ...btn.primary, padding: '8px 16px', fontSize: 14, borderRadius: 999, boxShadow: 'none' }}>
             <LayoutDashboard size={15} /> Go to my dashboard
@@ -97,12 +105,12 @@ export function Hero({ userData, navigate }) {
       <style>{'@media (max-width: 560px){.gw-hero-form{flex-direction:column}.gw-hero-form button{padding:14px 22px !important}.gw-welcome{border-radius:18px !important;padding:12px !important}}'}</style>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 18, maxWidth: 760 }}>
-        {IDEAS.map(([icon, label, text]) => {
+        {IDEAS.map(({ icon: IdeaIcon, label, text }) => {
           const on = idea === text
           return (
             <button key={label} type="button" onClick={() => setIdea(text)} aria-pressed={on}
-              style={{ padding: '8px 15px', borderRadius: 999, border: `1px solid ${on ? C.violet : C.border}`, background: on ? 'rgba(124,58,237,0.08)' : C.surface, color: on ? C.violet : C.text, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: FONT, boxShadow: shadow.sm }}>
-              {icon} {label}
+              style={{ padding: '8px 15px', borderRadius: 999, border: `1px solid ${on ? C.violet : C.border}`, background: on ? 'rgba(104,123,104,0.10)' : C.surface, color: on ? C.violet : C.text, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: FONT, boxShadow: shadow.sm }}>
+              {React.createElement(IdeaIcon, { size: 15, strokeWidth: 1.9 })} {label}
             </button>
           )
         })}
@@ -182,10 +190,8 @@ export function HowItWorks() {
         <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 18 }}>
           {STEPS.map((s, i) => (
             <Motion.li key={s.title} {...fade} style={{ ...card, position: 'relative', padding: '30px 26px' }}>
-              <span aria-hidden="true" style={{ position: 'absolute', top: 22, right: 24, fontSize: 44, fontWeight: 800, color: '#ece9fb', lineHeight: 1 }}>{i + 1}</span>
-              <span style={{ display: 'grid', placeItems: 'center', width: 48, height: 48, borderRadius: 14, marginBottom: 18, background: C.brand, color: '#fff', boxShadow: shadow.brand }}>
-                {React.createElement(s.icon, { size: 22 })}
-              </span>
+              <span aria-hidden="true" style={{ position: 'absolute', top: 22, right: 24, fontSize: 44, fontWeight: 800, color: '#e4ded3', lineHeight: 1 }}>{i + 1}</span>
+              <IconTile icon={s.icon} color={[C.green, C.terracotta, C.sage][i]} />
               <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: C.ink }}>{s.title}</h3>
               <p style={{ margin: 0, fontSize: 15, lineHeight: 1.7, color: C.muted }}>{s.text}</p>
             </Motion.li>
@@ -202,48 +208,20 @@ export function Features() {
     <section id="features" style={sectionWrap}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <Motion.div {...fade} style={{ textAlign: 'center', marginBottom: 50 }}>
-          <div style={{ ...pill('#db2777'), marginBottom: 16 }}>WHAT YOU GET</div>
+          <div style={{ ...pill('#c8795d'), marginBottom: 16 }}>WHAT YOU GET</div>
           <h2 style={h2}>Everything you need — and control over all of it</h2>
           <p style={lead}>AI does the first draft. You stay in charge of every detail, for free.</p>
         </Motion.div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,300px),1fr))', gap: 18 }}>
           {FEATURES.map(({ icon, color, title, text }) => (
             <Motion.div key={title} {...fade} style={{ ...card, padding: 26 }}>
-              <div style={{ width: 46, height: 46, borderRadius: 13, display: 'grid', placeItems: 'center', background: `${color}14`, border: `1px solid ${color}2e`, marginBottom: 16 }}>
-                {React.createElement(icon, { size: 22, color })}
-              </div>
+              <IconTile icon={icon} color={color} />
               <h3 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 700, color: C.ink }}>{title}</h3>
               <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.7, color: C.muted }}>{text}</p>
             </Motion.div>
           ))}
         </div>
       </div>
-    </section>
-  )
-}
-
-// ── Final call to action ────────────────────────────────────────────────────
-export function FinalCta({ userData, navigate }) {
-  const start = useStartWithIdea(userData, navigate)
-  return (
-    <section style={{ ...sectionWrap, paddingTop: 10 }}>
-      <Motion.div {...fade} style={{ maxWidth: 940, margin: '0 auto', borderRadius: 28, background: C.brand, padding: 'clamp(40px,6vw,64px) clamp(22px,5vw,64px)', textAlign: 'center', boxShadow: shadow.brand, position: 'relative', overflow: 'hidden' }}>
-        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.14) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-        <div style={{ position: 'relative' }}>
-          <h2 style={{ ...h2, color: '#fff' }}>Your business deserves a website today</h2>
-          <p style={{ ...lead, color: 'rgba(255,255,255,0.9)', marginBottom: 30 }}>Start with a sentence. See the plan for free, then build when you like it.</p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => start('')} style={{ ...btn.secondary, border: 'none', padding: '14px 28px', fontSize: 16, fontWeight: 700, color: C.violet }}>
-              {userData ? 'Build a new website' : 'Start building — free'} <ArrowRight size={18} />
-            </button>
-            {userData && (
-              <button onClick={() => navigate('/dashboard')} style={{ ...btn.secondary, background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.45)', color: '#fff', padding: '14px 28px', fontSize: 16 }}>
-                <LayoutDashboard size={18} /> My dashboard
-              </button>
-            )}
-          </div>
-        </div>
-      </Motion.div>
     </section>
   )
 }

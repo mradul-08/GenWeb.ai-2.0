@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion as Motion, AnimatePresence } from 'framer-motion'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, Wand2, ClipboardList, Rocket, LayoutTemplate, Palette, FileText, Files, Monitor, Code2, Maximize2, Download, ArrowRight, X, Check, Shuffle, AlertTriangle, Loader2 } from 'lucide-react'
+import { Sparkles, Wand2, ClipboardList, Rocket, LayoutTemplate, Palette, FileText, Files, Monitor, Code2, Maximize2, Download, ArrowRight, X, Check, Shuffle, AlertTriangle, Loader2, Megaphone, PanelsTopLeft } from 'lucide-react'
 import { setUserData } from '../redux/userSlice'
 import { serverUrl } from '../config'
 import axios from 'axios'
@@ -29,6 +29,15 @@ const getRandomPalette = () => RANDOM_PALETTES[Math.floor(Math.random() * RANDOM
 const STEP_WEIGHTS = [0.10, 0.15, 0.20, 0.25, 0.20, 0.10]
 
 const STYLE_PRESETS = [
+  { id: 'auto', label: 'Auto', icon: Sparkles, desc: 'Best fit for your business' },
+  { id: 'minimal', label: 'Minimal', icon: LayoutTemplate, desc: 'Clean, lots of whitespace' },
+  { id: 'bold', label: 'Bold', icon: Megaphone, desc: 'Strong colours, big type' },
+  { id: 'glassmorphism', label: 'Glass', icon: PanelsTopLeft, desc: 'Frosted glass effects' },
+  { id: 'dark', label: 'Dark', icon: Monitor, desc: 'Dark theme, premium feel' },
+  { id: 'colorful', label: 'Colourful', icon: Palette, desc: 'Vibrant, playful palette' },
+  { id: 'corporate', label: 'Corporate', icon: ClipboardList, desc: 'Professional, trustworthy' },
+  { id: 'random', label: 'Random', icon: Shuffle, desc: 'Surprise colour palette' },
+/*
   // Auto: no style is forced; the template and the business decide the look.
   { id: 'auto',          label: 'Auto',      icon: '✦', desc: 'Best fit for your business' },
   { id: 'minimal',       label: 'Minimal',   icon: '◻', desc: 'Clean, lots of whitespace' },
@@ -38,7 +47,7 @@ const STYLE_PRESETS = [
   { id: 'colorful',      label: 'Colourful', icon: '◍', desc: 'Vibrant, playful palette' },
   { id: 'corporate',     label: 'Corporate', icon: '◫', desc: 'Professional, trustworthy' },
   { id: 'random',        label: 'Random',    icon: '🎲', desc: 'Surprise colour palette' },
-]
+*/]
 
 const SECTIONS = [
   { id: 'hero',         label: 'Hero' },
@@ -120,8 +129,8 @@ async function fetchJsonWithTimeout(url, options, timeoutMs) {
 const LBL = { display: 'flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, color: C.ink, margin: '0 0 10px' }
 const choice = (on) => ({
   padding: '10px 12px', borderRadius: 12, cursor: 'pointer', textAlign: 'left', fontFamily: FONT,
-  border: `1.5px solid ${on ? C.violet : C.border}`, background: on ? 'rgba(124,58,237,0.06)' : C.surface,
-  boxShadow: on ? '0 0 0 3px rgba(124,58,237,0.08)' : 'none', transition: 'border-color .15s, background .15s',
+  border: `1.5px solid ${on ? C.violet : C.border}`, background: on ? 'rgba(104,123,104,0.07)' : C.surface,
+  boxShadow: on ? '0 0 0 3px rgba(104,123,104,0.10)' : 'none', transition: 'border-color .15s, background .15s',
 })
 const Spin = ({ size = 16 }) => <Loader2 size={size} style={{ animation: 'gw-spin 1s linear infinite' }} />
 
@@ -131,9 +140,9 @@ function CircularProgress({ pct = 0, size = 168, stroke = 10 }) {
   return (
     <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }} aria-hidden="true">
       <defs>
-        <linearGradient id="gw-prog" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#7c3aed" /><stop offset="100%" stopColor="#2563eb" /></linearGradient>
+        <linearGradient id="gw-prog" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#687b68" /><stop offset="100%" stopColor="#c8795d" /></linearGradient>
       </defs>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#ece9fb" strokeWidth={stroke} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#e4ded3" strokeWidth={stroke} />
       <Motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="url(#gw-prog)" strokeWidth={stroke} strokeLinecap="round"
         strokeDasharray={circum} animate={{ strokeDashoffset: circum * (1 - pct / 100) }} transition={{ duration: 0.55, ease: 'easeOut' }} />
     </svg>
@@ -466,7 +475,7 @@ export default function Generate() {
                 <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><Sparkles size={15} color={C.violet} /> Describe your business</span>
                 <span style={{ fontSize: 12, fontWeight: 500, color: prompt.length > PROMPT_CHAR_LIMIT - 100 ? C.red : C.faint }}>{prompt.length}/{PROMPT_CHAR_LIMIT}</span>
               </label>
-              <div style={{ borderRadius: 14, border: `1.5px solid ${prompt ? C.violet : C.borderStrong}`, background: C.surface, boxShadow: prompt ? '0 0 0 4px rgba(124,58,237,0.08)' : shadow.sm, transition: 'border-color .2s, box-shadow .2s' }}>
+              <div style={{ borderRadius: 14, border: `1.5px solid ${prompt ? C.violet : C.borderStrong}`, background: C.surface, boxShadow: prompt ? '0 0 0 4px rgba(104,123,104,0.10)' : shadow.sm, transition: 'border-color .2s, box-shadow .2s' }}>
                 <textarea id="gen-prompt" ref={textareaRef} value={prompt} onChange={e => updatePromptDraft(e.target.value)} onKeyDown={handleKeyDown}
                   placeholder="e.g. A unisex salon in Noida called Glow Studio with haircuts, facials, bridal makeup, prices and online appointments"
                   style={{ display: 'block', width: '100%', minHeight: 110, maxHeight: 220, padding: '14px 14px 6px', border: 'none', outline: 'none', resize: 'none', background: 'transparent', color: C.ink, fontSize: 14.5, lineHeight: 1.6, fontFamily: FONT }} />
@@ -475,7 +484,7 @@ export default function Generate() {
                     ? <span style={{ fontSize: 12, color: C.green, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}><Check size={14} /> Improved by AI — edit freely</span>
                     : <span style={{ fontSize: 12, color: C.faint }}>Ctrl + Enter to build</span>}
                   <button onClick={handleEnhancePrompt} disabled={!prompt.trim() || busy} title="Let AI add useful details to your description (optional)"
-                    style={{ ...btn.ghost, marginLeft: 'auto', padding: '6px 10px', fontSize: 13, color: prompt.trim() && !busy ? C.violet : C.faint, background: 'rgba(124,58,237,0.06)', cursor: prompt.trim() && !busy ? 'pointer' : 'not-allowed' }}>
+                    style={{ ...btn.ghost, marginLeft: 'auto', padding: '6px 10px', fontSize: 13, color: prompt.trim() && !busy ? C.violet : C.faint, background: 'rgba(104,123,104,0.07)', cursor: prompt.trim() && !busy ? 'pointer' : 'not-allowed' }}>
                     {enhancing ? <><Spin size={14} /> Improving…</> : <><Wand2 size={14} /> Improve with AI</>}
                   </button>
                 </div>
@@ -485,7 +494,7 @@ export default function Generate() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {EXAMPLES.map(([icon, label, text]) => (
                     <button key={label} className="gw-ex" onClick={() => updatePromptDraft(text)} title={text}
-                      style={{ padding: '6px 11px', borderRadius: 99, border: `1px solid ${prompt === text ? C.violet : C.border}`, background: prompt === text ? 'rgba(124,58,237,0.07)' : C.surface, color: prompt === text ? C.violet : C.text, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: FONT }}>
+                      style={{ padding: '6px 11px', borderRadius: 99, border: `1px solid ${prompt === text ? C.violet : C.border}`, background: prompt === text ? 'rgba(104,123,104,0.08)' : C.surface, color: prompt === text ? C.violet : C.text, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: FONT }}>
                       {icon} {label}
                     </button>
                   ))}
@@ -543,7 +552,7 @@ export default function Generate() {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 6 }}>
                           {STYLE_PRESETS.map(s => (
                             <button key={s.id} onClick={() => handleStyleSelect(s.id)} aria-pressed={selectedStyle === s.id} style={{ ...choice(selectedStyle === s.id), padding: '8px 10px' }}>
-                              <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}><span style={{ color: selectedStyle === s.id ? C.violet : C.faint, marginRight: 6 }}>{s.icon}</span>{s.label}</div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 700, color: C.ink }}><s.icon size={16} strokeWidth={1.9} color={selectedStyle === s.id ? C.violet : C.muted} />{s.label}</div>
                               <div style={{ fontSize: 11.5, color: C.muted, marginTop: 2 }}>{s.id === 'random' && activePalette ? activePalette.name : s.desc}</div>
                             </button>
                           ))}
@@ -563,7 +572,7 @@ export default function Generate() {
                             const on = selectedSections.includes(s.id)
                             return (
                               <button key={s.id} onClick={() => toggleSection(s.id)} aria-pressed={on}
-                                style={{ padding: '6px 12px', borderRadius: 99, cursor: 'pointer', fontFamily: FONT, fontSize: 12.5, fontWeight: 600, border: `1px solid ${on ? C.violet : C.border}`, background: on ? 'rgba(124,58,237,0.07)' : C.surface, color: on ? C.violet : C.text }}>
+                                style={{ padding: '6px 12px', borderRadius: 99, cursor: 'pointer', fontFamily: FONT, fontSize: 12.5, fontWeight: 600, border: `1px solid ${on ? C.violet : C.border}`, background: on ? 'rgba(104,123,104,0.08)' : C.surface, color: on ? C.violet : C.text }}>
                                 {on ? '✓ ' : ''}{s.label}
                               </button>
                             )
@@ -579,8 +588,8 @@ export default function Generate() {
             {/* Actions */}
             <div className="gw-gen-actions" style={{ display: 'grid', gap: 10, position: 'sticky', bottom: 0, margin: '0 -26px -26px', padding: '14px 26px 18px', background: 'linear-gradient(to top, #fff 82%, rgba(255,255,255,0))' }}>
               {lowCredits && (
-                <div style={{ fontSize: 13, color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, padding: '10px 12px' }}>
-                  Building needs {GENERATION_COST} credits and you have {credits}. Reviewing the plan is still free. <button onClick={() => navigate('/pricing')} style={{ ...btn.ghost, display: 'inline', padding: 0, color: C.amber, textDecoration: 'underline', fontSize: 13 }}>Get credits</button>
+                  <div style={{ fontSize: 13, color: '#7a4637', background: '#f7e9e2', border: '1px solid #d8b39f', borderRadius: 12, padding: '10px 12px' }}>
+                  Building needs {GENERATION_COST} credits and you have {credits}. Reviewing the plan is still free. <button onClick={() => navigate('/pricing')} style={{ ...btn.ghost, display: 'inline', padding: 0, color: C.terracotta, textDecoration: 'underline', fontSize: 13 }}>Get credits</button>
                 </div>
               )}
               {!plan && (
@@ -594,7 +603,7 @@ export default function Generate() {
                 {generating ? <><Spin /> {GEN_STEPS[Math.min(generatingStep, GEN_STEPS.length - 1)]}</> : <><Rocket size={17} /> {plan ? 'Build from plan' : 'Build my website'}</>}
               </button>
               <p style={{ margin: 0, fontSize: 12.5, color: C.muted, textAlign: 'center' }}>
-                {GENERATION_COST} credits per website · <b style={{ color: C.amber }}>{credits}</b> left
+                {GENERATION_COST} credits per website · <b style={{ color: C.terracotta }}>{credits}</b> left
               </p>
             </div>
           </div>
@@ -638,10 +647,10 @@ export default function Generate() {
                     </div>
                     <div style={{ padding: 20, display: 'grid', gap: 10 }}>
                       <div style={{ height: 12, width: '45%', borderRadius: 6, background: C.brand, opacity: 0.85 }} />
-                      <div style={{ height: 22, width: '80%', borderRadius: 8, background: '#ece9fb' }} />
-                      <div style={{ height: 10, width: '65%', borderRadius: 6, background: '#f1effb' }} />
+                      <div style={{ height: 22, width: '80%', borderRadius: 8, background: '#e4ded3' }} />
+                      <div style={{ height: 10, width: '65%', borderRadius: 6, background: '#eeeae1' }} />
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginTop: 6 }}>
-                        {[0, 1, 2].map(i => <div key={i} style={{ height: 48, borderRadius: 10, background: '#f5f3ff', border: `1px solid ${C.border}` }} />)}
+                        {[0, 1, 2].map(i => <div key={i} style={{ height: 48, borderRadius: 10, background: '#f6f3ed', border: `1px solid ${C.border}` }} />)}
                       </div>
                     </div>
                   </div>
@@ -675,7 +684,7 @@ export default function Generate() {
                     const done = i < generatingStep, active = i === generatingStep
                     return (
                       <li key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 10, background: active ? C.surface : 'transparent', border: `1px solid ${active ? C.border : 'transparent'}`, boxShadow: active ? shadow.sm : 'none', opacity: done || active ? 1 : 0.45 }}>
-                        <span style={{ width: 22, height: 22, borderRadius: 99, display: 'grid', placeItems: 'center', flexShrink: 0, background: done ? C.green : active ? 'rgba(124,58,237,0.1)' : C.soft, color: done ? '#fff' : C.violet, fontSize: 11, fontWeight: 700 }}>
+                        <span style={{ width: 22, height: 22, borderRadius: 99, display: 'grid', placeItems: 'center', flexShrink: 0, background: done ? C.green : active ? 'rgba(104,123,104,0.12)' : C.soft, color: done ? '#fff' : C.violet, fontSize: 11, fontWeight: 700 }}>
                           {done ? <Check size={13} /> : active ? <Spin size={13} /> : i + 1}
                         </span>
                         <span style={{ fontSize: 13.5, color: done ? C.text : active ? C.ink : C.muted, fontWeight: active ? 700 : 500 }}>{step}</span>
@@ -713,7 +722,7 @@ export default function Generate() {
               {generated && redirecting && (
                 <Motion.div role="status" initial={{ x: '-50%', y: 20, opacity: 0 }} animate={{ x: '-50%', y: 0, opacity: 1 }} exit={{ x: '-50%', y: 20, opacity: 0 }}
                   style={{ position: 'absolute', bottom: 22, left: '50%', zIndex: 5, display: 'flex', alignItems: 'center', gap: 12, padding: '10px 10px 10px 16px', borderRadius: 14, background: C.ink, color: '#fff', boxShadow: shadow.lg, fontSize: 14, whiteSpace: 'nowrap' }}>
-                  <Check size={17} color="#4ade80" /> Website saved — opening the editor…
+                  <Check size={17} color="#7f9d82" /> Website saved — opening the editor…
                   <button onClick={stayHere} style={{ ...btn.ghost, padding: '6px 10px', color: '#fff', background: 'rgba(255,255,255,0.12)', fontSize: 13 }}>Stay here</button>
                 </Motion.div>
               )}

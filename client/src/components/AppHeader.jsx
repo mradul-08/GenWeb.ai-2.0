@@ -56,7 +56,7 @@ export default function AppHeader({ maxWidth = 1200 }) {
   const navLink = (l) => (
     <a key={l.to} href={l.to} onClick={e => { if (!l.to.includes('#')) { e.preventDefault(); go(l.to) } else { setMobileOpen(false) } }}
       aria-current={isActive(l.to) ? 'page' : undefined}
-      style={{ ...btn.ghost, textDecoration: 'none', color: isActive(l.to) ? C.violet : C.text, background: isActive(l.to) ? 'rgba(124,58,237,0.08)' : 'transparent' }}>
+      style={{ ...btn.ghost, textDecoration: 'none', color: isActive(l.to) ? C.violet : C.text, background: isActive(l.to) ? 'rgba(104,123,104,0.10)' : 'transparent' }}>
       {l.icon && <l.icon size={16} />}{l.label}
     </a>
   )
@@ -75,8 +75,8 @@ export default function AppHeader({ maxWidth = 1200 }) {
           <div className="gw-hdr-desktop" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
             {userData ? (
               <>
-                <button onClick={() => go('/pricing')} title="Credits" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 999, border: '1px solid #fde68a', background: '#fffbeb', color: C.amber, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONT }}>
-                  <Zap size={14} fill="#f59e0b" color="#f59e0b" />{userData.credits ?? 0}<span style={{ fontWeight: 500, color: '#92400e' }}>credits</span>
+                <button onClick={() => go('/pricing')} title="Credits" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 999, border: '1px solid #d8b39f', background: '#f7e9e2', color: C.terracotta, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: FONT }}>
+                  <Zap size={14} fill="#d69a82" color={C.terracotta} />{userData.credits ?? 0}<span style={{ fontWeight: 500, color: C.text }}>credits</span>
                 </button>
                 <button onClick={() => go('/generate')} style={{ ...btn.primary, padding: '9px 16px', fontSize: 14 }}><Plus size={16} />New website</button>
                 <div ref={menuRef} style={{ position: 'relative' }}>
@@ -117,7 +117,7 @@ export default function AppHeader({ maxWidth = 1200 }) {
           <div className="gw-hdr-mobile-panel" style={{ borderTop: `1px solid ${C.border}`, background: C.surface, padding: 14, display: 'grid', gap: 4 }}>
             {userData && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, marginBottom: 6, borderRadius: 12, background: C.soft }}>
-                <Avatar user={userData} /><div><div style={{ fontWeight: 700, color: C.ink, fontSize: 14 }}>{userData.name}</div><div style={{ fontSize: 12, color: C.amber, fontWeight: 700 }}>⚡ {userData.credits ?? 0} credits</div></div>
+                <Avatar user={userData} /><div><div style={{ fontWeight: 700, color: C.ink, fontSize: 14 }}>{userData.name}</div><div style={{ fontSize: 12, color: C.terracotta, fontWeight: 700 }}>⚡ {userData.credits ?? 0} credits</div></div>
               </div>
             )}
             {userData && <button onClick={() => go('/generate')} style={{ ...btn.primary, width: '100%' }}><Plus size={16} />New website</button>}

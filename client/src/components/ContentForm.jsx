@@ -66,7 +66,7 @@ function ItemList({ field, value, onChange, iconList }) {
         )
       })}
       {value.length < field.maxItems && <button type="button" onClick={() => onChange([...value, {}])} style={small}>+ Add {field.label.toLowerCase().replace(/s$/, '')}</button>}
-      {!value.length && <p style={{ fontSize:11, color:'#fbbf24', margin:'6px 0 0' }}>Add at least one — sections without items are left out of the site.</p>}
+      {!value.length && <p style={{ fontSize:11, color:'#d69a82', margin:'6px 0 0' }}>Add at least one — sections without items are left out of the site.</p>}
     </div>
   )
 }

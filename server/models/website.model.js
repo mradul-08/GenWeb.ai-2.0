@@ -72,6 +72,13 @@ const websiteSchema = new mongoose.Schema(
       default: null,
     },
 
+    // Published immutable snapshot; legacy deployments remain supported when null.
+    liveRelease: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Release",
+      default: null,
+    },
+
     deployed: {
       type: Boolean,
       default: false,

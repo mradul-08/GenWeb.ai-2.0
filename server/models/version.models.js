@@ -25,6 +25,7 @@ const versionSchema = new mongoose.Schema({
   files:   [{ _id: false, path: { type: String, required: true }, blob: { type: String, required: true }, size: { type: Number, required: true } }],
   source:  { type: String, enum: VERSION_SOURCES, required: true },
   label:   { type: String, default: "" },         // short human description shown in the history
+  pinned:  { type: Boolean, default: false },
   createdBy: { type: ObjectId, ref: "User", default: null },
   // Template-built versions only: the build source (ai/hybrid.js makeBuild)
   // so restoring this version also restores its design-editor state.

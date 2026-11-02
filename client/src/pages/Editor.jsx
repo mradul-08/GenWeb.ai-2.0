@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Monitor, Tablet, Smartphone, FileText, ArrowLeft, Undo2, Redo2, Zap, Download, Rocket, Maximize2, Palette, Code2, History, CheckCircle2, UserRound, Sparkles, Moon, Smartphone as SmartphoneIcon, WandSparkles, Link2, MessageSquare, BarChart3, Pencil, Copy } from 'lucide-react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { setUserData } from '../redux/userSlice'
@@ -9,18 +10,19 @@ import { buildPreviewDoc, PREVIEW_SANDBOX, isPageNavMessage } from '../utils/pre
 import VersionHistory from '../components/VersionHistory'
 import PlanChecklist from '../components/PlanChecklist'
 import DesignPanel from '../components/DesignPanel'
+import './Editor.css'
 
 const EDIT_STEPS = ['Reading request…','Analyzing code…','Planning changes…','Applying edits…','Polishing…','Done ✓']
 
 const QUICK_EDITS = [
-  { label:'🌙 Dark mode toggle',  prompt:'Add a dark/light mode toggle button to the navbar that switches the entire site theme' },
-  { label:'📱 Fix mobile',        prompt:'Fix all mobile responsiveness issues — ensure every section looks great on screens below 480px' },
-  { label:'✨ Add animations',    prompt:'Add smooth scroll-triggered fade-up animations to all sections using Intersection Observer' },
-  { label:'🎨 New color scheme',  prompt:'Refresh the accent color throughout the site with a more vibrant, modern feel' },
-  { label:'⚡ Page loader',       prompt:'Add a beautiful animated page loading screen that fades out after 1.5 seconds' },
-  { label:'🔗 Smooth scroll',     prompt:'Make all navigation links scroll smoothly to their sections' },
-  { label:'💬 Add testimonials',  prompt:'Add a testimonials/reviews section with 3 cards featuring star ratings and quotes' },
-  { label:'📊 Add stats section', prompt:'Add an animated stats/numbers section showcasing key metrics with count-up animation' },
+  { icon: Moon, label:'Dark mode toggle', prompt:'Add a dark/light mode toggle button to the navbar that switches the entire site theme' },
+  { icon: SmartphoneIcon, label:'Fix mobile', prompt:'Fix all mobile responsiveness issues — ensure every section looks great on screens below 480px' },
+  { icon: WandSparkles, label:'Add animations', prompt:'Add smooth scroll-triggered fade-up animations to all sections using Intersection Observer' },
+  { icon: Palette, label:'New color scheme', prompt:'Refresh the accent color throughout the site with a more vibrant, modern feel' },
+  { icon: Zap, label:'Page loader', prompt:'Add a beautiful animated page loading screen that fades out after 1.5 seconds' },
+  { icon: Link2, label:'Smooth scroll', prompt:'Make all navigation links scroll smoothly to their sections' },
+  { icon: MessageSquare, label:'Add testimonials', prompt:'Add a testimonials/reviews section with 3 cards featuring star ratings and quotes' },
+  { icon: BarChart3, label:'Add stats section', prompt:'Add an animated stats/numbers section showcasing key metrics with count-up animation' },
 ]
 
 const TIPS = [
@@ -32,9 +34,9 @@ const TIPS = [
 ]
 
 const DEVICES = [
-  { id:'desktop', label:'Desktop', icon:'🖥', width:'100%'  },
-  { id:'tablet',  label:'Tablet',  icon:'📟', width:'768px' },
-  { id:'mobile',  label:'Mobile',  icon:'📱', width:'375px' },
+  { id:'desktop', label:'Desktop', icon: Monitor, width:'100%'  },
+  { id:'tablet',  label:'Tablet',  icon: Tablet, width:'768px' },
+  { id:'mobile',  label:'Mobile',  icon: Smartphone, width:'375px' },
 ]
 
 
@@ -105,10 +107,10 @@ function CodeViewer({ code, onCodeChange, fileName = 'website.html' }) {
   if (editing) return (
     <div style={{ display:'flex', flexDirection:'column', height:'100%', background:'#08080f' }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 16px', background:'#0c0c18', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0 }}>
-        <span style={{ fontSize:12, color:'#818cf8', fontWeight:700 }}>✎ Direct Edit Mode</span>
+        <span style={{ fontSize:12, color:'#9ab59b', fontWeight:700 }}>✎ Direct Edit Mode</span>
         <div style={{ display:'flex', gap:8 }}>
           <button onClick={() => setEditing(false)} style={{ padding:'4px 12px', borderRadius:6, border:'1px solid rgba(255,255,255,0.1)', background:'transparent', color:'rgba(255,255,255,0.5)', fontSize:11, cursor:'pointer', fontFamily:'inherit' }}>Cancel</button>
-          <button onClick={() => { onCodeChange(draft); setEditing(false) }} style={{ padding:'4px 12px', borderRadius:6, border:'none', background:'linear-gradient(135deg,#818cf8,#38bdf8)', color:'#fff', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>Apply →</button>
+          <button onClick={() => { onCodeChange(draft); setEditing(false) }} style={{ padding:'4px 12px', borderRadius:6, border:'none', background:'linear-gradient(135deg,#687b68,#c8795d)', color:'#fff', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>Apply →</button>
         </div>
       </div>
       <textarea value={draft} onChange={e => setDraft(e.target.value)} spellCheck={false}
@@ -124,10 +126,10 @@ function CodeViewer({ code, onCodeChange, fileName = 'website.html' }) {
         </div>
         <span style={{ fontSize:11, color:'rgba(255,255,255,0.2)', fontFamily:'monospace' }}>{fileName} · {lines.length} lines</span>
         <div style={{ display:'flex', gap:8 }}>
-          <button onClick={() => setEditing(true)} style={{ padding:'4px 12px', borderRadius:6, border:'1px solid rgba(129,140,248,0.3)', background:'rgba(129,140,248,0.08)', color:'#818cf8', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>✎ Edit</button>
+          <button onClick={() => setEditing(true)} style={{ padding:'4px 12px', borderRadius:6, border:'1px solid rgba(154,181,155,0.3)', background:'rgba(154,181,155,0.08)', color:'#9ab59b', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:5 }}><Pencil size={12} /> Edit</button>
           <button onClick={() => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
             style={{ padding:'4px 12px', borderRadius:6, border:'1px solid rgba(255,255,255,0.09)', background: copied ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.04)', color: copied ? '#4ade80' : 'rgba(255,255,255,0.45)', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s' }}>
-            {copied ? '✓ Copied' : '⎘ Copy'}
+            {copied ? '✓ Copied' : <><Copy size={12} /> Copy</>}
           </button>
         </div>
       </div>
@@ -153,7 +155,7 @@ function FullPreview({ doc, onClose }) {
     const h = e => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', h)
     return () => window.removeEventListener('keydown', h)
-  }, [])
+  }, [onClose])
   return (
     <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
       style={{ position:'fixed', inset:0, zIndex:9999, background:'#000', display:'flex', flexDirection:'column' }}>
@@ -182,11 +184,11 @@ function ChatMessage({ msg }) {
   return (
     <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.28 }}
       style={{ display:'flex', gap:10, padding:'10px 16px', alignItems:'flex-start' }}>
-      <div style={{ width:28, height:28, borderRadius:8, flexShrink:0, background: isUser ? 'linear-gradient(135deg,#a855f7,#38bdf8)' : 'rgba(129,140,248,0.15)', border: isUser ? 'none' : '1px solid rgba(129,140,248,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, color:'#fff' }}>
-        {isUser ? '✦' : '⚡'}
+      <div style={{ width:28, height:28, borderRadius:8, flexShrink:0, background: isUser ? 'linear-gradient(135deg,#687b68,#c8795d)' : 'rgba(154,181,155,0.15)', border: isUser ? 'none' : '1px solid rgba(154,181,155,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, color:'#fff' }}>
+        {React.createElement(isUser ? UserRound : Sparkles, { size: 14, strokeWidth: 1.9 })}
       </div>
       <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ fontSize:11, fontWeight:700, color: isUser ? '#a855f7' : '#38bdf8', marginBottom:5, letterSpacing:'0.04em', textTransform:'uppercase' }}>
+        <div style={{ fontSize:11, fontWeight:700, color: isUser ? '#c9ddc9' : '#d69a82', marginBottom:5, letterSpacing:'0.04em', textTransform:'uppercase' }}>
           {isUser ? 'You' : 'GenWeb AI'}
         </div>
         <div style={{ fontSize:13, color: isUser ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.62)', lineHeight:1.7, wordBreak:'break-word' }}>
@@ -195,17 +197,17 @@ function ChatMessage({ msg }) {
         {msg.meta && (
           <div style={{ marginTop:6, display:'flex', gap:8, flexWrap:'wrap' }}>
             {msg.meta.editType && (
-              <span style={{ fontSize:10, padding:'2px 8px', borderRadius:20, background:'rgba(129,140,248,0.1)', border:'1px solid rgba(129,140,248,0.2)', color:'#818cf8', fontWeight:600 }}>
+              <span style={{ fontSize:10, padding:'2px 8px', borderRadius:20, background:'rgba(154,181,155,0.1)', border:'1px solid rgba(154,181,155,0.2)', color:'#b5cdb6', fontWeight:600 }}>
                 {msg.meta.editType}
               </span>
             )}
             {msg.meta.creditsUsed && (
-              <span style={{ fontSize:10, padding:'2px 8px', borderRadius:20, background:'rgba(251,191,36,0.08)', border:'1px solid rgba(251,191,36,0.2)', color:'#fbbf24', fontWeight:600 }}>
-                ⚡ {msg.meta.creditsUsed} credits
+              <span style={{ fontSize:10, padding:'2px 8px', borderRadius:20, background:'rgba(200,121,93,0.09)', border:'1px solid rgba(200,121,93,0.22)', color:'#e0aa95', fontWeight:600 }}>
+                <Zap size={11} /> {msg.meta.creditsUsed} credits
               </span>
             )}
             {msg.meta.tokensUsed != null && (
-              <span title="AI tokens used by this edit (all calls, measured)" style={{ fontSize:10, padding:'2px 8px', borderRadius:20, background:'rgba(52,211,153,0.08)', border:'1px solid rgba(52,211,153,0.2)', color:'#34d399', fontWeight:600 }}>
+              <span title="AI tokens used by this edit (all calls, measured)" style={{ fontSize:10, padding:'2px 8px', borderRadius:20, background:'rgba(127,157,130,0.10)', border:'1px solid rgba(127,157,130,0.22)', color:'#a9c2ab', fontWeight:600 }}>
                 {msg.meta.tokensUsed.toLocaleString()} tokens
               </span>
             )}
@@ -226,17 +228,17 @@ function ParticleBg() {
     canvas.width = W; canvas.height = H
     const resize = () => { W = canvas.parentElement.offsetWidth; H = canvas.parentElement.offsetHeight; canvas.width = W; canvas.height = H }
     window.addEventListener('resize', resize)
-    const pts = Array.from({ length:55 }, () => ({ x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.28, vy:(Math.random()-.5)*.28, r:Math.random()*1.4+.3, c:Math.random()>.5?'rgba(129,140,248,':'rgba(56,189,248,', a:Math.random()*.35+.1 }))
+    const pts = Array.from({ length:55 }, () => ({ x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.28, vy:(Math.random()-.5)*.28, r:Math.random()*1.4+.3, c:Math.random()>.5?'rgba(154,181,155,':'rgba(200,121,93,', a:Math.random()*.25+.08 }))
     const draw = () => {
       ctx.clearRect(0,0,W,H)
       const bg = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*.7); bg.addColorStop(0,'rgba(8,6,22,1)'); bg.addColorStop(1,'rgba(4,4,12,1)')
       ctx.fillStyle=bg; ctx.fillRect(0,0,W,H)
-      ctx.strokeStyle='rgba(129,140,248,0.022)'; ctx.lineWidth=1
+      ctx.strokeStyle='rgba(154,181,155,0.022)'; ctx.lineWidth=1
       for(let x=0;x<W;x+=58){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
       for(let y=0;y<H;y+=58){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
       pts.forEach((p,i)=>{ p.x+=p.vx;p.y+=p.vy; if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0
         ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.c+p.a+')';ctx.fill()
-        pts.slice(i+1).forEach(p2=>{ const dx=p.x-p2.x,dy=p.y-p2.y,d=Math.sqrt(dx*dx+dy*dy); if(d<95){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p2.x,p2.y);ctx.strokeStyle=`rgba(129,140,248,${.055*(1-d/95)})`;ctx.lineWidth=.7;ctx.stroke()} }) })
+        pts.slice(i+1).forEach(p2=>{ const dx=p.x-p2.x,dy=p.y-p2.y,d=Math.sqrt(dx*dx+dy*dy); if(d<95){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p2.x,p2.y);ctx.strokeStyle=`rgba(154,181,155,${.04*(1-d/95)})`;ctx.lineWidth=.7;ctx.stroke()} }) })
       animRef.current = requestAnimationFrame(draw)
     }
     animRef.current = requestAnimationFrame(draw)
@@ -267,6 +269,7 @@ export default function Editor() {
   const isMulti = !!files && files.length > 1
 
   const versionHistory = useVersionHistory()
+  const { reset: resetHistory, push: pushHistory, undo: undoHistory, redo: redoHistory } = versionHistory
 
   const [messages,  setMessages]  = useState([])
   const [input,     setInput]     = useState('')
@@ -298,7 +301,7 @@ export default function Editor() {
   const startTime     = useRef(null)
   const estimatedMs   = 35000
 
-  useEffect(() => { if (!userData) navigate('/login') }, [userData])
+  useEffect(() => { if (!userData) navigate('/login') }, [userData, navigate])
 
   useEffect(() => {
     tipTimer.current = setInterval(() => setTipIndex(p => (p + 1) % TIPS.length), 5500)
@@ -340,7 +343,7 @@ export default function Editor() {
           setFiles(multi ? data.website.files : null)
           setCurrentPath('index.html')
           setCurrentCode(data.website.latestCode)
-          versionHistory.reset(data.website.latestCode)
+          resetHistory(data.website.latestCode)
           if (data.website.deployUrl) setDeployUrl(data.website.deployUrl)
           setPreviewDoc(buildPreviewDoc(data.website.latestCode, { pages: multi }))
           const conv = data.website.conversation || []
@@ -354,7 +357,7 @@ export default function Editor() {
       finally  { setLoadingWebsite(false) }
     }
     load()
-  }, [websiteId, userId])
+  }, [websiteId, userId, setFiles, setCurrentPath, resetHistory])
 
   // Manual saves, undo/redo and restores change the code too: refresh the
   // server-computed checklist after each of them (plan-mode sites only).
@@ -382,9 +385,9 @@ export default function Editor() {
     const page = filesRef.current?.find(f => f.path === path)
     if (!page) return
     setCurrentPath(path)
-    versionHistory.reset(page.content)
+    resetHistory(page.content)
     updatePreview(page.content, { scrollTo: hash })
-  }, [setCurrentPath, versionHistory.reset, updatePreview])
+  }, [setCurrentPath, resetHistory, updatePreview])
 
   useEffect(() => {
     const onMessage = (e) => {
@@ -447,37 +450,37 @@ export default function Editor() {
 
   const handleRestored = useCallback((code, seq, restoredFiles) => {
     const shown = showServerFiles(code, restoredFiles)
-    versionHistory.push(shown)
+    pushHistory(shown)
     updatePreview(shown)
     bumpHistory()
     setMessages(prev => [...prev, { role:'assistant', content:`↺ Restored version ${seq}. It is now the current version — your previous one is still in History.` }])
-  }, [versionHistory.push, updatePreview, bumpHistory, showServerFiles])
+  }, [pushHistory, updatePreview, bumpHistory, showServerFiles])
 
   // The design editor rebuilt the site (no AI, no credits).
   const handleDesignApplied = useCallback((data) => {
     const shown = showServerFiles(data.code, data.kind === 'static' ? data.files : null)
-    versionHistory.reset(shown)
+    resetHistory(shown)
     updatePreview(shown)
     if (data.checklist) setChecklist(data.checklist)
     setWebsite(w => (w ? { ...w, kind: data.kind } : w))
     bumpHistory()
-  }, [showServerFiles, versionHistory.reset, updatePreview, bumpHistory])
+  }, [showServerFiles, resetHistory, updatePreview, bumpHistory])
 
   const handleUndo = useCallback(() => {
-    const code = versionHistory.undo()
+    const code = undoHistory()
     if (!code) return
     updatePreview(code)
     persistCode(code)
     setMessages(prev => [...prev, { role:'assistant', content:'↩ Undone — reverted to previous version.' }])
-  }, [versionHistory.undo, updatePreview, persistCode])
+  }, [undoHistory, updatePreview, persistCode])
 
   const handleRedo = useCallback(() => {
-    const code = versionHistory.redo()
+    const code = redoHistory()
     if (!code) return
     updatePreview(code)
     persistCode(code)
     setMessages(prev => [...prev, { role:'assistant', content:'↪ Redone — moved forward.' }])
-  }, [versionHistory.redo, updatePreview, persistCode])
+  }, [redoHistory, updatePreview, persistCode])
 
   useEffect(() => { shortcutsRef.current = { undo: handleUndo, redo: handleRedo } }, [handleUndo, handleRedo])
 
@@ -500,7 +503,7 @@ export default function Editor() {
       stopTimers()
       // Site-wide edits change other pages too: take the server's page list.
       if (data.files && filesRef.current) setFiles(data.files)
-      versionHistory.push(data.code)
+      pushHistory(data.code)
       updatePreview(data.code)
       bumpHistory()
       if (data.checklist) setChecklist(data.checklist)
@@ -522,7 +525,7 @@ export default function Editor() {
   }
 
   const handleDirectEdit = (newCode) => {
-    versionHistory.push(newCode)
+    pushHistory(newCode)
     updatePreview(newCode)
     persistCode(newCode)
     setMessages(prev => [...prev, { role:'assistant', content:'✓ Code updated directly and saved. Preview refreshed.' }])
@@ -586,7 +589,7 @@ export default function Editor() {
   if (loadingWebsite) return (
     <div style={{ minHeight:'100vh', background:'#060608', display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:16, fontFamily:"'DM Sans',system-ui,sans-serif" }}>
       <motion.div animate={{ rotate:360 }} transition={{ duration:1.2, repeat:Infinity, ease:'linear' }}
-        style={{ width:44, height:44, borderRadius:'50%', border:'3px solid rgba(168,85,247,0.15)', borderTopColor:'#a855f7' }} />
+        style={{ width:44, height:44, borderRadius:'50%', border:'3px solid rgba(154,181,155,0.15)', borderTopColor:'#9ab59b' }} />
       <p style={{ color:'rgba(255,255,255,0.4)', fontSize:14 }}>Loading your website…</p>
     </div>
   )
@@ -595,19 +598,19 @@ export default function Editor() {
     <div style={{ minHeight:'100vh', background:'#060608', display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:16, fontFamily:"'DM Sans',system-ui,sans-serif" }}>
       <div style={{ fontSize:40 }}>🔍</div>
       <p style={{ color:'rgba(255,255,255,0.5)', fontSize:16, fontWeight:600 }}>No website selected</p>
-      <button onClick={() => navigate('/dashboard')} style={{ padding:'10px 24px', borderRadius:10, background:'rgba(168,85,247,0.12)', border:'1px solid rgba(168,85,247,0.3)', color:'#a855f7', fontWeight:700, cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>← Dashboard</button>
+      <button onClick={() => navigate('/dashboard')} style={{ padding:'10px 24px', borderRadius:10, background:'rgba(154,181,155,0.12)', border:'1px solid rgba(154,181,155,0.3)', color:'#9ab59b', fontWeight:700, cursor:'pointer', fontFamily:'inherit', fontSize:14 }}>← Dashboard</button>
     </div>
   )
 
   return (
-    <div style={{ height:'100vh', background:'#060608', color:'#f0f0f0', fontFamily:"'DM Sans','Inter',system-ui,sans-serif", display:'flex', flexDirection:'column', overflow:'hidden' }}>
+    <div className="editor-shell" style={{ height:'100vh', background:'#060608', color:'#f0f0f0', fontFamily:"'DM Sans','Inter',system-ui,sans-serif", display:'flex', flexDirection:'column', overflow:'hidden' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
         *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
         ::-webkit-scrollbar{width:3px;height:3px}
         ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:rgba(168,85,247,0.3);border-radius:2px}
-        textarea{scrollbar-width:thin;scrollbar-color:rgba(168,85,247,0.3) transparent}
+        ::-webkit-scrollbar-thumb{background:rgba(154,181,155,0.3);border-radius:2px}
+        textarea{scrollbar-width:thin;scrollbar-color:rgba(154,181,155,0.3) transparent}
       `}</style>
 
       <AnimatePresence>
@@ -615,15 +618,15 @@ export default function Editor() {
       </AnimatePresence>
 
       {/* TOP NAV */}
-      <nav style={{ height:56, flexShrink:0, background:'rgba(6,6,8,0.96)', backdropFilter:'blur(24px)', borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 20px', zIndex:50 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+      <nav className="editor-topbar" style={{ height:56, flexShrink:0, background:'rgba(6,6,8,0.96)', backdropFilter:'blur(24px)', borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 20px', zIndex:50 }}>
+        <div className="editor-topbar__left" style={{ display:'flex', alignItems:'center', gap:12 }}>
           <button onClick={() => navigate('/dashboard')}
             style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', cursor:'pointer', color:'rgba(255,255,255,0.5)', width:32, height:32, borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, transition:'all 0.2s', flexShrink:0 }}
             onMouseEnter={e => { e.currentTarget.style.color='#fff'; e.currentTarget.style.borderColor='rgba(255,255,255,0.2)' }}
-            onMouseLeave={e => { e.currentTarget.style.color='rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.08)' }}>←</button>
+            onMouseLeave={e => { e.currentTarget.style.color='rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.08)' }} aria-label="Back to dashboard" title="Back to dashboard"><ArrowLeft size={16} /></button>
 
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <div style={{ width:7, height:7, borderRadius:'50%', background:'#34d399', boxShadow:'0 0 8px rgba(52,211,153,0.8)' }} />
+            <div style={{ width:7, height:7, borderRadius:'50%', background:'#7f9d82', boxShadow:'0 0 6px rgba(127,157,130,0.45)' }} />
             <span style={{ fontSize:14, fontWeight:700, color:'#fff', maxWidth:200, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
               {website?.title || 'Editor'}
             </span>
@@ -633,21 +636,21 @@ export default function Editor() {
             <button onClick={handleUndo} disabled={!versionHistory.canUndo} title="Undo (Ctrl+Z)"
               style={{ width:28, height:28, borderRadius:7, border:'1px solid rgba(255,255,255,0.07)', background:'transparent', color: versionHistory.canUndo ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.18)', cursor: versionHistory.canUndo ? 'pointer' : 'not-allowed', fontSize:14, display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.15s' }}
               onMouseEnter={e => { if (versionHistory.canUndo) e.currentTarget.style.background='rgba(255,255,255,0.08)' }}
-              onMouseLeave={e => { e.currentTarget.style.background='transparent' }}>↩</button>
+              onMouseLeave={e => { e.currentTarget.style.background='transparent' }}><Undo2 size={15} /></button>
             <button onClick={handleRedo} disabled={!versionHistory.canRedo} title="Redo (Ctrl+Y)"
               style={{ width:28, height:28, borderRadius:7, border:'1px solid rgba(255,255,255,0.07)', background:'transparent', color: versionHistory.canRedo ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.18)', cursor: versionHistory.canRedo ? 'pointer' : 'not-allowed', fontSize:14, display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.15s' }}
               onMouseEnter={e => { if (versionHistory.canRedo) e.currentTarget.style.background='rgba(255,255,255,0.08)' }}
-              onMouseLeave={e => { e.currentTarget.style.background='transparent' }}>↪</button>
+              onMouseLeave={e => { e.currentTarget.style.background='transparent' }}><Redo2 size={15} /></button>
             {versionHistory.total > 1 && (
               <span style={{ fontSize:10, color:'rgba(255,255,255,0.22)', alignSelf:'center', marginLeft:2 }}>v{versionHistory.pointer + 1}/{versionHistory.total}</span>
             )}
           </div>
         </div>
 
-        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+        <div className="editor-topbar__actions" style={{ display:'flex', alignItems:'center', gap:8 }}>
           <div style={{ display:'flex', alignItems:'center', gap:5, padding:'5px 12px', borderRadius:20, background:'rgba(251,191,36,0.08)', border:'1px solid rgba(251,191,36,0.2)' }}>
-            <span style={{ fontSize:12 }}>⚡</span>
-            <span style={{ fontSize:13, fontWeight:700, color:'#fbbf24' }}>{userData?.credits ?? 0}</span>
+            <Zap size={14} color="#d69a82" />
+            <span style={{ fontSize:13, fontWeight:700, color:'#d69a82' }}>{userData?.credits ?? 0}</span>
           </div>
 
           {currentCode && (
@@ -655,17 +658,17 @@ export default function Editor() {
               <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }} onClick={handleDownload} disabled={exporting} title="Download every page as a .zip you can host anywhere"
                 style={{ padding:'7px 14px', borderRadius:8, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.7)', fontWeight:600, fontSize:12, cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.color='#fff'}
-                onMouseLeave={e => e.currentTarget.style.color='rgba(255,255,255,0.7)'}>{exporting ? 'Exporting…' : '↓ Export ZIP'}</motion.button>
+                onMouseLeave={e => e.currentTarget.style.color='rgba(255,255,255,0.7)'}>{exporting ? 'Exporting…' : <><Download size={14} /> Export ZIP</>}</motion.button>
 
               <motion.button
                 whileHover={!deploying ? { scale:1.04, boxShadow:'0 0 28px rgba(52,211,153,0.5)' } : {}}
                 whileTap={!deploying ? { scale:0.97 } : {}}
                 onClick={handleDeploy}
                 disabled={deploying}
-                style={{ padding:'7px 16px', borderRadius:8, border:'none', background: deploying ? 'rgba(52,211,153,0.15)' : 'linear-gradient(135deg,#34d399,#059669)', color: deploying ? '#34d399' : '#fff', fontWeight:700, fontSize:12, cursor: deploying ? 'not-allowed' : 'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:6, boxShadow: deploying ? 'none' : '0 0 16px rgba(52,211,153,0.3)', transition:'all 0.2s' }}>
+                style={{ padding:'7px 16px', borderRadius:8, border:'none', background: deploying ? 'rgba(127,157,130,0.15)' : 'linear-gradient(135deg,#4e6251,#687b68)', color: deploying ? '#b5cdb6' : '#fff', fontWeight:700, fontSize:12, cursor: deploying ? 'not-allowed' : 'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:6, boxShadow:'0 4px 14px rgba(78,98,81,0.22)', transition:'all 0.2s' }}>
                 {deploying
-                  ? <><motion.span animate={{ rotate:360 }} transition={{ duration:1, repeat:Infinity, ease:'linear' }} style={{ display:'inline-block', fontSize:14 }}>⟳</motion.span> Deploying…</>
-                  : deployUrl ? '✓ Re-deploy' : '🚀 Deploy'
+                  ? <><motion.span animate={{ rotate:360 }} transition={{ duration:1, repeat:Infinity, ease:'linear' }} style={{ display:'inline-flex' }}><Rocket size={14} /></motion.span> Deploying…</>
+                  : deployUrl ? <><CheckCircle2 size={14} /> Re-deploy</> : <><Rocket size={14} /> Deploy</>
                 }
               </motion.button>
             </>
@@ -673,18 +676,18 @@ export default function Editor() {
 
           {previewDoc && (
             <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }} onClick={() => setShowFullPreview(true)}
-              style={{ padding:'7px 14px', borderRadius:8, border:'1px solid rgba(168,85,247,0.35)', background:'rgba(168,85,247,0.08)', color:'#a855f7', fontWeight:700, fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>
-              ⛶ Full Preview
+              style={{ padding:'7px 14px', borderRadius:8, border:'1px solid rgba(154,181,155,0.35)', background:'rgba(154,181,155,0.08)', color:'#9ab59b', fontWeight:700, fontSize:12, cursor:'pointer', fontFamily:'inherit' }}>
+                  <Maximize2 size={14} /> Full Preview
             </motion.button>
           )}
         </div>
       </nav>
 
       {/* BODY */}
-      <div style={{ flex:1, display:'flex', overflow:'hidden' }}>
+      <div className="editor-workspace" style={{ flex:1, display:'flex', overflow:'hidden' }}>
 
         {/* LEFT: CHAT PANEL */}
-        <div style={{ width:370, flexShrink:0, height:'100%', display:'flex', flexDirection:'column', borderRight:'1px solid rgba(255,255,255,0.06)', background:'rgba(6,6,9,0.97)' }}>
+        <div className="editor-chat-panel" style={{ width:370, flexShrink:0, height:'100%', display:'flex', flexDirection:'column', borderRight:'1px solid rgba(255,255,255,0.06)', background:'rgba(6,6,9,0.97)' }}>
 
           <AnimatePresence>
             {error && (
@@ -705,22 +708,22 @@ export default function Editor() {
 
             {isEditing && (
               <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
-                style={{ padding:'16px', margin:'8px 16px', borderRadius:16, background:'rgba(168,85,247,0.05)', border:'1px solid rgba(168,85,247,0.15)' }}>
+                style={{ padding:'16px', margin:'8px 16px', borderRadius:16, background:'rgba(154,181,155,0.05)', border:'1px solid rgba(154,181,155,0.15)' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:14, marginBottom:14 }}>
                   <div style={{ position:'relative', width:52, height:52, flexShrink:0 }}>
                     <svg width={52} height={52} style={{ transform:'rotate(-90deg)', display:'block' }}>
-                      <circle cx={26} cy={26} r={22} fill="none" stroke="rgba(168,85,247,0.1)" strokeWidth={4} />
+                      <circle cx={26} cy={26} r={22} fill="none" stroke="rgba(154,181,155,0.1)" strokeWidth={4} />
                       <motion.circle cx={26} cy={26} r={22} fill="none" stroke="url(#eg)" strokeWidth={4}
                         strokeLinecap="round" strokeDasharray={138.2}
                         animate={{ strokeDashoffset: 138.2 * (1 - realPct / 100) }}
                         transition={{ duration:0.4, ease:'easeOut' }} />
-                      <defs><linearGradient id="eg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#a855f7"/><stop offset="100%" stopColor="#38bdf8"/></linearGradient></defs>
+                      <defs><linearGradient id="eg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#687b68"/><stop offset="100%" stopColor="#c8795d"/></linearGradient></defs>
                     </svg>
                     <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:800, color:'#fff' }}>{realPct}%</div>
                   </div>
                   <div>
                     <div style={{ fontSize:13, fontWeight:700, color:'#fff', marginBottom:3 }}>Applying changes…</div>
-                    <div style={{ fontSize:11, color: remaining < 4 ? '#4ade80' : '#a855f7' }}>
+                    <div style={{ fontSize:11, color: remaining < 4 ? '#4ade80' : '#9ab59b' }}>
                       {remaining > 1 ? `~${Math.round(remaining)}s remaining` : 'Almost done…'}
                     </div>
                   </div>
@@ -730,8 +733,8 @@ export default function Editor() {
                   {EDIT_STEPS.map((step, i) => {
                     const done = i < editStep, active = i === editStep
                     return (
-                      <div key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 8px', borderRadius:7, background: done ? 'rgba(168,85,247,0.08)' : active ? 'rgba(168,85,247,0.04)' : 'transparent', opacity: done ? 1 : active ? 0.9 : 0.2, transition:'all 0.35s' }}>
-                        <div style={{ width:16, height:16, borderRadius:'50%', flexShrink:0, background: done ? 'linear-gradient(135deg,#a855f7,#38bdf8)' : 'rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:8, color:'#fff' }}>
+                      <div key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 8px', borderRadius:7, background: done ? 'rgba(154,181,155,0.08)' : active ? 'rgba(154,181,155,0.04)' : 'transparent', opacity: done ? 1 : active ? 0.9 : 0.2, transition:'all 0.35s' }}>
+                        <div style={{ width:16, height:16, borderRadius:'50%', flexShrink:0, background: done ? 'linear-gradient(135deg,#687b68,#c8795d)' : 'rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:8, color:'#fff' }}>
                           {done ? '✓' : active ? <motion.span animate={{ opacity:[1,.2,1] }} transition={{ duration:1, repeat:Infinity }}>·</motion.span> : i+1}
                         </div>
                         <span style={{ fontSize:11.5, color: done ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.35)' }}>{step}</span>
@@ -757,9 +760,9 @@ export default function Editor() {
                 {QUICK_EDITS.map((q, i) => (
                   <button key={i} onClick={() => setInput(q.prompt)}
                     style={{ padding:'5px 10px', borderRadius:20, border:'1px solid rgba(255,255,255,0.07)', background:'rgba(255,255,255,0.025)', color:'rgba(255,255,255,0.4)', fontSize:11, fontWeight:500, cursor:'pointer', fontFamily:'inherit', transition:'all 0.15s', whiteSpace:'nowrap' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(168,85,247,0.4)'; e.currentTarget.style.color='#a855f7'; e.currentTarget.style.background='rgba(168,85,247,0.06)' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(154,181,155,0.4)'; e.currentTarget.style.color='#9ab59b'; e.currentTarget.style.background='rgba(154,181,155,0.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor='rgba(255,255,255,0.07)'; e.currentTarget.style.color='rgba(255,255,255,0.4)'; e.currentTarget.style.background='rgba(255,255,255,0.025)' }}>
-                    {q.label}
+                    {React.createElement(q.icon, { size: 13, strokeWidth: 1.8 })} {q.label}
                   </button>
                 ))}
               </div>
@@ -767,7 +770,7 @@ export default function Editor() {
           )}
 
           <div style={{ padding:'8px 12px 12px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ background:'rgba(255,255,255,0.025)', border:`1px solid ${input ? 'rgba(168,85,247,0.45)' : 'rgba(255,255,255,0.08)'}`, borderRadius:14, padding:'10px 12px', transition:'all 0.2s', boxShadow: input ? '0 0 0 3px rgba(168,85,247,0.06)' : 'none' }}>
+            <div style={{ background:'rgba(255,255,255,0.025)', border:`1px solid ${input ? 'rgba(154,181,155,0.45)' : 'rgba(255,255,255,0.08)'}`, borderRadius:14, padding:'10px 12px', transition:'all 0.2s', boxShadow: input ? '0 0 0 3px rgba(154,181,155,0.06)' : 'none' }}>
               <textarea ref={inputRef} value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSend() }}
@@ -779,7 +782,7 @@ export default function Editor() {
                 <motion.button onClick={handleSend} disabled={!input.trim() || isEditing}
                   whileHover={input.trim() && !isEditing ? { scale:1.05 } : {}}
                   whileTap={input.trim() && !isEditing ? { scale:0.96 } : {}}
-                  style={{ padding:'7px 16px', borderRadius:9, border:'none', background: input.trim() && !isEditing ? 'linear-gradient(135deg,#a855f7,#38bdf8)' : 'rgba(255,255,255,0.05)', color: input.trim() && !isEditing ? '#fff' : 'rgba(255,255,255,0.2)', fontWeight:700, fontSize:12.5, fontFamily:'inherit', cursor: input.trim() && !isEditing ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', gap:6, transition:'all 0.2s', boxShadow: input.trim() && !isEditing ? '0 0 18px rgba(168,85,247,0.35)' : 'none' }}>
+                  style={{ padding:'7px 16px', borderRadius:9, border:'none', background: input.trim() && !isEditing ? 'linear-gradient(135deg,#687b68,#c8795d)' : 'rgba(255,255,255,0.05)', color: input.trim() && !isEditing ? '#fff' : 'rgba(255,255,255,0.2)', fontWeight:700, fontSize:12.5, fontFamily:'inherit', cursor: input.trim() && !isEditing ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', gap:6, transition:'all 0.2s', boxShadow: input.trim() && !isEditing ? '0 0 18px rgba(104,123,104,0.28)' : 'none' }}>
                   {isEditing
                     ? <><motion.span animate={{ rotate:360 }} transition={{ duration:1, repeat:Infinity, ease:'linear' }} style={{ display:'inline-block', fontSize:14 }}>⟳</motion.span> Editing…</>
                     : <>Send ↑</>}
@@ -790,17 +793,18 @@ export default function Editor() {
         </div>
 
         {/* RIGHT: PREVIEW / CODE PANEL */}
-        <div style={{ flex:1, height:'100%', display:'flex', flexDirection:'column', overflow:'hidden', minWidth:0, position:'relative' }}>
+        <div className="editor-preview-panel" style={{ flex:1, height:'100%', display:'flex', flexDirection:'column', overflow:'hidden', minWidth:0, position:'relative' }}>
 
           {!previewDoc && (
             <div style={{ position:'absolute', inset:0, zIndex:0 }}><ParticleBg /></div>
           )}
 
-          <div style={{ height:46, flexShrink:0, borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', padding:'0 14px', gap:4, background:'rgba(8,8,12,0.9)', backdropFilter:'blur(16px)', zIndex:2, position:'relative' }}>
+          <div className="editor-tabbar" style={{ height:46, flexShrink:0, borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', padding:'0 14px', gap:4, background:'rgba(8,8,12,0.9)', backdropFilter:'blur(16px)', zIndex:2, position:'relative' }}>
             {['preview','design','code','history', ...(checklist ? ['plan'] : [])].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                style={{ padding:'5px 13px', borderRadius:7, border:'none', cursor:'pointer', background: activeTab === tab ? 'rgba(168,85,247,0.12)' : 'transparent', color: activeTab === tab ? '#a855f7' : 'rgba(255,255,255,0.35)', fontSize:12.5, fontWeight:500, fontFamily:'inherit', transition:'all 0.15s' }}>
-                {{ preview:'🖥 Preview', design:'🎨 Design', code:'‹/› Code', history:'🕘 History', plan:`✅ Plan ${checklist?.summary.found}/${checklist?.summary.checked}` }[tab]}
+                className={`editor-tab${activeTab === tab ? ' is-active' : ''}`}
+                style={{ padding:'5px 13px', borderRadius:7, border:'none', cursor:'pointer', background: activeTab === tab ? 'rgba(154,181,155,0.12)' : 'transparent', color: activeTab === tab ? '#9ab59b' : 'rgba(255,255,255,0.35)', fontSize:12.5, fontWeight:500, fontFamily:'inherit', transition:'all 0.15s' }}>
+                {React.createElement({ preview: Monitor, design: Palette, code: Code2, history: History, plan: CheckCircle2 }[tab], { size: 14, strokeWidth: 1.8 })} {tab === 'plan' ? `Plan ${checklist?.summary.found}/${checklist?.summary.checked}` : tab[0].toUpperCase() + tab.slice(1)}
               </button>
             ))}
 
@@ -811,8 +815,8 @@ export default function Editor() {
                   const label = f.path === 'index.html' ? 'Home' : f.path.replace(/\.html$/, '').replace(/-/g, ' ')
                   return (
                     <button key={f.path} role="tab" aria-selected={active} onClick={() => showPage(f.path)} disabled={isEditing} title={f.path}
-                      style={{ padding:'4px 10px', borderRadius:99, border:`1px solid ${active ? 'rgba(56,189,248,0.4)' : 'rgba(255,255,255,0.07)'}`, background: active ? 'rgba(56,189,248,0.1)' : 'transparent', color: active ? '#7dd3fc' : 'rgba(255,255,255,0.4)', fontSize:11.5, fontWeight:600, cursor: isEditing ? 'not-allowed' : 'pointer', fontFamily:'inherit', whiteSpace:'nowrap', textTransform:'capitalize' }}>
-                      📄 {label}
+                style={{ padding:'4px 10px', borderRadius:99, border:`1px solid ${active ? 'rgba(200,121,93,0.42)' : 'rgba(255,255,255,0.07)'}`, background: active ? 'rgba(200,121,93,0.11)' : 'transparent', color: active ? '#e0aa95' : 'rgba(255,255,255,0.4)', fontSize:11.5, fontWeight:600, cursor: isEditing ? 'not-allowed' : 'pointer', fontFamily:'inherit', whiteSpace:'nowrap', textTransform:'capitalize' }}>
+                      <FileText size={13} strokeWidth={1.8} /> {label}
                     </button>
                   )
                 })}
@@ -824,25 +828,25 @@ export default function Editor() {
                 <div style={{ width:1, height:20, background:'rgba(255,255,255,0.08)', margin:'0 6px' }} />
                 {DEVICES.map(d => (
                   <button key={d.id} onClick={() => setDevice(d.id)} title={d.label}
-                    style={{ padding:'5px 10px', borderRadius:7, border:'none', cursor:'pointer', background: device === d.id ? 'rgba(168,85,247,0.12)' : 'transparent', color: device === d.id ? '#a855f7' : 'rgba(255,255,255,0.3)', fontSize:14, fontFamily:'inherit', transition:'all 0.15s', display:'flex', alignItems:'center', gap:4 }}>
-                    {d.icon}
+                    style={{ padding:'5px 10px', borderRadius:7, border:'none', cursor:'pointer', background: device === d.id ? 'rgba(154,181,155,0.12)' : 'transparent', color: device === d.id ? '#9ab59b' : 'rgba(255,255,255,0.3)', fontSize:14, fontFamily:'inherit', transition:'all 0.15s', display:'flex', alignItems:'center', gap:4 }}>
+                    <d.icon size={15} strokeWidth={1.8} />
                     {device === d.id && <span style={{ fontSize:10.5, fontWeight:600 }}>{d.label}</span>}
                   </button>
                 ))}
                 <div style={{ width:1, height:20, background:'rgba(255,255,255,0.08)', margin:'0 6px' }} />
                 <button onClick={() => setShowFullPreview(true)}
-                  style={{ padding:'5px 12px', borderRadius:7, border:'1px solid rgba(168,85,247,0.3)', background:'rgba(168,85,247,0.07)', color:'#a855f7', fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
-                  ⛶ Full Page
+                  style={{ padding:'5px 12px', borderRadius:7, border:'1px solid rgba(200,121,93,0.34)', background:'rgba(200,121,93,0.09)', color:'#e0aa95', fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+                  <Maximize2 size={14} /> Full Page
                 </button>
               </>
             )}
 
             {isEditing && (
               <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}
-                style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6, padding:'4px 12px', borderRadius:20, background:'rgba(168,85,247,0.1)', border:'1px solid rgba(168,85,247,0.25)' }}>
+                style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:6, padding:'4px 12px', borderRadius:20, background:'rgba(200,121,93,0.1)', border:'1px solid rgba(200,121,93,0.25)' }}>
                 <motion.div animate={{ opacity:[1,.3,1] }} transition={{ duration:1.2, repeat:Infinity }}
-                  style={{ width:6, height:6, borderRadius:'50%', background:'#a855f7' }} />
-                <span style={{ fontSize:11, color:'#a855f7', fontWeight:600 }}>AI editing…</span>
+                  style={{ width:6, height:6, borderRadius:'50%', background:'#d69a82' }} />
+                <span style={{ fontSize:11, color:'#e0aa95', fontWeight:600 }}>AI editing…</span>
               </motion.div>
             )}
           </div>
@@ -877,15 +881,15 @@ export default function Editor() {
                           style={{ position:'absolute', inset:0, display:'flex', alignItems:'flex-end', justifyContent:'center', paddingBottom:20, background:'linear-gradient(to top, rgba(5,5,10,0.6) 0%, transparent 28%)', cursor:'pointer', zIndex:2, opacity:0, transition:'opacity 0.2s' }}
                           onMouseEnter={e => e.currentTarget.style.opacity='1'}
                           onMouseLeave={e => e.currentTarget.style.opacity='0'}>
-                          <div style={{ display:'flex', alignItems:'center', gap:7, padding:'8px 18px', borderRadius:99, background:'rgba(8,8,16,0.92)', border:'1px solid rgba(168,85,247,0.4)', backdropFilter:'blur(14px)', color:'#a855f7', fontSize:12.5, fontWeight:600 }}>
-                            ⛶ Open full-page preview
+                          <div style={{ display:'flex', alignItems:'center', gap:7, padding:'8px 18px', borderRadius:99, background:'rgba(8,8,16,0.92)', border:'1px solid rgba(200,121,93,0.4)', backdropFilter:'blur(14px)', color:'#e0aa95', fontSize:12.5, fontWeight:600 }}>
+                            <Maximize2 size={14} /> Open full-page preview
                           </div>
                         </div>
                       )}
                       {isEditing && (
                         <div style={{ position:'absolute', inset:0, background:'rgba(6,6,12,0.65)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:5 }}>
                           <motion.div initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }} style={{ textAlign:'center', padding:28 }}>
-                            <motion.div animate={{ rotate:360 }} transition={{ duration:1.5, repeat:Infinity, ease:'linear' }} style={{ width:44, height:44, borderRadius:'50%', border:'3px solid rgba(168,85,247,0.2)', borderTopColor:'#a855f7', margin:'0 auto 14px' }} />
+                            <motion.div animate={{ rotate:360 }} transition={{ duration:1.5, repeat:Infinity, ease:'linear' }} style={{ width:44, height:44, borderRadius:'50%', border:'3px solid rgba(154,181,155,0.2)', borderTopColor:'#9ab59b', margin:'0 auto 14px' }} />
                             <p style={{ color:'rgba(255,255,255,0.8)', fontSize:14, fontWeight:600, margin:'0 0 4px' }}>Applying your changes…</p>
                             <p style={{ color:'rgba(255,255,255,0.35)', fontSize:12, margin:0 }}>{EDIT_STEPS[Math.min(editStep, EDIT_STEPS.length-1)]}</p>
                           </motion.div>
@@ -896,7 +900,7 @@ export default function Editor() {
                 </div>
               ) : (
                 <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} style={{ textAlign:'center', maxWidth:400, padding:24, position:'relative', zIndex:2 }}>
-                  <div style={{ width:80, height:80, borderRadius:24, background:'linear-gradient(135deg,rgba(168,85,247,0.2),rgba(56,189,248,0.12))', border:'1px solid rgba(168,85,247,0.3)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px', fontSize:34, boxShadow:'0 0 60px rgba(168,85,247,0.18)' }}>🌐</div>
+                  <div style={{ width:80, height:80, borderRadius:24, background:'linear-gradient(135deg,rgba(154,181,155,0.2),rgba(200,121,93,0.12))', border:'1px solid rgba(154,181,155,0.3)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px', fontSize:34, boxShadow:'0 0 40px rgba(154,181,155,0.14)' }}>🌐</div>
                   <p style={{ color:'rgba(255,255,255,0.5)', fontSize:15 }}>Loading preview…</p>
                 </motion.div>
               )
@@ -951,7 +955,7 @@ export default function Editor() {
                 animate={{ scale:1, rotate:0 }}
                 transition={{ delay:0.08, type:'spring', stiffness:280 }}
                 style={{ width:64, height:64, borderRadius:20, background:'rgba(52,211,153,0.1)', border:'1px solid rgba(52,211,153,0.28)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:22, fontSize:32 }}>
-                🚀
+                <Rocket size={30} strokeWidth={1.8} color="#a9c2ab" />
               </motion.div>
 
               <motion.h3 initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.12 }}
@@ -965,13 +969,13 @@ export default function Editor() {
 
               <motion.div initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.2 }}
                 style={{ padding:'14px 16px', borderRadius:14, background:'rgba(52,211,153,0.05)', border:'1px solid rgba(52,211,153,0.18)', marginBottom:24, display:'flex', alignItems:'center', gap:12 }}>
-                <div style={{ width:8, height:8, borderRadius:'50%', background:'#34d399', boxShadow:'0 0 10px rgba(52,211,153,0.9)', flexShrink:0 }} />
-                <span style={{ fontSize:12.5, color:'#34d399', fontWeight:600, fontFamily:'monospace', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                <div style={{ width:8, height:8, borderRadius:'50%', background:'#7f9d82', boxShadow:'0 0 7px rgba(127,157,130,0.5)', flexShrink:0 }} />
+                <span style={{ fontSize:12.5, color:'#a9c2ab', fontWeight:600, fontFamily:'monospace', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                   {deployUrl}
                 </span>
                 <button
                   onClick={() => { navigator.clipboard.writeText(deployUrl); setDeployCopied(true); setTimeout(() => setDeployCopied(false), 2000) }}
-                  style={{ background: deployCopied ? 'rgba(52,211,153,0.2)' : 'rgba(52,211,153,0.08)', border:'1px solid rgba(52,211,153,0.25)', borderRadius:8, padding:'5px 12px', color: deployCopied ? '#4ade80' : '#34d399', fontSize:11.5, fontWeight:700, cursor:'pointer', flexShrink:0, fontFamily:'inherit', transition:'all 0.2s' }}>
+                  style={{ background: deployCopied ? 'rgba(127,157,130,0.2)' : 'rgba(127,157,130,0.08)', border:'1px solid rgba(127,157,130,0.3)', borderRadius:8, padding:'5px 12px', color: deployCopied ? '#c0d7c1' : '#a9c2ab', fontSize:11.5, fontWeight:700, cursor:'pointer', flexShrink:0, fontFamily:'inherit', transition:'all 0.2s' }}>
                   {deployCopied ? '✓ Copied' : 'Copy'}
                 </button>
               </motion.div>
@@ -985,7 +989,7 @@ export default function Editor() {
                   Close
                 </button>
                 <button onClick={() => window.open(deployUrl, '_blank')}
-                  style={{ flex:2, padding:'12px 0', borderRadius:12, border:'none', background:'linear-gradient(135deg,#34d399,#059669)', color:'#fff', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 4px 20px rgba(52,211,153,0.35)', transition:'all 0.2s' }}
+                  style={{ flex:2, padding:'12px 0', borderRadius:12, border:'none', background:'linear-gradient(135deg,#4e6251,#687b68)', color:'#fff', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', boxShadow:'0 4px 18px rgba(78,98,81,0.24)', transition:'all 0.2s' }}
                   onMouseEnter={e => e.currentTarget.style.boxShadow='0 6px 28px rgba(52,211,153,0.5)'}
                   onMouseLeave={e => e.currentTarget.style.boxShadow='0 4px 20px rgba(52,211,153,0.35)'}>
                   Open Live Site →

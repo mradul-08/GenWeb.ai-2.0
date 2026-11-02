@@ -1,4 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
+@import "./components/global.css";
 
 * {
   margin: 0;
@@ -9,6 +11,9 @@
 body {
   margin: 0;
   padding: 0;
+  background: #f6f3ed;
+  color: #514d46;
+  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
 }
 
 #root {

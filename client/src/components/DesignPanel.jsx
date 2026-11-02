@@ -14,7 +14,7 @@ const title = (id) => id.split('-').map(w => w[0].toUpperCase() + w.slice(1)).jo
 
 const card = { background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:12, padding:'14px 14px' }
 const h = { fontSize:10.5, fontWeight:700, color:'rgba(255,255,255,0.4)', letterSpacing:'0.12em', textTransform:'uppercase', margin:'0 0 10px' }
-const btn = (on) => ({ padding:'5px 10px', borderRadius:7, border:`1px solid ${on ? 'rgba(168,85,247,0.45)' : 'rgba(255,255,255,0.1)'}`, background: on ? 'rgba(168,85,247,0.12)' : 'transparent', color: on ? '#d8b4fe' : 'rgba(255,255,255,0.6)', fontSize:11.5, fontWeight:600, cursor:'pointer', fontFamily:'inherit' })
+const btn = (on) => ({ padding:'5px 10px', borderRadius:7, border:`1px solid ${on ? 'rgba(154,181,155,0.45)' : 'rgba(255,255,255,0.1)'}`, background: on ? 'rgba(154,181,155,0.12)' : 'transparent', color: on ? '#c9ddc9' : 'rgba(255,255,255,0.6)', fontSize:11.5, fontWeight:600, cursor:'pointer', fontFamily:'inherit' })
 const icon = { width:26, height:26, borderRadius:6, border:'1px solid rgba(255,255,255,0.08)', background:'transparent', color:'rgba(255,255,255,0.5)', cursor:'pointer', fontSize:12, fontFamily:'inherit' }
 const input = { padding:'6px 9px', borderRadius:7, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.03)', color:'#fff', fontSize:12.5, fontFamily:'inherit', outline:'none' }
 
@@ -87,13 +87,13 @@ export default function DesignPanel({ websiteId, refreshKey, disabled, onApplied
         <div>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             <h3 style={{ margin:0, fontSize:15, color:'#fff', fontWeight:700 }}>Design</h3>
-            <span style={{ fontSize:10.5, fontWeight:700, color:'#4ade80', background:'rgba(74,222,128,0.1)', padding:'2px 8px', borderRadius:99 }}>NO AI · FREE</span>
+            <span style={{ fontSize:10.5, fontWeight:700, color:'#a9c2ab', background:'rgba(127,157,130,0.12)', padding:'2px 8px', borderRadius:99 }}>NO AI · FREE</span>
           </div>
           <p style={{ margin:'4px 0 0', fontSize:12, color:'rgba(255,255,255,0.4)' }}>Change the theme, layout, sections and text instantly. Every change is saved in History.</p>
         </div>
 
         {!state.inSync && (
-          <div style={{ padding:'10px 12px', borderRadius:10, background:'rgba(251,191,36,0.07)', border:'1px solid rgba(251,191,36,0.25)', fontSize:12, color:'#fde68a', lineHeight:1.55 }}>
+          <div style={{ padding:'10px 12px', borderRadius:10, background:'rgba(200,121,93,0.08)', border:'1px solid rgba(200,121,93,0.25)', fontSize:12, color:'#e0aa95', lineHeight:1.55 }}>
             This site has AI or code edits made after it was built. Theme changes keep them. Other design changes rebuild the site from its template and replace those edits — you will be asked first, and they stay in History.
           </div>
         )}
@@ -108,7 +108,7 @@ export default function DesignPanel({ websiteId, refreshKey, disabled, onApplied
               const active = p.id === state.design.preset
               return (
                 <button key={p.id} disabled={busy || disabled} onClick={() => !active && apply({ ...draft, preset: p.id })} title={`${title(p.id)} · ${p.fonts.heading} / ${p.fonts.body}`}
-                  style={{ textAlign:'left', padding:0, borderRadius:10, overflow:'hidden', cursor: active ? 'default' : 'pointer', border:`2px solid ${active ? '#a855f7' : 'rgba(255,255,255,0.08)'}`, background:p.colors.bg, fontFamily:'inherit' }}>
+                  style={{ textAlign:'left', padding:0, borderRadius:10, overflow:'hidden', cursor: active ? 'default' : 'pointer', border:`2px solid ${active ? '#9ab59b' : 'rgba(255,255,255,0.08)'}`, background:p.colors.bg, fontFamily:'inherit' }}>
                   <div style={{ display:'flex', gap:4, padding:'10px 10px 6px' }}>
                     {[p.colors.primary, p.colors.secondary, p.colors.accent].map(c => <span key={c} style={{ width:16, height:16, borderRadius:99, background:c, border:'1px solid rgba(0,0,0,0.15)' }} />)}
                   </div>
@@ -150,7 +150,7 @@ export default function DesignPanel({ websiteId, refreshKey, disabled, onApplied
                 <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
                   <input aria-label="Section name" value={s.name} maxLength={40} onChange={e => setSections(sections.map(x => (x.id === s.id ? { ...x, name: e.target.value } : x)))} style={{ ...input, width:150 }} />
                   <span style={{ fontSize:10.5, color:'rgba(255,255,255,0.4)' }}>{k?.label}</span>
-                  {empty && <span title="No content yet — this section is hidden until you add some" style={{ fontSize:10.5, color:'#fbbf24' }}>● hidden (no content)</span>}
+                  {empty && <span title="No content yet — this section is hidden until you add some" style={{ fontSize:10.5, color:'#d69a82' }}>● hidden (no content)</span>}
                   <div style={{ marginLeft:'auto', display:'flex', gap:4, alignItems:'center' }}>
                     {k?.variants.length > 1 && (
                       <select aria-label="Design" value={s.variant} onChange={e => setSections(sections.map(x => (x.id === s.id ? { ...x, variant: e.target.value } : x)))} style={{ ...input, padding:'5px 6px' }}>
@@ -187,7 +187,7 @@ export default function DesignPanel({ websiteId, refreshKey, disabled, onApplied
           <span style={{ fontSize:12, color:'rgba(255,255,255,0.45)', marginRight:'auto' }}>Unsaved design changes · no credits needed</span>
           <button style={btn(false)} disabled={busy} onClick={() => setDraft(structuredClone(state.design))}>Discard</button>
           <button disabled={busy || disabled} onClick={() => apply(draft)}
-            style={{ padding:'8px 16px', borderRadius:9, border:'none', background:'linear-gradient(135deg,#a855f7,#6366f1)', color:'#fff', fontWeight:700, fontSize:12.5, cursor: busy ? 'wait' : 'pointer', fontFamily:'inherit' }}>
+            style={{ padding:'8px 16px', borderRadius:9, border:'none', background:'linear-gradient(135deg,#687b68,#c8795d)', color:'#fff', fontWeight:700, fontSize:12.5, cursor: busy ? 'wait' : 'pointer', fontFamily:'inherit' }}>
             {busy ? 'Applying…' : 'Apply changes'}
           </button>
         </div>

@@ -1,6 +1,6 @@
 # GenWeb.ai 2.0: Hybrid Builder Blueprint
 
-*Written 2026-11-02 from the source at commit `556701a`. Planning only: no source, configuration, dependency or database was changed while writing it.*
+*Updated 2026-11-02 from the current `websiteBuilder-v2` working tree. Planning only: this document update does not change application behavior, configuration, dependencies, databases, deployment, or Git history. The working tree contains unrelated/uncommitted client changes from earlier work; this blueprint treats them as current local state, not as a released baseline.*
 
 This document answers both planning briefs ("Builder Architecture and Implementation Plan" and "Intelligent Hybrid Website Builder") in one place. It does **not** repeat what is already designed in [GENWEB_AI_2_TARGET_ARCHITECTURE.md](GENWEB_AI_2_TARGET_ARCHITECTURE.md) (schemas, migration, multi-file preview, quality engine) or [GENWEB_AI_2_ROADMAP.md](GENWEB_AI_2_ROADMAP.md) (phases R0–R8). It links to them and adds what is new:
 
@@ -10,7 +10,7 @@ This document answers both planning briefs ("Builder Architecture and Implementa
 - how all of this maps onto the existing phases and files.
 
 **Labels:**
-- `[VERIFIED]`: read in the source at `556701a`.
+- `[VERIFIED]`: confirmed in the current source tree, tests, or authoritative project documentation; the file path and evidence are named.
 - `[PROPOSED]`: new design.
 - `[ASSUMPTION]`: needs measurement or the owner's confirmation.
 - `[BLOCKED]`: waits on a prerequisite.
@@ -20,7 +20,7 @@ This document answers both planning briefs ("Builder Architecture and Implementa
 
 ## 1. Executive summary
 
-**Today** `[VERIFIED]`: GenWeb.ai generates **one self-contained HTML file** per website. It does so with one AI call (or two in "brief" mode), validates and repairs the page deterministically, and edits it with section-level patches. These patches fall back to a full rewrite when needed. The engine is small (≈2,900 server lines), well tested (184 server tests) and free-tier only.
+**Today** `[VERIFIED]`: GenWeb.ai has a legacy single-file path plus a current template-backed static multi-page path. It uses one AI call or a brief-plus-generation strategy, validates and repairs output deterministically, applies targeted edits with full-rewrite fallback, and supports design-library assembly, versions, export and deployment. The current local verification baseline is **267 server tests passing**, **15 client tests passing**, client lint clean and a successful production build; the build retains a chunk-size advisory. AI remains free-tier only.
 
 **Target** `[PROPOSED]`:
 
@@ -109,7 +109,7 @@ sequenceDiagram
 
 | # | Finding | Evidence | Impact |
 | --- | --- | --- | --- |
-| **H-1** | Single-file only | `Website.latestCode: String`; prompts demand "one self-contained file" | Blocks multi-page sites and React mode |
+| **H-1** | Legacy storage remains single-code-centric | `Website.latestCode` remains the compatibility field; current static multi-page behavior also uses `files` and page-aware routes | A first-class manifest/version model is still needed for larger projects and React mode |
 | **H-2** | No server-side versions | Only `latestCode`; Editor history is client-side, 20 entries, lost on reload | A bad edit or a bad save is irreversible |
 | **H-3** | **Slug generator is broken** (bug) | `generateSlug` uses `/[^a-z0-9s-]/` and `/s+/` (missing backslashes). `"Business Solutions"` → `"bu-ine-olution-"` (reproduced with node) | Ugly, unreadable public URLs. Not a security issue. Fix is one line + test; changes only **new** slugs (existing ones must stay) |
 | **H-4** | Conversation embedded without bound | `conversation: [messageSchema]` grows on every edit | Document can approach MongoDB's 16 MB limit together with `latestCode` (1.5 MB cap) on long-lived projects `[ASSUMPTION: rare today]` |
@@ -550,7 +550,7 @@ The existing order stays: **R0 → R1 → R4 → R2 → R3 → R5 → R7 → R6 
 | Phase | Hybrid work added | Key files | Exit criteria |
 | --- | --- | --- | --- |
 | **R0** (open) | Fix H-3 slug bug (tiny); close owner actions. The new separate v2 stack deployed 2026-11-02 covers "staging/separate DB/new Firebase" in practice, but its AI keys and the Razorpay test webhook are still missing | `controllers/website.controller.js`, tests | Google login E2E ✅ (done 2026-11-02 on v2 stack); webhook credited once; AI generation works on v2 stack |
-| **R1** | Versions + blobs + restore; `memory` and `library` fields reserved in the schema | `models/*`, new `services/versions.js`, Editor versions panel | Every change creates a version; restore works; existing 184 tests green |
+| **R1** | Versions + blobs + restore; `memory` and `library` fields reserved in the schema | `models/*`, existing `server/services/versions.js`, Editor versions panel | Every change creates a version; restore works; current 267 server tests remain green |
 | **R4** | Requirement extractor + plan checklist + deterministic requirement checks (single-file first); task types `analyze`/`plan` | `ai/requirements.js`, `ai/plan.js`, `prompts.js`, `catalog.js` | Plan shown and followed; tokens measured vs baseline |
 | **R2** | **Classic multi-file + library v1** (≥ 8 presets, ≥ 3 variants × 10 section kinds, 6 interactions, 4 starters); matcher; task graph; budget manager; per-file edit; multi-file preview and deploy | `server/library/**`, `ai/project/*`, `services/projectFiles.js`, `client/src/utils/assemblePreview.js` | Benchmark gates in §11 |
 | **R3** | Explorer, per-file editor, diagnostics tab | `client/src/pages/Editor.jsx` → components | Developer edits round-trip as versions |

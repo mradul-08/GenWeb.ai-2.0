@@ -2,31 +2,34 @@
 // common element styles so every page looks like the same product.
 
 export const C = {
-  bg:        '#f8f7ff',   // page
-  surface:   '#ffffff',   // cards, panels
-  soft:      '#f3f1fd',   // subtle fills, inputs
-  border:    '#e6e3f5',
-  borderStrong: '#d6d1ef',
-  ink:       '#14112b',   // headings, primary text
-  text:      '#3f3b5c',   // body text
-  muted:     '#6e6a8a',   // secondary text (AA on white)
-  faint:     '#9a96b3',   // hints, placeholders (not for body text)
-  violet:    '#7c3aed',
-  blue:      '#2563eb',
-  green:     '#059669',
-  amber:     '#b45309',
-  red:       '#dc2626',
-  brand:     'linear-gradient(135deg,#7c3aed 0%,#4f46e5 50%,#2563eb 100%)',
-  brandText: 'linear-gradient(120deg,#7c3aed 0%,#2563eb 55%,#0891b2 100%)',
+  bg:        '#f6f3ed',
+  surface:   '#fffdf8',
+  soft:      '#eeeae1',
+  border:    '#ded8cc',
+  borderStrong: '#c9c1b3',
+  ink:       '#25231f',
+  text:      '#514d46',
+  muted:     '#6e685f',
+  faint:     '#a29b90',
+  sage:      '#4e6251',
+  terracotta:'#c8795d',
+  // Backwards-compatible aliases for components not yet migrated.
+  violet:    '#4e6251',
+  blue:      '#a85f48',
+  green:     '#4e6f55',
+  amber:     '#8a6235',
+  red:       '#bd625a',
+  brand:     'linear-gradient(135deg,#4e6251 0%,#596d59 100%)',
+  brandText: 'linear-gradient(120deg,#3f5142 0%,#4e6251 100%)',
 }
 
 export const FONT = "'DM Sans','Inter',system-ui,-apple-system,sans-serif"
 
 export const shadow = {
-  sm: '0 1px 2px rgba(20,17,43,0.06)',
-  md: '0 8px 24px rgba(76,61,180,0.08)',
-  lg: '0 20px 50px rgba(76,61,180,0.12)',
-  brand: '0 10px 30px rgba(99,62,234,0.28)',
+  sm: '0 1px 2px rgba(37,35,31,0.06)',
+  md: '0 8px 24px rgba(78,98,81,0.09)',
+  lg: '0 20px 50px rgba(78,98,81,0.13)',
+  brand: '0 10px 26px rgba(78,98,81,0.22)',
 }
 
 export const card = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, boxShadow: shadow.md }
@@ -45,10 +48,10 @@ export const pill = (color) => ({ display: 'inline-flex', alignItems: 'center', 
 export const pageBackground = {
   backgroundColor: C.bg,
   backgroundImage: [
-    'radial-gradient(900px 500px at 10% -10%, rgba(124,58,237,0.10), transparent 60%)',
-    'radial-gradient(800px 500px at 100% 0%, rgba(37,99,235,0.09), transparent 60%)',
-    'radial-gradient(700px 500px at 50% 110%, rgba(236,72,153,0.06), transparent 60%)',
-    'radial-gradient(rgba(20,17,43,0.06) 1px, transparent 1px)',
+    'radial-gradient(900px 500px at 10% -10%, rgba(104,123,104,0.08), transparent 60%)',
+    'radial-gradient(800px 500px at 100% 0%, rgba(200,121,93,0.06), transparent 60%)',
+    'radial-gradient(700px 500px at 50% 110%, rgba(200,121,93,0.04), transparent 60%)',
+    'radial-gradient(rgba(37,35,31,0.045) 1px, transparent 1px)',
   ].join(','),
   backgroundSize: 'auto, auto, auto, 22px 22px',
   backgroundAttachment: 'fixed',
@@ -56,10 +59,9 @@ export const pageBackground = {
 
 // Global CSS shared by app pages (fonts, focus ring, scrollbar).
 export const GLOBAL_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
-::selection{background:rgba(124,58,237,0.18)}
-:focus-visible{outline:3px solid rgba(124,58,237,0.45);outline-offset:2px}
-::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#d6d1ef;border-radius:8px}::-webkit-scrollbar-track{background:transparent}
-input::placeholder,textarea::placeholder{color:${C.faint}}
+::selection{background:rgba(104,123,104,0.22)}
+:focus-visible{outline:3px solid rgba(104,123,104,0.5);outline-offset:2px}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#c9c1b3;border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+input::placeholder,textarea::placeholder{color:${C.muted}}
 `

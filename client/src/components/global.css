@@ -4,8 +4,6 @@
    import './global.css'
 ═══════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
-
 *, *::before, *::after {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
@@ -20,8 +18,8 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background: #040408;
-  color: #f0f0f8;
+  background: #f6f3ed;
+  color: #514d46;
   font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
   overflow-x: hidden;
 }
@@ -29,8 +27,8 @@ body {
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.35); border-radius: 2px; }
-* { scrollbar-width: thin; scrollbar-color: rgba(139,92,246,0.35) transparent; }
+::-webkit-scrollbar-thumb { background: #c9c1b3; border-radius: 2px; }
+* { scrollbar-width: thin; scrollbar-color: #c9c1b3 transparent; }
 
 /* ── Safe area for notched phones ── */
 .safe-top    { padding-top: env(safe-area-inset-top); }

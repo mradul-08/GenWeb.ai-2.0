@@ -23,7 +23,15 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // JSX member expressions such as <motion.div> are not counted as a
+      // variable use by the base rule, although the imported object is used.
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]|^motion$' }],
+    },
+  },
+  {
+    files: ['vite.config.js', 'tests/**/*.js'],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 ])

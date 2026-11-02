@@ -41,13 +41,13 @@ export default function PlanChecklist({ checklist, onFix, disabled }) {
         </p>
 
         <div style={{ padding:'12px 14px', borderRadius:10, marginBottom:14, background: allGood ? 'rgba(74,222,128,0.07)' : 'rgba(251,191,36,0.07)', border:`1px solid ${allGood ? 'rgba(74,222,128,0.25)' : 'rgba(251,191,36,0.25)'}`, display:'flex', alignItems:'center', gap:10 }}>
-          <span style={{ fontSize:20, fontWeight:800, color: allGood ? '#4ade80' : '#fbbf24' }}>{summary.found}/{summary.checked}</span>
+          <span style={{ fontSize:20, fontWeight:800, color: allGood ? '#7f9d82' : '#d69a82' }}>{summary.found}/{summary.checked}</span>
           <span style={{ fontSize:12.5, color:'rgba(255,255,255,0.65)' }}>
             {allGood ? 'Everything in the plan that can be checked is in your site.' : `${missing.length} planned item${missing.length === 1 ? ' is' : 's are'} missing.`}
           </span>
           {missing.length > 0 && onFix && (
             <button onClick={() => onFix(fixPrompt)} disabled={disabled}
-              style={{ marginLeft:'auto', padding:'6px 12px', borderRadius:8, border:'1px solid rgba(168,85,247,0.35)', background:'rgba(168,85,247,0.1)', color:'#c084fc', fontSize:12, fontWeight:600, cursor: disabled ? 'not-allowed' : 'pointer', fontFamily:'inherit', opacity: disabled ? 0.5 : 1, whiteSpace:'nowrap' }}>
+              style={{ marginLeft:'auto', padding:'6px 12px', borderRadius:8, border:'1px solid rgba(154,181,155,0.35)', background:'rgba(154,181,155,0.1)', color:'#c9ddc9', fontSize:12, fontWeight:600, cursor: disabled ? 'not-allowed' : 'pointer', fontFamily:'inherit', opacity: disabled ? 0.5 : 1, whiteSpace:'nowrap' }}>
               ✨ Fix with AI
             </button>
           )}

@@ -57,7 +57,7 @@ export default function PlanReview({ plan, onChange, onGenerate, onDiscard, cred
         <p style={label}>Sections · in page order</p>
         {plan.sections.map((s, i) => (
           <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderTop: i ? `1px solid ${C.border}` : 'none' }}>
-            <span style={{ width: 24, height: 24, borderRadius: 7, display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 700, color: C.violet, background: 'rgba(124,58,237,0.08)', flexShrink: 0 }}>{i + 1}</span>
+            <span style={{ width: 24, height: 24, borderRadius: 7, display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 700, color: C.violet, background: 'rgba(104,123,104,0.10)', flexShrink: 0 }}>{i + 1}</span>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{s.name}</div>
               {s.purpose && <div style={{ fontSize: 13, color: C.muted, marginTop: 1 }}>{s.purpose}</div>}
@@ -83,7 +83,7 @@ export default function PlanReview({ plan, onChange, onGenerate, onDiscard, cred
         <p style={label}>Features that must work</p>
         {plan.features.map((f, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: i ? `1px solid ${C.border}` : 'none' }}>
-            <span style={{ fontSize: 11.5, fontWeight: 700, color: C.blue, background: 'rgba(37,99,235,0.08)', borderRadius: 99, padding: '3px 9px', flexShrink: 0 }}>{FEATURE_LABEL[f.kind] || 'Custom'}</span>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: C.blue, background: 'rgba(200,121,93,0.11)', borderRadius: 99, padding: '3px 9px', flexShrink: 0 }}>{FEATURE_LABEL[f.kind] || 'Custom'}</span>
             <span style={{ fontSize: 13.5, color: C.text }}>{f.text}</span>
             <button aria-label="Remove feature" title="Remove feature" onClick={() => setFeatures(plan.features.filter((_, j) => j !== i))} style={{ ...iconBtn, marginLeft: 'auto', color: C.red }}><X size={14} /></button>
           </div>

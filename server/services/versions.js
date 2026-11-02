@@ -151,7 +151,7 @@ export async function listVersions(websiteId) {
   return ProjectVersion.find({ project: websiteId })
     .sort({ seq: -1 })
     .limit(MAX_LIST)
-    .select("seq source label files.size createdAt")
+    .select("seq source label pinned files.size createdAt")
     .lean()
 }
 
@@ -163,6 +163,17 @@ export async function getVersionCode(websiteId, versionId) {
   const files = []
   for (const f of version.files) files.push({ path: f.path, content: await readBlob(f.blob) })
   return { version, code: (files.find(f => f.path === MAIN_FILE) ?? files[0]).content, files }
+}
+
+export async function updateVersionMeta(websiteId, versionId, { label, pinned }) {
+  const set = {}
+  if (label !== undefined) set.label = cleanLabel(label)
+  if (pinned !== undefined) set.pinned = pinned
+  return ProjectVersion.findOneAndUpdate(
+    { _id: versionId, project: websiteId },
+    { $set: set },
+    { returnDocument: "after" }
+  ).select("seq source label pinned createdAt").lean()
 }
 
 export async function deleteHistory(websiteId) {

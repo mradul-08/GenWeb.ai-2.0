@@ -10,9 +10,11 @@ import { insertAt } from "../ai/htmlPatch.js"
 import { allowedOrigins } from "../config/origins.js"
 import Website from "../models/website.model.js"
 import { reserveCredits, refundCredits } from "../services/credits.js"
-import { commitCode, commitFiles, commitTransform, currentFiles, UnknownPageError, MAIN_FILE, ensureVersioned, listVersions, getVersionCode, deleteHistory } from "../services/versions.js"
+import { commitCode, commitFiles, commitTransform, currentFiles, UnknownPageError, MAIN_FILE, ensureVersioned, listVersions, getVersionCode, updateVersionMeta, deleteHistory } from "../services/versions.js"
 import { PAGE_PATH } from "../library/assemble.js"
 import { createZip } from "../utils/zip.js"
+import { publishRelease, listReleases, rollbackRelease, undeployRelease, deleteReleases } from "../services/releases.js"
+import Release from "../models/release.model.js"
 
 const CREDITS_CONFIG = {
   COST_PER_GENERATION: 50,
@@ -460,6 +462,7 @@ export const deleteWebsite = async (req, res) => {
     const w = await Website.findOneAndDelete({ _id: req.params.id, user: req.user._id })
     if (!w) return notFound(res)
     await deleteHistory(w._id)
+    await deleteReleases(w._id)
     return res.json({ success: true, message: "Deleted successfully" })
   } catch (e) { return serverError(res, "deleteWebsite", e) }
 }
@@ -529,7 +532,7 @@ export const getWebsiteVersions = async (req, res) => {
     return res.json({
       success: true,
       versions: versions.map(v => ({
-        id: v._id, seq: v.seq, source: v.source, label: v.label,
+        id: v._id, seq: v.seq, source: v.source, label: v.label, pinned: v.pinned,
         size: v.files.reduce((n, f) => n + f.size, 0), createdAt: v.createdAt,
         current: String(v._id) === String(head.headVersion),
       })),
@@ -551,13 +554,33 @@ export const getWebsiteVersion = async (req, res) => {
     const found = await findOwnVersion(req, res)
     if (!found) return
     const { version, code, files } = found
-    return res.json({ success: true, version: { id: version._id, seq: version.seq, source: version.source, label: version.label, createdAt: version.createdAt }, code, files })
+    return res.json({ success: true, version: { id: version._id, seq: version.seq, source: version.source, label: version.label, pinned: version.pinned, createdAt: version.createdAt }, code, files })
   } catch (e) { return serverError(res, "getWebsiteVersion", e) }
+}
+
+export const updateWebsiteVersion = async (req, res) => {
+  try {
+    const website = await findOwnWebsite(req)
+    if (!website || !mongoose.isValidObjectId(req.params.versionId)) return notFound(res)
+    const { label, pinned } = req.body || {}
+    if (label !== undefined && (typeof label !== "string" || label.length > 120)) {
+      return res.status(400).json({ success: false, message: "label must be a string of at most 120 characters" })
+    }
+    if (pinned !== undefined && typeof pinned !== "boolean") {
+      return res.status(400).json({ success: false, message: "pinned must be boolean" })
+    }
+    if (label === undefined && pinned === undefined) {
+      return res.status(400).json({ success: false, message: "label or pinned is required" })
+    }
+    const version = await updateVersionMeta(website._id, req.params.versionId, { label, pinned })
+    if (!version) return notFound(res)
+    return res.json({ success: true, version })
+  } catch (e) { return serverError(res, "updateWebsiteVersion", e) }
 }
 
 // POST /api/website/:id/versions/:versionId/restore → makes that version's
 // code current by recording it as a NEW version (history is never rewritten).
-// Like a manual save, it also updates a deployed site.
+// Like a manual save, it changes the working version without rewriting a published release.
 export const restoreWebsiteVersion = async (req, res) => {
   try {
     const found = await findOwnVersion(req, res)
@@ -601,14 +624,14 @@ export const deployWebsite = async (req, res) => {
 
     if (!website.slug) {
       website.slug = generateSlug(website.title)
+      await website.save()
     }
 
-    const baseUrl  = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 3002}`
-    const deployUrl = `${baseUrl}/s/${website.slug}${website.kind === "static" ? "/" : ""}`
-
-    website.deployed  = true
-    website.deployUrl = deployUrl
-    await website.save()
+    const latest = await Website.findById(website._id)
+    if (!latest.headVersion) await ensureVersioned(latest)
+    const published = await publishRelease(website._id, { userId: req.user._id, slug: website.slug })
+    if (!published) return notFound(res)
+    const deployUrl = published.deployUrl
 
     console.log(`[Deploy] ✅ "${website.title}" → ${deployUrl}`)
 
@@ -628,15 +651,32 @@ export const undeployWebsite = async (req, res) => {
     const website = await findOwnWebsite(req)
     if (!website) return notFound(res)
 
-    website.deployed  = false
-    website.deployUrl = ""
-    await website.save()
+    await undeployRelease(website._id, req.user._id)
 
     console.log(`[Undeploy] "${website.title}" taken offline`)
     return res.json({ success: true, message: "Site taken offline." })
   } catch (e) {
     return serverError(res, "undeployWebsite", e)
   }
+}
+
+export const getWebsiteReleases = async (req, res) => {
+  try {
+    const website = await findOwnWebsite(req)
+    if (!website) return notFound(res)
+    const releases = await listReleases(website._id, req.user._id)
+    return res.json({ success: true, releases: releases.map(r => ({ id: r._id, version: r.version, slug: r.slug, status: r.status, createdAt: r.createdAt })) })
+  } catch (e) { return serverError(res, "getWebsiteReleases", e) }
+}
+
+export const rollbackWebsiteRelease = async (req, res) => {
+  try {
+    const website = await findOwnWebsite(req)
+    if (!website) return notFound(res)
+    const result = await rollbackRelease(website._id, req.params.releaseId, req.user._id)
+    if (!result) return notFound(res)
+    return res.json({ success: true, deployUrl: result.deployUrl, release: { id: result.release._id, version: result.release.version, status: result.release.status }, changed: result.changed })
+  } catch (e) { return serverError(res, "rollbackWebsiteRelease", e) }
 }
 
 // Deployed sites are sandboxed (opaque origin) because they are served from the
@@ -656,8 +696,16 @@ export const serveDeployedSite = async (req, res) => {
     const { slug } = req.params
     // /s/:slug → index.html; /s/:slug/:page → another page of a multi-page site.
     const pagePath = req.params.page === undefined ? MAIN_FILE : requestedPath(req.params.page)
-    const found    = pagePath ? await Website.findOne({ slug: String(slug), deployed: true }) : null
-    const website  = found && findPage(found, pagePath) ? found : null
+    const found = pagePath ? await Website.findOne({ slug: String(slug), deployed: true }) : null
+    let source = found
+    if (found?.liveRelease) {
+      const live = await Release.findOne({ _id: found.liveRelease, project: found._id, status: "live" }).lean()
+      const released = live ? await getVersionCode(found._id, live.version) : null
+      if (released) {
+        source = { ...found.toObject(), files: released.files, latestCode: released.code }
+      }
+    }
+    const website  = source && findPage(source, pagePath) ? source : null
     const clientUrl = process.env.CLIENT_URL || "http://localhost:5173"
 
     if (!website) {

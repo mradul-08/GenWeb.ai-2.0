@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import AppHeader from '../components/AppHeader'
-import { Hero, Examples, HowItWorks, Features, FinalCta, SiteFooter } from '../components/Landing'
+import { Hero, Examples, HowItWorks, Features, SiteFooter } from '../components/Landing'
 import { C, FONT, GLOBAL_CSS, pageBackground } from '../theme'
 
 export default function Home() {
@@ -27,7 +27,6 @@ export default function Home() {
         <Examples userData={userData} navigate={navigate} />
         <HowItWorks />
         <Features />
-        <FinalCta userData={userData} navigate={navigate} />
       </main>
       <SiteFooter userData={userData} navigate={navigate} />
     </div>

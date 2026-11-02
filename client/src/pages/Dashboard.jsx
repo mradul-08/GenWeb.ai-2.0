@@ -64,7 +64,7 @@ function Modal({ onClose, children, width = 440, labelledBy }) {
   useEscape(onClose);
   return (
     <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}
-      style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(20,17,43,0.38)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(37,35,31,0.38)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <Motion.div role="dialog" aria-modal="true" aria-labelledby={labelledBy}
         initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} transition={{ type: "spring", stiffness: 300, damping: 26 }}
         onClick={(e) => e.stopPropagation()}
@@ -279,7 +279,7 @@ function ProjectCard({ site, index, navigate, onPublish, onDelete, onToast }) {
 function Stat({ icon, label, value, color, action }) {
   return (
     <div style={{ ...card, padding: "16px 18px", display: "flex", alignItems: "center", gap: 14 }}>
-      <span style={{ width: 42, height: 42, borderRadius: 12, display: "grid", placeItems: "center", background: `${color}14`, color, flexShrink: 0 }}>{React.createElement(icon, { size: 20 })}</span>
+      <span style={{ width: 48, height: 48, borderRadius: 14, display: "grid", placeItems: "center", background: `${color}12`, border: `1px solid ${color}35`, color, flexShrink: 0 }}>{React.createElement(icon, { size: 21, strokeWidth: 1.9 })}</span>
       <div style={{ minWidth: 0 }}>
         <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, lineHeight: 1.1 }}>{value}</div>
         <div style={{ fontSize: 13, color: C.muted }}>{label}</div>
@@ -372,7 +372,7 @@ export default function Dashboard() {
         {/* Welcome + start a new site */}
         <section className="gw-dash-hero" style={{ display: "grid", gridTemplateColumns: "minmax(0,1.6fr) minmax(0,1fr)", gap: 18, marginBottom: 18 }}>
           <div style={{ ...card, padding: "clamp(22px,3vw,32px)", position: "relative", overflow: "hidden" }}>
-            <div aria-hidden="true" style={{ position: "absolute", right: -60, top: -60, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(124,58,237,0.14), transparent 70%)" }} />
+            <div aria-hidden="true" style={{ position: "absolute", right: -60, top: -60, width: 220, height: 220, borderRadius: "50%", background: "radial-gradient(circle, rgba(104,123,104,0.12), transparent 70%)" }} />
             <p style={{ margin: "0 0 4px", fontSize: 14, color: C.muted, fontWeight: 600 }}>{greeting}, {firstName} 👋</p>
             <h1 style={{ margin: "0 0 18px", fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: 800, color: C.ink, letterSpacing: "-0.02em" }}>What are we building today?</h1>
             <form onSubmit={(e) => { e.preventDefault(); startWith(idea); }} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -383,7 +383,7 @@ export default function Dashboard() {
             <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 12 }}>
               {START_IDEAS.map(([icon, label, text]) => (
                 <button key={label} type="button" onClick={() => setIdea(text)} aria-pressed={idea === text}
-                  style={{ padding: "6px 12px", borderRadius: 99, border: `1px solid ${idea === text ? C.violet : C.border}`, background: idea === text ? "rgba(124,58,237,0.08)" : C.surface, color: idea === text ? C.violet : C.text, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>
+                  style={{ padding: "6px 12px", borderRadius: 99, border: `1px solid ${idea === text ? C.violet : C.border}`, background: idea === text ? "rgba(104,123,104,0.10)" : C.surface, color: idea === text ? C.violet : C.text, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>
                   {icon} {label}
                 </button>
               ))}
@@ -391,7 +391,7 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: "grid", gap: 12, alignContent: "start" }}>
-            <Stat icon={Zap} color="#d97706" label="Credits left" value={credits}
+            <Stat icon={Zap} color={C.terracotta} label="Credits left" value={credits}
               action={<button onClick={() => navigate("/pricing")} style={{ ...btn.secondary, marginLeft: "auto", padding: "7px 12px", fontSize: 13 }}><Gem size={14} /> Buy</button>} />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <Stat icon={LayoutGrid} color={C.violet} label="Websites" value={loading ? "–" : websites.length} />
@@ -402,7 +402,7 @@ export default function Dashboard() {
 
         {credits <= 0 && (
           <div role="status" style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", padding: "12px 16px", marginBottom: 18, borderRadius: 14, background: "#fffbeb", border: "1px solid #fde68a", color: "#92400e", fontSize: 14 }}>
-            <Zap size={18} color="#d97706" />
+            <Zap size={18} color={C.terracotta} />
             <span style={{ flex: 1, minWidth: 200 }}>You're out of credits. Planning a site and the design editor stay free; generating and AI edits need credits.</span>
             <button onClick={() => navigate("/pricing")} style={{ ...btn.secondary, padding: "7px 14px", fontSize: 13.5 }}>Get credits</button>
           </div>
@@ -439,7 +439,7 @@ export default function Dashboard() {
                   <div style={{ padding: 16, display: "grid", gap: 10 }}><div className="gw-skel" style={{ height: 14, width: "60%", borderRadius: 6 }} /><div className="gw-skel" style={{ height: 34, borderRadius: 10 }} /></div>
                 </div>
               ))}
-              <style>{`.gw-skel{background:linear-gradient(90deg,${C.soft},#fbfaff,${C.soft});background-size:200% 100%;animation:gwskel 1.3s infinite}@keyframes gwskel{to{background-position:-200% 0}}`}</style>
+              <style>{`.gw-skel{background:linear-gradient(90deg,${C.soft},${C.surface},${C.soft});background-size:200% 100%;animation:gwskel 1.3s infinite}@keyframes gwskel{to{background-position:-200% 0}}`}</style>
             </div>
           ) : loadError ? (
             <div style={{ ...card, padding: 28, textAlign: "center" }}>
@@ -462,7 +462,7 @@ export default function Dashboard() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(min(100%,290px),1fr))", gap: 18 }}>
               <button onClick={() => navigate("/generate")} className="gw-card"
                 style={{ ...card, boxShadow: "none", border: `2px dashed ${C.borderStrong}`, background: "rgba(255,255,255,0.6)", minHeight: 240, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, cursor: "pointer", fontFamily: FONT, color: C.violet }}>
-                <span style={{ width: 52, height: 52, borderRadius: 16, display: "grid", placeItems: "center", background: "rgba(124,58,237,0.1)" }}><Plus size={26} /></span>
+                <span style={{ width: 52, height: 52, borderRadius: 16, display: "grid", placeItems: "center", background: "rgba(104,123,104,0.12)" }}><Plus size={26} /></span>
                 <span style={{ fontSize: 15.5, fontWeight: 700, color: C.ink }}>New website</span>
                 <span style={{ fontSize: 13, color: C.muted }}>Start from a sentence</span>
               </button>

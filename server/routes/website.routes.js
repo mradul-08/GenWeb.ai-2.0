@@ -13,8 +13,11 @@ import {
   undeployWebsite,
   getWebsiteVersions,
   getWebsiteVersion,
+  updateWebsiteVersion,
   restoreWebsiteVersion,
   exportWebsite,
+  getWebsiteReleases,
+  rollbackWebsiteRelease,
 } from "../controllers/website.controller.js"
 import { getLibrary, getDesign, applyDesign } from "../controllers/design.controller.js"
 import isAuth from "../middlewares/isAuth.js"
@@ -46,7 +49,10 @@ websiteRouter.post("/:id/undeploy",    isAuth, undeployWebsite)
 websiteRouter.get("/:id/export",       isAuth, saveLimit, exportWebsite)
 websiteRouter.get("/:id/versions",                       isAuth, getWebsiteVersions)
 websiteRouter.get("/:id/versions/:versionId",            isAuth, getWebsiteVersion)
+websiteRouter.patch("/:id/versions/:versionId",          isAuth, saveLimit, updateWebsiteVersion)
 websiteRouter.post("/:id/versions/:versionId/restore",   isAuth, saveLimit, restoreWebsiteVersion)
+websiteRouter.get("/:id/releases",                         isAuth, getWebsiteReleases)
+websiteRouter.post("/:id/releases/:releaseId/rollback",   isAuth, saveLimit, rollbackWebsiteRelease)
 // No-AI design editor (theme, layout, sections, text) — no credits.
 websiteRouter.get("/:id/design",       isAuth, getDesign)
 websiteRouter.put("/:id/design",       isAuth, saveLimit, applyDesign)

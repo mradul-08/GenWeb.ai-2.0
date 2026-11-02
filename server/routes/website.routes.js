@@ -14,6 +14,7 @@ import {
   getWebsiteVersions,
   getWebsiteVersion,
   restoreWebsiteVersion,
+  exportWebsite,
 } from "../controllers/website.controller.js"
 import { getLibrary, getDesign, applyDesign } from "../controllers/design.controller.js"
 import isAuth from "../middlewares/isAuth.js"
@@ -42,6 +43,7 @@ websiteRouter.patch("/:id/code",       isAuth, saveLimit, saveWebsiteCode)
 websiteRouter.delete("/:id",           isAuth, deleteWebsite)
 websiteRouter.post("/:id/deploy",      isAuth, deployWebsite)
 websiteRouter.post("/:id/undeploy",    isAuth, undeployWebsite)
+websiteRouter.get("/:id/export",       isAuth, saveLimit, exportWebsite)
 websiteRouter.get("/:id/versions",                       isAuth, getWebsiteVersions)
 websiteRouter.get("/:id/versions/:versionId",            isAuth, getWebsiteVersion)
 websiteRouter.post("/:id/versions/:versionId/restore",   isAuth, saveLimit, restoreWebsiteVersion)

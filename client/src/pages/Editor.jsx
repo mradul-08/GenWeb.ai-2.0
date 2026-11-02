@@ -528,11 +528,26 @@ export default function Editor() {
     setMessages(prev => [...prev, { role:'assistant', content:'✓ Code updated directly and saved. Preview refreshed.' }])
   }
 
-  const handleDownload = () => {
-    const a = document.createElement('a')
-    a.href     = URL.createObjectURL(new Blob([currentCode], { type:'text/html' }))
-    a.download = isMulti ? currentPath : `${website?.title || 'website'}.html`
-    a.click()
+  // Downloads the whole site (every page + README) as a .zip from the server,
+  // so it always matches what is saved.
+  const [exporting, setExporting] = useState(false)
+  const handleDownload = async () => {
+    if (exporting || !websiteId) return
+    setExporting(true)
+    try {
+      const res = await axios.get(`${serverUrl}/api/website/${websiteId}/export`, { withCredentials: true, responseType: 'blob' })
+      const name = /filename="([^"]+)"/.exec(res.headers['content-disposition'] || '')?.[1] || 'website.zip'
+      const url = URL.createObjectURL(res.data)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = name
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 10000)
+    } catch {
+      setError('Export failed. Please try again.')
+    } finally {
+      setExporting(false)
+    }
   }
 
   const handleDeploy = async () => {
@@ -637,10 +652,10 @@ export default function Editor() {
 
           {currentCode && (
             <>
-              <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }} onClick={handleDownload}
+              <motion.button whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }} onClick={handleDownload} disabled={exporting} title="Download every page as a .zip you can host anywhere"
                 style={{ padding:'7px 14px', borderRadius:8, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.7)', fontWeight:600, fontSize:12, cursor:'pointer', fontFamily:'inherit', transition:'all 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.color='#fff'}
-                onMouseLeave={e => e.currentTarget.style.color='rgba(255,255,255,0.7)'}>↓ Export</motion.button>
+                onMouseLeave={e => e.currentTarget.style.color='rgba(255,255,255,0.7)'}>{exporting ? 'Exporting…' : '↓ Export ZIP'}</motion.button>
 
               <motion.button
                 whileHover={!deploying ? { scale:1.04, boxShadow:'0 0 28px rgba(52,211,153,0.5)' } : {}}

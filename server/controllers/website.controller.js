@@ -12,6 +12,7 @@ import Website from "../models/website.model.js"
 import { reserveCredits, refundCredits } from "../services/credits.js"
 import { commitCode, commitFiles, commitTransform, currentFiles, UnknownPageError, MAIN_FILE, ensureVersioned, listVersions, getVersionCode, deleteHistory } from "../services/versions.js"
 import { PAGE_PATH } from "../library/assemble.js"
+import { createZip } from "../utils/zip.js"
 
 const CREDITS_CONFIG = {
   COST_PER_GENERATION: 50,
@@ -461,6 +462,54 @@ export const deleteWebsite = async (req, res) => {
     await deleteHistory(w._id)
     return res.json({ success: true, message: "Deleted successfully" })
   } catch (e) { return serverError(res, "deleteWebsite", e) }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EXPORT — the whole site as a .zip the owner can host anywhere
+// ══════════════════════════════════════════════════════════════════════════════
+
+function exportReadme(website, files) {
+  const pages = files.map(f => `- \`${f.path}\``).join("\n")
+  return `# ${website.title}
+
+Exported from GenWeb.ai on ${new Date().toISOString().slice(0, 10)}.
+
+## Files
+${pages}
+
+Every page is a complete HTML file (styles and scripts included). Open
+\`index.html\` in a browser to view the site.
+
+## Put it online for free
+- **Netlify Drop:** go to https://app.netlify.com/drop and drag this folder in.
+- **GitHub Pages:** create a repository, upload these files, then turn on
+  Settings → Pages (branch: main, folder: root).
+- **Cloudflare Pages / Vercel:** create a project and upload the folder.
+
+## Before you publish
+- Check every price, opening time, review, team name and number — the AI
+  writes realistic examples that you should replace with your real ones.
+- Forms check the fields and show a thank-you message, but they do not
+  send anything yet. To receive messages, connect a form service (for
+  example Formspree or Netlify Forms) to the \`<form>\` tags.
+`
+}
+
+const safeFileBase = (s) => String(s || "website").normalize("NFKD").replace(/[̀-ͯ]/g, "")
+  .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "website"
+
+// GET /api/website/:id/export → application/zip (all pages + README.md)
+export const exportWebsite = async (req, res) => {
+  try {
+    const website = await findOwnWebsite(req)
+    if (!website) return notFound(res)
+    const files = currentFiles(website)
+    const zip = createZip([...files.map(f => ({ name: f.path, content: f.content })), { name: "README.md", content: exportReadme(website, files) }])
+    res.setHeader("Content-Type", "application/zip")
+    res.setHeader("Content-Disposition", `attachment; filename="${safeFileBase(website.slug || website.title)}.zip"`)
+    res.setHeader("Cache-Control", "no-store")
+    return res.send(zip)
+  } catch (e) { return serverError(res, "exportWebsite", e) }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
